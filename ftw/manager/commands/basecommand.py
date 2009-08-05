@@ -1,7 +1,9 @@
 
 import sys
-from ftw.manager.ftwCommand import FTWCommand
 from optparse import OptionParser
+
+from ftw.manager.ftwCommand import FTWCommand
+from ftw.manager.utils import output
 
 def registerCommand(command_cls):
     FTWCommand.registerCommand(command_cls)
@@ -30,9 +32,9 @@ class BaseCommand(object):
 
     def extend_usage(self):
         usage = self.parser.get_usage()
-        usage += '    Command name:     %s\n' % self.command_name
+        usage += '    Command name:     %s\n' % output.ColorString(self.command_name, output.YELLOW)
         if self.command_shortcut:
-            usage += '    Command shortcut: %s\n' % self.command_shortcut
+            usage += '    Command shortcut: %s\n' % output.ColorString(self.command_shortcut, output.YELLOW)
         usage += self.__class__.__doc__
         self.parser.set_usage(usage)
 
