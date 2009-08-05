@@ -25,6 +25,7 @@ setup(name='ftw.manager',
       install_requires=[
           'setuptools',
           # -*- Extra requirements: -*-
+          'collective.dist',
       ],
       entry_points="""
       # -*- Entry points: -*-
