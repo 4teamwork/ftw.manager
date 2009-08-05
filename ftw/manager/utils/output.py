@@ -78,3 +78,7 @@ def error(msg, exit=False):
 def warning(msg):
     print ColorString('WARNING: ', YELLOW_BOLD) + ColorString(msg, YELLOW)
 
+def part_title(title):
+    line = ColorString('===', RED)
+    print line, ColorString(title, YELLOW), line
+

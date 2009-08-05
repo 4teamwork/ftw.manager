@@ -39,17 +39,33 @@ class ReleaseCommand(basecommand.BaseCommand):
                                action='store_true',
                                help=u'Keine Änderungen vornehmen')
         """
+        self.parser.add_option('-e', '--only-egg', dest='release_egg_only',
+                               action='store_true', default=False,
+                               help=u'Nur Egg erstellen, kein SVN-Tag machen')
         self.parser.add_option('-E', '--no-egg', dest='release_egg',
-                               action='store_false',
+                               action='store_false', default=True,
                                help=u'Kein Egg erstellen')
 
     def __call__(self):
         self.analyse()
-        if not self.options.release_egg:
+        if self.options.release_egg:
             self.check_pyprc()
-        self.check_versions()
+        if not self.options.release_egg_only:
+            self.check_versions()
+        print ''
+        input.prompt('Are you sure to continue? [OK]')
+        if not self.options.release_egg_only:
+            self.create_tag()
+            self.bump_trunk_after_tagging()
+            self.bump_tag_after_tagging()
+        if self.options.release_egg:
+            self.release_egg()
+        if not self.options.release_egg_only:
+            self.switch_to_trunk()
+        # swith back to trunk
 
     def analyse(self):
+        output.part_title('Checking subversion project')
         if not svn.is_subversion('.'):
             # without subversion it doesnt work...
             output.error('Not in a subversion checkout', exit=True)
@@ -58,10 +74,11 @@ class ReleaseCommand(basecommand.BaseCommand):
             output.error('Project does not have default layout with trunk, ' +\
                         'tags and branches. At least one folder is missing.',
                         exit=True)
-        if svn.get_svn_url('.')!=svn.get_package_root_url('.')+'/trunk':
-            # command must be run at the "trunk" folder of a package
-            output.error('Please run this command at the root of the package' +\
-                         '(trunk folder)', exit=True)
+        if not self.options.release_egg_only:
+            if svn.get_svn_url('.')!=svn.get_package_root_url('.')+'/trunk':
+                # command must be run at the "trunk" folder of a package
+                output.error('Please run this command at the root of the package' +\
+                             '(trunk folder)', exit=True)
         if not os.path.isfile('setup.py'):
             # setup.py is required
             output.error('Could not find the file ./setup.py', exit=True)
@@ -76,13 +93,19 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not os.path.isfile(version_file):
             # version.txt is required
             output.error('Could not find the file %s' % version_file, exit=True)
+        # check subversion state
+        cmd = 'svn st | grep -v ^X | grep -v ^Performing | grep -v ^$'
+        if len(runcmd(cmd, log=False, respond=True)):
+            output.error('You have local changes, please commit them first.',
+                         exit=True)
 
     def check_versions(self):
+        output.part_title('Checking package versions')
         version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         trunk_version = open(version_file).read().strip()
-        print 'Trunk-Version:       %s' % output.ColorString(trunk_version,
-                                                             output.YELLOW)
+        print ' * Current version of trunk:         %s' %\
+                output.ColorString(trunk_version, output.YELLOW)
         next_version = trunk_version.split('-')[0]
         existing_tags = svn.get_existing_tags('.')
         if next_version in existing_tags.keys():
@@ -101,10 +124,10 @@ class ReleaseCommand(basecommand.BaseCommand):
         next_trunk_version_input = input.prompt(prompt_msg)
         if next_trunk_version_input:
             next_trunk_version = next_trunk_version_input
-        print 'Tagging Version:     %s' % output.ColorString(next_version,
-                                                             output.YELLOW)
-        print 'Setting trunk to:    %s' % output.ColorString(next_trunk_version,
-                                                             output.YELLOW)
+        print ' * The version of the tag will be:   %s' %\
+                output.ColorString(next_version, output.YELLOW)
+        print ' * New version of the trunk will be: %s' %\
+                output.ColorString(next_trunk_version, output.YELLOW)
         self.new_tag_version = next_version
         self.new_trunk_version = next_trunk_version
 
@@ -116,6 +139,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         return '-'.join(version_parts)
 
     def check_pyprc(self):
+        output.part_title('Checking .pypirc for egg-release targets')
         pypirc_path = os.path.expanduser('~/.pypirc')
         if not os.path.isfile(pypirc_path):
             # ~/.pypirc required
@@ -123,7 +147,6 @@ class ReleaseCommand(basecommand.BaseCommand):
         config = ConfigParser.ConfigParser()
         config.readfp(open(pypirc_path))
         basic_namespace = svn.get_package_name('.').split('.')[0]
-        print 'Checking .pypirc for egg-release targets'
         for section in config.sections():
             print '* found target "%s"' % output.ColorString(section,
                                             output.YELLOW)
@@ -138,6 +161,85 @@ class ReleaseCommand(basecommand.BaseCommand):
                             and True or 'Please select a target listed above')
         if pypi_target_input:
             self.pypi_target = pypi_target_input
+
+    def create_tag(self):
+        output.part_title('Creating subversion tag')
+        root_url = svn.get_package_root_url('.')
+        trunk_url = os.path.join(root_url, 'trunk')
+        tag_url = os.path.join(root_url, 'tags', self.new_tag_version)
+        cmd = 'svn cp %s %s -m "creating tag %s for package %s"' % (
+            trunk_url,
+            tag_url,
+            self.new_tag_version,
+            svn.get_package_name('.'),
+        )
+        runcmd(cmd)
+
+    def bump_trunk_after_tagging(self):
+        output.part_title('Bumping versions in trunk')
+        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+                                    'version.txt')
+        print '* updating %s' % version_file
+        version_txt = open(version_file, 'w')
+        version_txt.write(self.new_trunk_version)
+        version_txt.close()
+        history_file = 'docs/HISTORY.txt'
+        print '* updating %s' % history_file
+        insert_title_on_line = 3
+        version = self.new_trunk_version.split('-')[0]
+        data = open(history_file).read().split('\n')
+        data = data[:insert_title_on_line] +\
+               ['', version,'-' * len(version), '', ] +\
+               data[insert_title_on_line:]
+        file = open(history_file, 'w')
+        file.write('\n'.join(data))
+        file.close()
+        cmd = 'svn ci -m "bumping versions in trunk of %s after tagging %s"' % (
+                svn.get_package_name('.'),
+                self.new_tag_version,
+        )
+        runcmd(cmd)
+
+    def bump_tag_after_tagging(self):
+        tag_url = os.path.join(svn.get_package_root_url('.'), 'tags',
+                               self.new_tag_version)
+        cmd = 'svn switch %s' % tag_url
+        runcmd(cmd)
+        output.part_title('Bumping versions in tag')
+        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+                                    'version.txt')
+        print '* updating %s' % version_file
+        version_txt = open(version_file, 'w')
+        version_txt.write(self.new_tag_version)
+        version_txt.close()
+        print '* updating setup.cfg : removing dev stuff'
+        data = open('setup.cfg').read().split('\n')
+        file = open('setup.cfg', 'w')
+        for line in data:
+            if not line.startswith('tag_build') and not line.startswith('tag_svn_rev'):
+                file.write(line)
+        file.write('\n')
+        file.close()
+        cmd = 'svn ci -m "bumping versions in tag of %s after tagging %s"' % (
+                svn.get_package_name('.'),
+                self.new_tag_version,
+        )
+        runcmd(cmd)
+
+    def release_egg(self):
+        output.part_title('Releasing agg to target %s' % self.pypi_target)
+        cmd = 'python2.4 setup.py mregister sdist bdist_egg mupload -r %s' %\
+              self.pypi_target
+        runcmd(cmd)
+        runcmd('rm -rf dist build')
+
+    def switch_to_trunk(self):
+        output.part_title('Cleaning up local repository')
+        tag_url = os.path.join(svn.get_package_root_url('.'), 'trunk')
+        cmd = 'svn switch %s' % tag_url
+        runcmd(cmd)
+
+
 
 
 basecommand.registerCommand(ReleaseCommand)
