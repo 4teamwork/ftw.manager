@@ -6,9 +6,9 @@ import ConfigParser
 
 from ftw.manager import utils
 from ftw.manager.commands import basecommand
+from ftw.manager.utils import *
 from ftw.manager.utils import output
 from ftw.manager.utils import input
-from ftw.manager.utils import runcmd
 from ftw.manager.utils import subversion as svn
 from ftw.manager.utils.memoize import memoize
 
@@ -45,9 +45,13 @@ class ReleaseCommand(basecommand.BaseCommand):
         self.parser.add_option('-E', '--no-egg', dest='release_egg',
                                action='store_false', default=True,
                                help=u'Kein Egg erstellen')
+        self.parser.add_option('-i', '--ignore-doc-errors', dest='ignore_doc_errors',
+                               action='store_true', default=False,
+                               help=u'Docstring Fehler (reStructuredText) ignorieren')
 
     def __call__(self):
         self.analyse()
+        self.check_doc()
         if self.options.release_egg:
             self.check_pyprc()
         if not self.options.release_egg_only:
@@ -98,6 +102,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         if len(runcmd(cmd, log=False, respond=True)):
             output.error('You have local changes, please commit them first.',
                          exit=True)
+
+    def check_doc(self):
+        if self.options.ignore_doc_errors:
+            return
+        output.part_title('Checking setup.py docstring (restructuredtext)')
+        cmd = '%s setup.py check --restructuredtext --strict' % sys.executable
+        if runcmd_with_exitcode(cmd, log=0)!=0:
+            output.error('You have errors in your docstring (README.txt, HISTORY.txt, ...)', exit=1)
 
     def check_versions(self):
         output.part_title('Checking package versions')
