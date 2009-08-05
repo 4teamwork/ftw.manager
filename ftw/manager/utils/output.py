@@ -74,3 +74,7 @@ def error(msg, exit=False):
     print ColorString('ERROR: ', RED_BOLD) + ColorString(msg, RED)
     if exit:
         sys.exit(0)
+
+def warning(msg):
+    print ColorString('WARNING: ', YELLOW_BOLD) + ColorString(msg, YELLOW)
+
