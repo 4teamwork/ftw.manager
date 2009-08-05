@@ -29,14 +29,14 @@ class FTWCommand(object):
         self.parser = OptionParser(version=self.version, usage=self.usage)
         self.extend_usage()
         if len(sys.argv)==1:
-            self.parser.print_usage()
+            self.parser.print_help()
         else:
             command_name = sys.argv[1]
             command = self.get_command(command_name)
             if command:
                 command(self)()
             else:
-                self.parser.print_usage()
+                self.parser.print_help()
 
     def extend_usage(self):
         usage = self.parser.get_usage()
