@@ -50,8 +50,8 @@ class ReleaseCommand(basecommand.BaseCommand):
                                help=u'Docstring Fehler (reStructuredText) ignorieren')
 
     def __call__(self):
-        self.analyse()
         self.check_doc()
+        self.analyse()
         if self.options.release_egg:
             self.check_pyprc()
         if not self.options.release_egg_only:
