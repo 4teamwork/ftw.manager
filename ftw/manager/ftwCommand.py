@@ -15,6 +15,7 @@ if __name__=='__main__':
 # ---- 
 
 import os
+import sys
 from optparse import OptionParser
 
 
@@ -27,11 +28,10 @@ class FTWCommand(object):
     def __init__(self):
         self.parser = OptionParser(version=self.version, usage=self.usage)
         self.extend_usage()
-        self.options, self.args = self.parser.parse_args()
-        if len(self.args)==0:
+        if len(sys.argv)==1:
             self.parser.print_usage()
         else:
-            command_name = self.args[0]
+            command_name = sys.argv[1]
             command = self.get_command(command_name)
             if command:
                 command(self)()

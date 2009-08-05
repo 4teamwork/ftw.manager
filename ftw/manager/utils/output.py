@@ -3,6 +3,8 @@ The output module contains functionality for emproving
 output with colors, tables, etc.
 """
 
+import sys
+
 RED             = '\033[0;31m%s\033[00m'
 GREEN           = '\033[0;32m%s\033[00m'
 YELLOW          = '\033[0;33m%s\033[00m'
@@ -67,3 +69,8 @@ class ASCIITable(object):
             print formatrow(row)
         print hline()
 
+
+def error(msg, exit=False):
+    print ColorString('ERROR: ', RED_BOLD) + ColorString(msg, RED)
+    if exit:
+        sys.exit(0)
