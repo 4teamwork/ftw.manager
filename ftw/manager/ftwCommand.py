@@ -9,7 +9,8 @@ from optparse import OptionParser
 
 class FTWCommand(object):
 
-    version = '0.1'
+    version = open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'version.txt')).read().strip()
     usage = '%prog ACTION [options]'
     commands = []
 

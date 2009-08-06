@@ -1,8 +1,16 @@
 Changelog
 =========
 
-0.1 - Unreleased
-----------------
 
-* Initial release
+0.1
+---
+
+* Implemented command structure
+* Added various helper utils
+* Implemented actions:
+    * zopeinstance  : Run bin/instance placeless [zi]
+    * help          : show help text
+    * release       : Release eines Packets erstellen [rl]
+    * version       : Display Version of the package containing the current directory
+    * test          : Run tests for current package [t]
 

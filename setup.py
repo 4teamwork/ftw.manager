@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.1'
+version = open('ftw/manager/version.txt').read().split()
 
 setup(name='ftw.manager',
       version=version,
