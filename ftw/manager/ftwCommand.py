@@ -2,18 +2,6 @@
 Main ftw command
 """
 
-if __name__=='__main__':
-    # initializer, fixes namespace and reloads itselve
-    import sys
-    import os
-    sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-    from ftw.manager import ftwCommand
-    from ftw.manager import commands
-    ftwCommand.FTWCommand()
-    sys.exit(0)
-
-# ---- 
-
 import os
 import sys
 from optparse import OptionParser
@@ -61,3 +49,10 @@ class FTWCommand(object):
     def registerCommand(cls, command_class):
         cls.commands.append(command_class)
 
+
+def main():
+    from ftw.manager import commands
+    FTWCommand()
+
+if __name__=='__main__':
+    main()

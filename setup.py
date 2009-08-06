@@ -27,7 +27,9 @@ setup(name='ftw.manager',
           # -*- Extra requirements: -*-
           'collective.dist',
       ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
+      entry_points = {
+            'console_scripts' : [
+                'ftw = ftw.manager.ftwCommand:main',
+            ],
+      },
       )
