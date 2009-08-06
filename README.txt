@@ -33,4 +33,13 @@ Mit folgendem Befehl können die Actions aufgelistet werden:
       --version   show program's version number and exit
       -h, --help  show this help message and exit
 
+Update
+======
+
+ftw.manager kann mit folgendem Befehl aktualisiert werden:
+
+::
+
+    % easy_install -U ftw.manager
+
 
