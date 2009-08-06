@@ -2,8 +2,10 @@ Changelog
 =========
 
 
-0.2
----
+0.1.1
+-----
+
+* fixed MANIFEST.in
 
 
 0.1

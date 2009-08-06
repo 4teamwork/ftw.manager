@@ -1,2 +1,3 @@
 recursive-include ftw *
+recursive-include docs *
 global-exclude *pyc
