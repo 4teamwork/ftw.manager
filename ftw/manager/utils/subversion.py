@@ -4,10 +4,13 @@ contains subversion helper methods
 
 import os
 import xml.dom.minidom
-from ftw.manager.utils import runcmd
+from ftw.manager.utils import runcmd, runcmd_with_exitcode
 from ftw.manager.utils.memoize import memoize
 
 class NotASubversionCheckout(Exception):
+    pass
+
+class InvalidSubversionURL(Exception):
     pass
 
 class InvalidProjectLayout(Exception):
@@ -95,3 +98,30 @@ def get_existing_tags(directory_or_url):
         tags[name] = rev
     return tags
 
+@memoize
+def listdir(url):
+    """
+    Returns list of elements in this directory (url)
+    e.g. ['trunk/', 'branches/', 'README.txt']
+    """
+    cmd = 'svn list %s' % url
+    exitcode, data = runcmd_with_exitcode(cmd, log=False, respond=True)
+    if exitcode==0:
+        return ''.join(data).strip().split('\n')
+    else:
+        return None
+
+@memoize
+def isdir(url):
+    if url[-1]=='/':
+        url = url[:-1]
+    data = listdir(url)
+    if not data:
+        # invalid url
+        return False
+    elif len(data)==1 and data[0]==os.path.basename(url):
+        # file
+        return False
+    else:
+        # dir
+        return True

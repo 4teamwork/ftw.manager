@@ -16,14 +16,16 @@ def prompt(prompt, validator=None):
     def ask():
         return raw_input(output.ColorString('  %s > ' % prompt, output.YELLOW))
     if validator:
-        def looper():
-            val = validator(ask())
+        def looper(input):
+            val = validator(input)
             if val!=True:
                 output.warning(val)
                 return True
             else:
                 return False
-        while looper():
-            pass
+        input = ask()
+        while looper(input):
+            input = ask()
+        return input
     else:
         return ask()

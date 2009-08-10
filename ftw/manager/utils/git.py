@@ -2,7 +2,9 @@
 contains git-svn helper methods
 """
 
+import os
 from ftw.manager.utils import runcmd
+from ftw.manager.utils import subversion as svn
 from ftw.manager.utils.memoize import memoize
 
 class NotAGitsvnRepository(Exception):
@@ -13,7 +15,7 @@ def is_git(directory):
     """
     Checks if a directory is a local git repo
     """
-    return 'Repository Root' in ''.join(runcmd('git svn info', log=False, respond=True))
+    return 'Repository Root' in ''.join(runcmd('git svn info 2> /dev/null', log=False, respond=True))
 
 @memoize
 def get_package_name(directory_or_url):
@@ -42,3 +44,59 @@ def get_svn_url(directory_or_url):
         if not is_git(directory):
             raise NotAGitsvnRepository
         return ''.join(runcmd('git svn info %s | grep URL | cut -d " " -f 2' % directory, log=False, respond=True)).strip()
+
+@memoize
+def get_gitsvn_cache_path():
+    return os.path.expanduser('~/.gitsvn')
+
+def setup_gitsvn_cache():
+    """
+    Sets up a gitsvn cache at ~/.gitsvn
+    """
+    path = get_gitsvn_cache_path()
+    if not os.path.isdir(path):
+        print '* creating local gitsn chache directory at %s' % path
+        os.mkdir(path)
+
+def checkout_gitsvn(svn_url):
+    svn_url = svn_url[-1]=='/' and svn_url[:-1] or svn_url
+    if not svn.isdir(svn_url):
+        raise InvalidSubversionURL
+    svn.check_project_layout(svn_url)
+    root_url = svn.get_package_root_url(svn_url)
+    package_name = svn.get_package_name(svn_url)
+    cache_path = os.path.join(get_gitsvn_cache_path(), package_name)
+    if os.path.exists(cache_path):
+        raise Exception('%s already in local cache' % package_name)
+    if os.path.exists(package_name):
+        raise Exception('%s already existing' % os.path.abspath(package_name))
+    gitbranch = svnurl_get_gitbranch(svn_url)
+    # clone it
+    runcmd('cd %s; git svn clone --stdlayout %s' % (
+            get_gitsvn_cache_path(),
+            root_url,
+    ))
+    runcmd('cp -r %s .' % cache_path)
+    runcmd('cd %s ; git checkout %s' % (
+            package_name,
+            gitbranch,
+    ))
+    runcmd('cd %s ; git reset --hard' % package_name)
+    runcmd('cd %s ; git svn rebase' % package_name)
+
+
+@memoize
+def svnurl_get_gitbranch(svn_url):
+    root_url = svn.get_package_root_url(svn_url)
+    gitbranch = 'master'
+    svn_parts = svn_url.split('/')
+    if root_url!=svn_url:
+        if svn_parts[-2]=='branches':
+            gitbranch = 'remotes/%s' % svn_parts[-1]
+        elif svn_parts[-2]=='tags':
+            gitbranch = 'remotes/tags/%s' % svn_parts[-1]
+    return gitbranch
+    
+
+
+

@@ -5,3 +5,4 @@ import release
 import version
 import testcmd
 import develop
+import checkout
