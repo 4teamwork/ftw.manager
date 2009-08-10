@@ -3,7 +3,7 @@ import os
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import runcmd
 from ftw.manager.utils import output
-from ftw.manager.utils import subversion as svn
+from ftw.manager.utils import scm
 
 class DevelopCommand(basecommand.BaseCommand):
         """
@@ -23,16 +23,17 @@ class DevelopCommand(basecommand.BaseCommand):
 
         def __call__(self):
             self.check_conditions()
+            self.remove_egg()
             self.set_to_develop()
             if len(self.args):
                 self.fix_dependency(self.args[0])
-
+        
         def check_conditions(self):
             output.part_title('Checking conditions')
-            if not svn.is_subversion('.'):
+            if not scm.is_subversion('.') and not scm.is_git('.'):
                 # without subversion it doesnt work...
-                output.error('Not in a subversion checkout', exit=True)
-            if svn.get_svn_url('.')!=svn.get_package_root_url('.')+'/trunk':
+                output.error('Not in a local repository', exit=True)
+            if scm.get_svn_url('.')!=scm.get_package_root_url('.')+'/trunk':
                 # command must be run at the "trunk" folder of a package
                 output.error('Please run this command at the root of the package' +\
                              '(trunk folder)', exit=True)
@@ -41,10 +42,15 @@ class DevelopCommand(basecommand.BaseCommand):
                     output.error('Could not find the file %s' % file, exit=True)
             if os.path.abspath('.').split('/')[-2]!='src':
                 output.error('I\'m confused: can\'t find a "src" folder...', exit=True)
+
+        def remove_egg(self):
+            package_name = scm.get_package_name('.')
+            output.part_title('Removing eggs')
+            runcmd('rm -rf ../../eggs/%s*' % package_name)
                 
 
         def set_to_develop(self):
-            package_name = svn.get_package_name('.')
+            package_name = scm.get_package_name('.')
             output.part_title('Setting %s to develop in buildout.cfg')
             buildout_file = '../../buildout.cfg'
             buildout = open(buildout_file).read().split('\n')
@@ -59,7 +65,7 @@ class DevelopCommand(basecommand.BaseCommand):
 
         def fix_dependency(self, main_package):
             output.part_title('Fixing dependency in %s' % main_package)
-            package_name = svn.get_package_name('.')
+            package_name = scm.get_package_name('.')
             path = os.path.join('../%s' % main_package)
             if not os.path.isdir(path):
                 output.error('Can\'t find main_package (%s) at %s' % (

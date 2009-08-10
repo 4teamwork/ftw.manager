@@ -6,6 +6,7 @@ Changelog
 -----
 
 * added "develop" command
+* added git-svn support
 
 
 0.1.2
