@@ -7,6 +7,7 @@ Changelog
 
 * added "develop" command
 * added git-svn support
+* fixed bug in "release" command: using sys.executable for deploying egg is required, because of dependency collective.dicts
 
 
 0.1.2

@@ -240,8 +240,10 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     def release_egg(self):
         output.part_title('Releasing agg to target %s' % self.pypi_target)
-        cmd = 'python2.4 setup.py mregister sdist bdist_egg mupload -r %s' %\
+        cmd = '%s setup.py mregister sdist bdist_egg mupload -r %s' % )
+              sys.executable,
               self.pypi_target
+        )
         runcmd(cmd)
         runcmd('rm -rf dist build')
 
