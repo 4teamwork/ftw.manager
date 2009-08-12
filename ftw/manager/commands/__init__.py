@@ -1,8 +1,8 @@
-
-import zopeinstance
+import checkdocs
+import checkout
+import develop
 import help
 import release
-import version
 import testcmd
-import develop
-import checkout
+import version
+import zopeinstance

@@ -1,6 +1,7 @@
 
 import os
 from ftw.manager.commands import basecommand
+from ftw.manager.utils import runcmd
 from ftw.manager.utils import output
 from ftw.manager.utils import input
 from ftw.manager.utils import scm
@@ -32,8 +33,8 @@ class CheckoutCommand(basecommand.BaseCommand):
         else:
             # cache_path existing ; just update and clone
             runcmd('cd %s; git reset --hard' % cache_path)
-            runcmd('cd %s; git fetch' % cache_path)
-            runcmd('cd %s; git rebase' % cache_path)
+            runcmd('cd %s; git svn fetch' % cache_path)
+            runcmd('cd %s; git svn rebase' % cache_path)
             runcmd('cp -r %s .' % cache_path)
             runcmd('cd %s ; git checkout %s' % (
                     package_name,
