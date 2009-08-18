@@ -34,10 +34,11 @@ class DevelopCommand(basecommand.BaseCommand):
             if not scm.is_subversion('.') and not scm.is_git('.'):
                 # without subversion it doesnt work...
                 output.error('Not in a local repository', exit=True)
-            if scm.get_svn_url('.')!=scm.get_package_root_url('.')+'/trunk':
+            svn_url = scm.get_svn_url('.')
+            if max([int(x in svn_url) for x in ['trunk', 'tags', 'branches']])==0:
                 # command must be run at the "trunk" folder of a package
                 output.error('Please run this command at the root of the package' +\
-                             '(trunk folder)', exit=True)
+                             '(trunk folder, branch, tag)', exit=True)
             for file in ['../../buildout.cfg']:
                 if not os.path.isfile(file):
                     output.error('Could not find the file %s' % file, exit=True)
