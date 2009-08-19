@@ -14,18 +14,18 @@ from ftw.manager.utils.memoize import memoize
 
 class ReleaseCommand(basecommand.BaseCommand):
     u"""
-    Der "release" command publiziert die aktuellen Änderungen eines Packets in
+    Der "release" command publiziert die aktuellen Aenderungen eines Packets in
     einer neuen Version. Der Befehl sollte vom root-Verzeichnis eines SVN-Checkouts
-    (trunk) ausgeführt werden.
+    (trunk) ausgefuehrt werden.
     Als ausgangslage wird der Versionsname verwendet, der im setup.py eingetragen
     ist (z.B. wenn "2.0.1-dev" im setup.py steht wird eine neue Version "2.0.1"
     erstellt).
 
     Es werden folgende Schritte gemacht:
         * Es wird ein SVN-Tag erstellt
-        * Die Version im Trunk wird erhöht (version.txt und HISTORY.txt)
+        * Die Version im Trunk wird erhoeht (version.txt und HISTORY.txt)
         * Die Version im Tag wird angepasst (version.txt und HISTORY.txt)
-        * Der Tag wird aufgeräumt (setup.cfg : dev-angaben entfernen)
+        * Der Tag wird aufgeraeumt (setup.cfg : dev-angaben entfernen)
         * Vom Tag wird ein Egg erstellt und ins pypi geladen
     """
 
@@ -37,7 +37,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         """
         self.parser.add_option('-d', '--dry-run', dest='dryrun',
                                action='store_true',
-                               help=u'Keine Änderungen vornehmen')
+                               help=u'Keine Aenderungen vornehmen')
         """
         self.parser.add_option('-e', '--only-egg', dest='release_egg_only',
                                action='store_true', default=False,

@@ -2,6 +2,7 @@ import checkdocs
 import checkout
 import develop
 import help
+import multiinstance
 import release
 import testcmd
 import version
