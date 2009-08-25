@@ -5,6 +5,8 @@ Changelog
 0.1.5
 -----
 
+* added "dependencytests" command
+
 
 0.1.4
 -----

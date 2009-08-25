@@ -1,5 +1,6 @@
 import checkdocs
 import checkout
+import dependencytests
 import develop
 import help
 import multiinstance
