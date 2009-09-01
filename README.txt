@@ -6,9 +6,15 @@ Installation
 
 Das Paket ftw.manager kann mit folgendem Befehl installiert werden:
 
+Install ftw.manager
 ::
 
-    % easy_install -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
+    sudo easy_install-2.4 -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
+
+Update ftw.manager
+::
+
+    sudo easy_install-2.4 -U -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
 
 Easy_install registriert die funktion ``ftw`` in dem *bin*-Ordner der ensprechenden
 Python-Version (siehe Ausgabe während der installation). Normalerweise ist dieser
@@ -18,7 +24,7 @@ Mit folgendem Befehl können die Actions aufgelistet werden:
 
 ::
 
-    ~% ftw help
+    ftw help
     usage: ftw ACTION [options]
 
     ACTIONS:
