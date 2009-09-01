@@ -25,9 +25,20 @@ class DevelopCommand(basecommand.BaseCommand):
         def __call__(self):
             self.check_conditions()
             self.remove_egg()
-            self.set_to_develop()
+            if self.options.revert:
+                self.disable_develop()
+            else:
+                self.set_to_develop()
             if len(self.args):
-                self.fix_dependency(self.args[0])
+                if self.options.revert:
+                    self.remove_dependency_fix(self.args[0])
+                else:
+                    self.fix_dependency(self.args[0])
+
+        def register_options(self):
+            self.parser.add_option('-r', '--revert', dest='revert',
+                                   action='store_true', default=False,
+                                   help=u'Disable development mode for package')
         
         def check_conditions(self):
             output.part_title('Checking conditions')
@@ -83,6 +94,19 @@ class DevelopCommand(basecommand.BaseCommand):
             f.write('\n'.join(new_buildout))
             f.close()
 
+        def disable_develop(self):
+            package_name = scm.get_package_name('.')
+            output.part_title('Removing %s from "develop" in buildout.cfg' % package_name)
+            buildout_file = '../../buildout.cfg'
+            buildout = open(buildout_file).read().split('\n')
+            new_buildout = []
+            for row in buildout:
+                if row.strip()!='src/' + package_name:
+                    new_buildout.append(row)
+            f = open(buildout_file, 'w')
+            f.write('\n'.join(new_buildout))
+            f.close()
+
         def fix_dependency(self, main_package):
             output.part_title('Fixing dependency in %s' % main_package)
             package_name = scm.get_package_name('.')
@@ -91,6 +115,22 @@ class DevelopCommand(basecommand.BaseCommand):
                 package_name,
                 path
             ))
+
+        def remove_dependency_fix(self, main_package):
+            package_name = scm.get_package_name('.')
+            output.part_title('Removing %s from %s/develop.txt' % (
+                    package_name,
+                    main_package
+            ))
+            path = os.path.join('../%s' % main_package, 'develop.txt')
+            data = open(path).read().strip().split('\n')
+            f = open(path, 'w')
+            f.seek(0)
+            for row in data:
+                if row.strip()!=package_name:
+                    f.write(row)
+                    f.write('\n')
+            f.close()
 
 
 basecommand.registerCommand(DevelopCommand)
