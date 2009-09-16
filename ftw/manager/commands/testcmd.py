@@ -3,7 +3,7 @@ import sys
 from ftw.manager.commands import basecommand
 from ftw.manager.commands import zopeinstance
 from ftw.manager.utils import runcmd
-from ftw.manager.utils import subversion as svn
+from ftw.manager.utils import scm
 
 class TestCommand(basecommand.BaseCommand):
     """
@@ -17,7 +17,7 @@ class TestCommand(basecommand.BaseCommand):
     description = 'Run tests for current package'
 
     def __call__(self):
-        package_name = svn.get_package_name('.')
+        package_name = scm.get_package_name('.')
         sys.argv = [sys.argv[0], 'zopeinstance', 'test', '-s', package_name]
         zopeinstance.ZopeInstanceCommand(self.maincommand)()
 

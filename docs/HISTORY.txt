@@ -5,6 +5,8 @@ Changelog
 0.1.6
 -----
 
+* made "test" command available in git-repositories
+
 
 0.1.5
 -----
