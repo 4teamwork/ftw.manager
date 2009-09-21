@@ -93,12 +93,19 @@ class BuildPotCommand(I18NDudeBaseCommand):
         package_dir = os.path.join(package_root, *package_name.split('.'))
         pot_path = os.path.join(self.locales_dir, '%s.pot' % package_name)
         output.part_title('Rebuilding pot file at %s' % pot_path)
-        cmd = '%s rebuild-pot --pot %s --create %s %s' % (
-                self.i18ndude,
-                pot_path,
+        # rebuild
+        cmd = ['%s rebuild-pot' % self.i18ndude]
+        cmd.append('--pot %s' % pot_path)
+        # manual file
+        manual_file = os.path.join(self.locales_dir, '%s-manual.pot' % package_name)
+        if os.path.exists(manual_file):
+            print '  merging manual pot file:', manual_file
+            cmd.append('--merge %s' % manual_file)
+        cmd.append('--create %s %s' % (
                 scm.get_package_name('.'),
                 package_dir,
-        )
+        ))
+        cmd = ' \\\n'.join(cmd)
         runcmd(cmd)
 
 basecommand.registerCommand(BuildPotCommand)

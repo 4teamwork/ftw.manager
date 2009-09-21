@@ -5,6 +5,9 @@ Changelog
 0.1.6.1
 -------
 
+* added --merge support to "i18npot" command
+  * add a your.package-manual.pot to your locales directory and it will be merged
+
 
 0.1.6
 -----
