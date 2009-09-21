@@ -19,6 +19,8 @@ class FTWCommand(object):
         self.extend_usage()
         if len(sys.argv)==1:
             self.parser.print_help()
+        elif len(sys.argv)==2 and sys.argv[1].startswith('-'):
+            self.options, self.args = self.parser.parse_args()
         else:
             command_name = sys.argv[1]
             command = self.get_command(command_name)
