@@ -7,6 +7,7 @@ Changelog
 
 * made "test" command available in git-repositories
 * added "i18npot" command
+* added "i18nsync" command
 
 
 0.1.5
