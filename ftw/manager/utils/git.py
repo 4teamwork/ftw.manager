@@ -96,6 +96,19 @@ def svnurl_get_gitbranch(svn_url):
         elif svn_parts[-2]=='tags':
             gitbranch = 'remotes/tags/%s' % svn_parts[-1]
     return gitbranch
+
+def apply_svn_ignores(path):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.lower()=='ignore.txt':
+                svnignore = os.path.join(root, file)
+                gitignore = os.path.join(root, '.gitignore')
+                if not os.path.exists(gitignore):
+                    f = open(gitignore, 'w')
+                    f.write(open(svnignore).read().strip())
+                    f.write('\n')
+                    f.write('.gitignore')
+                    f.close()
     
 
 
