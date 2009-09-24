@@ -54,3 +54,26 @@ def get_package_name(directory_or_url):
         return svn.get_package_name(directory_or_url)
     raise NotAScm
 
+@memoize
+def has_local_changes(path):
+    if is_git(path):
+        return git.has_local_changes(path)
+    elif is_subversion(path):
+        return svn.has_local_changes(path)
+    raise NotAScm
+
+@memoize
+def is_scm(path):
+    return is_subversion(path) or is_git(path)
+
+@memoize
+def is_package_root(directory_or_url):
+    svn_url = get_svn_url(directory_or_url)
+    svn_url = svn_url.strip()
+    if svn_url.endswith('/'):
+        svn_url = svn_url[:-1]
+    parts = svn_url.split('/')
+    last = parts[-1]
+    second_last = parts[-2]
+    return last=='trunk' or second_last in ('tags', 'branches')
+

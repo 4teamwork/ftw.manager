@@ -5,6 +5,9 @@ Changelog
 0.1.7
 -----
 
+* using svns INGORE.TXT files as .gitignore after after running "checkout" command
+* implemented switch command for switching between svn and git-svn
+
 
 0.1.6.1
 -------

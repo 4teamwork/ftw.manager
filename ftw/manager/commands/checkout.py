@@ -40,6 +40,7 @@ class CheckoutCommand(basecommand.BaseCommand):
                     package_name,
                     'master',
             ))
+            git.apply_svn_ignores(package_name)
 
     def get_svn_url(self, package_name):
         # what's the svn url?

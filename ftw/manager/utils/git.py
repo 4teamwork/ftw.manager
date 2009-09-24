@@ -58,7 +58,7 @@ def setup_gitsvn_cache():
         print '* creating local gitsn chache directory at %s' % path
         os.mkdir(path)
 
-def checkout_gitsvn(svn_url):
+def checkout_gitsvn(svn_url, location='.'):
     svn_url = svn_url[-1]=='/' and svn_url[:-1] or svn_url
     if not svn.isdir(svn_url):
         raise InvalidSubversionURL
@@ -66,23 +66,27 @@ def checkout_gitsvn(svn_url):
     root_url = svn.get_package_root_url(svn_url)
     package_name = svn.get_package_name(svn_url)
     cache_path = os.path.join(get_gitsvn_cache_path(), package_name)
-    if os.path.exists(cache_path):
-        raise Exception('%s already in local cache' % package_name)
     if os.path.exists(package_name):
         raise Exception('%s already existing' % os.path.abspath(package_name))
     gitbranch = svnurl_get_gitbranch(svn_url)
     # clone it
-    runcmd('cd %s; git svn clone --stdlayout %s' % (
-            get_gitsvn_cache_path(),
-            root_url,
-    ))
-    runcmd('cp -r %s .' % cache_path)
+    if os.path.exists(cache_path):
+        runcmd('cd %s; git reset --hard' % cache_path)
+        runcmd('cd %s; git svn fetch' % cache_path)
+        runcmd('cd %s; git svn rebase' % cache_path)
+    else:
+        runcmd('cd %s; git svn clone --stdlayout %s' % (
+                get_gitsvn_cache_path(),
+                root_url,
+        ))
+    runcmd('cp -r %s %s' % (cache_path, location))
+    co_path = os.path.join(location, package_name)
     runcmd('cd %s ; git checkout %s' % (
-            package_name,
+            co_path,
             gitbranch,
     ))
-    runcmd('cd %s ; git reset --hard' % package_name)
-    runcmd('cd %s ; git svn rebase' % package_name)
+    runcmd('cd %s ; git reset --hard' % co_path)
+    runcmd('cd %s ; git svn rebase' % co_path)
 
 
 @memoize
@@ -110,6 +114,8 @@ def apply_svn_ignores(path):
                     f.write('.gitignore')
                     f.close()
     
-
-
+@memoize
+def has_local_changes(path):
+    cmd = 'cd %s ; git status | grep "	"' % path
+    return len(runcmd(cmd, log=False, respond=True))>0
 

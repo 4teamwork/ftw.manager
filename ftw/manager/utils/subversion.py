@@ -125,3 +125,9 @@ def isdir(url):
     else:
         # dir
         return True
+
+@memoize
+def has_local_changes(path):
+    cmd = 'svn st %s | grep -v ^X | grep -v ^Performing | grep -v ^$' % path
+    return len(runcmd(cmd, log=False, respond=True))>0
+
