@@ -13,20 +13,32 @@ from ftw.manager.utils import subversion as svn
 from ftw.manager.utils.memoize import memoize
 
 class ReleaseCommand(basecommand.BaseCommand):
-    u"""
-    Der "release" command publiziert die aktuellen Aenderungen eines Packets in
+    """
+    Der "release" command publiziert die aktuellen Änderungen eines Packets in
     einer neuen Version. Der Befehl sollte vom root-Verzeichnis eines SVN-Checkouts
-    (trunk) ausgefuehrt werden.
-    Als ausgangslage wird der Versionsname verwendet, der im setup.py eingetragen
-    ist (z.B. wenn "2.0.1-dev" im setup.py steht wird eine neue Version "2.0.1"
-    erstellt).
+    (trunk) ausgeführt werden.
 
-    Es werden folgende Schritte gemacht:
-        * Es wird ein SVN-Tag erstellt
-        * Die Version im Trunk wird erhoeht (version.txt und HISTORY.txt)
-        * Die Version im Tag wird angepasst (version.txt und HISTORY.txt)
-        * Der Tag wird aufgeraeumt (setup.cfg : dev-angaben entfernen)
-        * Vom Tag wird ein Egg erstellt und ins pypi geladen
+    Bedingungen
+    -----------
+    *   Die Option *long_description* im *setup.py* muss validierter restructuredText
+        sein
+    *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
+        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
+        sein, ansonsten muss es der trunk sein.
+    *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
+        branches und tags besitzen
+    *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
+    *   Die Version ist in der Datei my/package/version.txt gespeichert
+    *   Eine Datei docs/HISTORY.txt ist notwendig
+    *   Das lokale Repository darf keine Änderungen haben, die nicht commitet wurden
+
+    Aktionen
+    --------
+    *   Es wird ein SVN-Tag erstellt
+    *   Die Version im Trunk wird erhöht (version.txt und HISTORY.txt)
+    *   Die Version im Tag wird angepasst (version.txt und HISTORY.txt)
+    *   Der Tag wird aufgeräumt (setup.cfg : dev-angaben entfernen)
+    *   Vom Tag wird ein Egg erstellt und ins pypi geladen
     """
 
     command_name = 'release'
@@ -34,11 +46,6 @@ class ReleaseCommand(basecommand.BaseCommand):
     description = 'Release eines Packets erstellen'
 
     def register_options(self):
-        """
-        self.parser.add_option('-d', '--dry-run', dest='dryrun',
-                               action='store_true',
-                               help=u'Keine Aenderungen vornehmen')
-        """
         self.parser.add_option('-e', '--only-egg', dest='release_egg_only',
                                action='store_true', default=False,
                                help=u'Nur Egg erstellen, kein SVN-Tag machen')
