@@ -31,6 +31,7 @@ class ReleaseCommand(basecommand.BaseCommand):
     *   Die Version ist in der Datei my/package/version.txt gespeichert
     *   Eine Datei docs/HISTORY.txt ist notwendig
     *   Das lokale Repository darf keine Änderungen haben, die nicht commitet wurden
+    *   Es wird eine MANIFEST.in Datei erwartet. Existiert keine, wird eine angelegt.
 
     Aktionen
     --------
@@ -104,6 +105,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not os.path.isfile(version_file):
             # version.txt is required
             output.error('Could not find the file %s' % version_file, exit=True)
+        if not self.options.release_egg_only and not os.path.isfile('MANIFEST.in'):
+            output.warning('Could not find the file ./MANIFEST.in, creating one')
+            f = open('MANIFEST.in', 'w')
+            namespace = svn.get_package_name('.').split('.')[0]
+            f.write('recursive-include %s *\n' % namespace)
+            f.write('recursive-include docs *\n')
+            f.write('global-exclude *pyc\n')
+            f.close()
         # check subversion state
         cmd = 'svn st | grep -v ^X | grep -v ^Performing | grep -v ^$'
         if len(runcmd(cmd, log=False, respond=True)):
