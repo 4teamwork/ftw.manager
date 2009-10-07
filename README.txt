@@ -16,6 +16,7 @@ Es sollte die Python-Version verwendet werden, mit welcher auch Zope läuft. Das
 
 Während der Installation wird ein Script ``ftw`` im *bin*-Ordner der angegebenen Zope-Version erstellt.
 Wenn dieser *bin*-Ordner noch nicht im PATH ist, dann sollte er eingetragen werden::
+
     ~% which python2.4
     /Library/Frameworks/Python.framework/Versions/2.4.6/bin//python2.4
     ~% echo "export PATH=/Library/Frameworks/Python.framework/Versions/2.4.6/bin:$PATH" > ~/.profile

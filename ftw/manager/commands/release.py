@@ -19,7 +19,7 @@ class ReleaseCommand(basecommand.BaseCommand):
     (trunk) ausgeführt werden.
 
     Bedingungen
-    -----------
+
     *   Die Option *long_description* im *setup.py* muss validierter restructuredText
         sein
     *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
@@ -34,7 +34,7 @@ class ReleaseCommand(basecommand.BaseCommand):
     *   Es wird eine MANIFEST.in Datei erwartet. Existiert keine, wird eine angelegt.
 
     Aktionen
-    --------
+
     *   Es wird ein SVN-Tag erstellt
     *   Die Version im Trunk wird erhöht (version.txt und HISTORY.txt)
     *   Die Version im Tag wird angepasst (version.txt und HISTORY.txt)

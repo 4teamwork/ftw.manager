@@ -10,6 +10,7 @@ Changelog
 * implemented auto generated docstring containing the help info for each command
 * added git-svn support for command "version"
 * added new command "selfupdate"
+* fixed some restructuredtext issues in command documentations
 
 
 0.1.6.1

@@ -13,7 +13,8 @@ class MultiinstanceCommand(basecommand.BaseCommand):
     a given parameter.
 
     The Instances should be numbered.
-    Example:
+    Example::
+
         bin/zeoserver
         bin/instanceadm
         bin/instance1
@@ -27,7 +28,6 @@ class MultiinstanceCommand(basecommand.BaseCommand):
     ACTION: The action is passed to the instance (e.g. start, stop, restart, fg)
 
     Examples:
-    ^^^^^^^^^
 
     ftw multiinstance 2 3 stop
         Stops instance2 and instance3

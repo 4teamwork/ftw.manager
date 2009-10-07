@@ -72,7 +72,7 @@ class BuildPotCommand(I18NDudeBaseCommand):
     wird in einem lokalen Checkout eines Eggs ausgeführt.
 
     Voraussetzungen:
-    ================
+
     Der i18n-dude muss im Buildout eingetragen und installiert sein:
         [buildout]
         parts += i18ndude

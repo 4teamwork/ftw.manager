@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import os
+import sys
 
 version = open('ftw/manager/version.txt').read().strip()
 
@@ -14,6 +15,9 @@ try:
 except ImportError:
     pass
 if generated_description:
+    # reset sys.argv
+    argv = sys.argv[:]
+    sys.argv = argv[:1]
     from StringIO import StringIO
     from ftw.manager.utils import output
     output.COLORSTRINGS_ENABLED = False
@@ -39,6 +43,7 @@ if generated_description:
     # --
     help.seek(0)
     long_description = long_description.replace('--help-text--', help.read())
+    sys.argv[:] = argv
 
 
 setup(name='ftw.manager',
