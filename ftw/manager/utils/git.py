@@ -15,7 +15,7 @@ def is_git(directory):
     """
     Checks if a directory is a local git repo
     """
-    return 'Repository Root' in ''.join(runcmd('git svn info 2> /dev/null', log=False, respond=True))
+    return 'Repository Root' in ''.join(runcmd('cd %s ; git svn info 2> /dev/null' % directory, log=False, respond=True))
 
 @memoize
 def get_package_name(directory_or_url):
@@ -43,7 +43,7 @@ def get_svn_url(directory_or_url):
         directory = directory_or_url
         if not is_git(directory):
             raise NotAGitsvnRepository
-        return ''.join(runcmd('git svn info %s | grep URL | cut -d " " -f 2' % directory, log=False, respond=True)).strip()
+        return ''.join(runcmd('cd %s; git svn info | grep URL | cut -d " " -f 2' % directory, log=False, respond=True)).strip()
 
 @memoize
 def get_gitsvn_cache_path():

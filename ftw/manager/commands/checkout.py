@@ -47,20 +47,22 @@ class CheckoutCommand(basecommand.BaseCommand):
         svn_url = None
         namespace = package_name.split('.')[0]
         # are there already packages checked out with same namespace?
-        dirs = os.listdir('.')
-        for dir in dirs:
+        dirs = [os.path.abspath(d) for d in os.listdir('.')]
+        dirs += [os.path.join(git.get_gitsvn_cache_path(), d)
+                 for d in os.listdir(git.get_gitsvn_cache_path())]
+        for path in dirs:
+            dir = os.path.basename(path)
             if dir.startswith('%s.' % namespace):
                 try:
-                    tmp_url = '/'.join(scm.get_package_root_url(dir).split('/')[:-1])
+                    tmp_url = '/'.join(scm.get_package_root_url(path).split('/')[:-1])
                     if tmp_url and '%s/' % package_name in svn.listdir(tmp_url):
                         svn_url = os.path.join(tmp_url, package_name, 'trunk')
-                        print svn_url
                         break
                 except scm.NotAScm:
                     pass
         if svn_url:
             print ' * found a package under %s' % svn_url
-            msg = 'SVN project root url [%s]' % \
+            msg = 'SVN project trunk url [%s]' % \
                     output.ColorString(svn_url, output.YELLOW_BOLD)
             def input_validator(v):
                 if not v:
@@ -72,7 +74,7 @@ class CheckoutCommand(basecommand.BaseCommand):
             if url_input:
                 svn_url = url_input.strip()
         else:
-            msg = 'SVN project root url:'
+            msg = 'SVN project trunk url:'
             def input_validator(v):
                 if not v or not svn.isdir(v.strip()):
                     return 'URL not found'
