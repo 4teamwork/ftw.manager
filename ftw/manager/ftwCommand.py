@@ -36,7 +36,7 @@ class FTWCommand(object):
         usage += '\nACTIONS::\n'
         namejust = max([len(cmd.command_name) for cmd in self.commands]) + 2
         for command in self.commands:
-            usage += '  %s: %s%s\n' % (
+            usage += '    %s: %s%s\n' % (
                 command.command_name.ljust(namejust),
                 command.description.strip(),
                 command.command_shortcut and ' [%s]' % command.command_shortcut or '',
