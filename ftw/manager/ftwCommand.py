@@ -11,7 +11,7 @@ class FTWCommand(object):
 
     version = open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 'version.txt')).read().strip()
-    usage = '%prog ACTION [options]'
+    usage = 'ftw ACTION [options]'
     commands = []
 
     def __init__(self):
