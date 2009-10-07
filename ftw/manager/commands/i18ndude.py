@@ -85,6 +85,7 @@ class BuildPotCommand(I18NDudeBaseCommand):
     command_name = 'i18npot'
     command_shortcut = 'ib'
     description = 'Aktualisiert die i18n-POT-Dateien eines Packets'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         self.check_conditions()
@@ -119,7 +120,7 @@ class SyncPoCommand(I18NDudeBaseCommand):
     command_name = 'i18nsync'
     command_shortcut = 'is'
     description = 'Aktualisiert die Übersetzungs-Dateien einer Sprache'
-    usage = '%%prog %s [LANG-CODE]' % command_name
+    usage = 'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):
         if len(self.args)<1:

@@ -17,7 +17,7 @@ class ZopeInstanceCommand(basecommand.BaseCommand):
     command_name = 'zopeinstance'
     command_shortcut = 'zi'
     description = 'Run bin/instance placeless'
-    usage = '%%prog %s action [options]' % command_name
+    usage = 'ftw %s action [options]' % command_name
     use_optparse = False
 
     def __call__(self):

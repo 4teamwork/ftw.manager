@@ -14,6 +14,7 @@ class DependencyTestsCommand(basecommand.BaseCommand):
     command_name = 'dependencytests'
     command_shortcut = 'dt'
     description = 'Run tests for dependencies found in dependencies.txt'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         if not os.path.isfile('dependencies.txt'):

@@ -12,6 +12,7 @@ class CheckdocsCommand(basecommand.BaseCommand):
 
     command_name = 'checkdocs'
     description = 'Checks if the description defined in setup.py is reStructured Text valid.'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         if not os.path.isfile('setup.py'):

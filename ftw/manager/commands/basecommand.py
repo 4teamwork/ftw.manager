@@ -16,7 +16,7 @@ class BaseCommand(object):
     command_name = None
     command_shortcut = None
     description = None
-    usage = '%%prog %s [options]' % command_name
+    usage = 'ftw %s [options]' % command_name
     use_optparse = True
 
     def __init__(self, maincommand):

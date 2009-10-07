@@ -45,6 +45,7 @@ class ReleaseCommand(basecommand.BaseCommand):
     command_name = 'release'
     command_shortcut = 'rl'
     description = 'Release eines Packets erstellen'
+    usage = 'ftw %s [OPTIONS]' % command_name
 
     def register_options(self):
         self.parser.add_option('-e', '--only-egg', dest='release_egg_only',

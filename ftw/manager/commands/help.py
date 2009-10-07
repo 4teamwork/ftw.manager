@@ -8,7 +8,7 @@ class HelpCommand(basecommand.BaseCommand):
 
     command_name = 'help'
     description = 'show help text'
-    usage = '%%prog %s command' % command_name
+    usage = 'ftw %s command' % command_name
 
     def __call__(self):
         if len(self.args)==0 or self.args[0]=='help':

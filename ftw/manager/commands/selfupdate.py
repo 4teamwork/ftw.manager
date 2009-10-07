@@ -11,7 +11,7 @@ class SelfUpdate(basecommand.BaseCommand):
 
     command_name = 'selfupdate'
     description = 'Updates ftw.manager with newest version from PSC using easy_install'
-    usage = '%%prog %s [options]' % command_name
+    usage = 'ftw %s [options]' % command_name
 
     def __call__(self):
         from pkg_resources import load_entry_point

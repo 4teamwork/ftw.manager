@@ -42,7 +42,7 @@ class MultiinstanceCommand(basecommand.BaseCommand):
     command_name = 'multiinstance'
     command_shortcut = 'mi'
     description = 'Calls multiple (ZEO-) instances one after another'
-    usage = '%%prog %s FROM [TO] ACTION'
+    usage = 'ftw %s FROM [TO] ACTION' % command_name
 
     alias_map = {
         'adm' : 0,

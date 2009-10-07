@@ -20,7 +20,7 @@ class DevelopCommand(basecommand.BaseCommand):
         command_name = 'develop'
         command_shortcut = 'dev'
         description = 'Sets a package to develop'
-        usage = '%prog %s [main_package] [options]'
+        usage = 'ftw %s [main_package] [options]' % command_name
 
         def __call__(self):
             self.check_conditions()

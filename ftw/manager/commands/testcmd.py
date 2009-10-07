@@ -15,6 +15,7 @@ class TestCommand(basecommand.BaseCommand):
     command_name = 'test'
     command_shortcut = 't'
     description = 'Run tests for current package'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         package_name = scm.get_package_name('.')

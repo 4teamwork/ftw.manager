@@ -33,7 +33,7 @@ class FTWCommand(object):
 
     def extend_usage(self):
         usage = self.parser.get_usage()
-        usage += '\nACTIONS:\n'
+        usage += '\nACTIONS::\n'
         namejust = max([len(cmd.command_name) for cmd in self.commands]) + 2
         for command in self.commands:
             usage += '  %s: %s%s\n' % (

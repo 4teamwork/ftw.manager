@@ -18,7 +18,7 @@ class CheckoutCommand(basecommand.BaseCommand):
     command_name = 'checkout'
     command_shortcut = 'co'
     description = 'Checks out a package with git-svn'
-    usage = '%%prog %s package_name' % command_name
+    usage = 'ftw %s package_name' % command_name
 
     def __call__(self):
         if len(self.args)==0:

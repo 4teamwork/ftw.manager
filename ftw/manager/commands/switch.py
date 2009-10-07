@@ -29,6 +29,7 @@ class SwitchCommand(basecommand.BaseCommand):
     command_name = 'switch'
     command_shortcut = 'sw'
     description = 'Wechselt zwischen lokalem SVN- und GIT-SVN-Repository'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         self.check_conditions()

@@ -13,6 +13,7 @@ class VersionCommand(basecommand.BaseCommand):
 
     command_name = 'version'
     description = 'Display Version of the package containing the current directory'
+    usage = 'ftw %s' % command_name
 
     def __call__(self):
         svn_url = scm.get_svn_url('.').split('/')
