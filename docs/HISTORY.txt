@@ -5,7 +5,7 @@ Changelog
 0.1.8
 -----
 
-* improved url proposal for "checkout" command
+* improved url proposal for "checkout" command (included git-svn cache directory)
 
 
 0.1.7
