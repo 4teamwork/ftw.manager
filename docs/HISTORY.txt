@@ -6,6 +6,7 @@ Changelog
 -----
 
 * improved url proposal for "checkout" command (included git-svn cache directory)
+* fixed bug in release command: wrong syntax for MANIFEST.in
 
 
 0.1.7

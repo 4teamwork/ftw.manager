@@ -111,7 +111,6 @@ class ReleaseCommand(basecommand.BaseCommand):
             f = open('MANIFEST.in', 'w')
             namespace = svn.get_package_name('.').split('.')[0]
             f.write('recursive-include %s *\n' % namespace)
-            f.write('recursive-include docs *\n')
             f.write('global-exclude *pyc\n')
             f.close()
         # check subversion state
