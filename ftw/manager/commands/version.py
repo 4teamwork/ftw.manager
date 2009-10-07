@@ -4,7 +4,7 @@ import os
 import basecommand
 from ftw.manager.utils import output
 from ftw.manager.utils import runcmd
-from ftw.manager.utils import subversion as svn
+from ftw.manager.utils import scm
 
 class VersionCommand(basecommand.BaseCommand):
     """
@@ -15,9 +15,9 @@ class VersionCommand(basecommand.BaseCommand):
     description = 'Display Version of the package containing the current directory'
 
     def __call__(self):
-        svn_url = svn.get_svn_url('.').split('/')
-        svn_root_url = svn.get_package_root_url('.').split('/')
-        package_name = svn.get_package_name('.')
+        svn_url = scm.get_svn_url('.').split('/')
+        svn_root_url = scm.get_package_root_url('.').split('/')
+        package_name = scm.get_package_name('.')
         path = os.path.abspath(os.path.join(
                 (len(svn_url) - len(svn_root_url) - 1) * '../',
                 package_name.replace('.','/'),
