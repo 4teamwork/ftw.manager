@@ -17,6 +17,8 @@ class FTWCommand(object):
     def __init__(self):
         self.parser = OptionParser(version=self.version, usage=self.usage)
         self.extend_usage()
+
+    def __call__(self):
         if len(sys.argv)==1:
             self.parser.print_help()
         elif len(sys.argv)==2 and sys.argv[1].startswith('-'):
@@ -55,7 +57,7 @@ class FTWCommand(object):
 
 def main():
     from ftw.manager import commands
-    FTWCommand()
+    FTWCommand()()
 
 if __name__=='__main__':
     main()

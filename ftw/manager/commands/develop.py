@@ -38,7 +38,7 @@ class DevelopCommand(basecommand.BaseCommand):
         def register_options(self):
             self.parser.add_option('-r', '--revert', dest='revert',
                                    action='store_true', default=False,
-                                   help=u'Disable development mode for package')
+                                   help='Disable development mode for package')
         
         def check_conditions(self):
             output.part_title('Checking conditions')

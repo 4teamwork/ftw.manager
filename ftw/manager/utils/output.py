@@ -12,9 +12,13 @@ RED_BOLD        = '\033[1;31m%s\033[00m'
 GREEN_BOLD      = '\033[1;32m%s\033[00m'
 YELLOW_BOLD     = '\033[1;33m%s\033[00m'
 
+COLORSTRINGS_ENABLED = True
+
 class ColorString(str):
 
     def __new__(cls, value, color):
+        if not COLORSTRINGS_ENABLED:
+            return value
         self = str.__new__(cls, color % value)
         self.value = value
         self.color = color

@@ -118,7 +118,7 @@ class MultiinstanceCommand(basecommand.BaseCommand):
     def register_options(self):
         self.parser.add_option('-d', '--delay', dest='delay',
                                action='store', type='int', default=1,
-                               help=u'Timeout between two instance calls')
+                               help='Timeout between two instance calls')
 
 
 basecommand.registerCommand(MultiinstanceCommand)

@@ -21,28 +21,7 @@ Wenn dieser *bin*-Ordner noch nicht im PATH ist, dann sollte er eingetragen werd
     ~% echo "export PATH=/Library/Frameworks/Python.framework/Versions/2.4.6/bin:$PATH" > ~/.profile
 
 Nach erfolgreicher Installation steht der Befehl ``ftw`` zur Verfügung::
-    ~% ftw help
-    usage: ftw ACTION [options]
-    
-    ACTIONS:
-      checkdocs        : Checks if the description defined in setup.py is reStructured Text valid.
-      checkout         : Checks out a package with git-svn [co]
-      zopeinstance     : Run bin/instance placeless [zi]
-      dependencytests  : Run tests for dependencies found in dependencies.txt [dt]
-      develop          : Sets a package to develop [dev]
-      help             : show help text
-      i18npot          : Aktualisiert die i18n-POT-Dateien eines Packets [ib]
-      i18nsync         : Aktualisiert die Übersetzungs-Dateien einer Sprache [is]
-      multiinstance    : Calls multiple (ZEO-) instances one after another [mi]
-      release          : Release eines Packets erstellen [rl]
-      switch           : Wechselt zwischen lokalem SVN- und GIT-SVN-Repository [sw]
-      test             : Run tests for current package [t]
-      version          : Display Version of the package containing the current directory
-    
-    
-    options:
-      --version   show program's version number and exit
-      -h, --help  show this help message and exit
-
+    ftw help
+    --help-text--
 
 

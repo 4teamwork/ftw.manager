@@ -15,7 +15,7 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
     
     def check_conditions(self):
         output.part_title('Checking Conditions')
-        # we should be in a buildout directory
+        # we should be in a buildout directory
         try:
             buildout_dir = self.buildout_dir
             print '  found buildout at:', buildout_dir
@@ -132,7 +132,7 @@ class SyncPoCommand(I18NDudeBaseCommand):
         pot_path = os.path.join(self.locales_dir, '%s.pot' % package_name)
         if not os.path.exists(pot_path):
             output.error('Could not find pot file at: %s' % pot_path, exit=1)
-        # check language directory
+        # check language directory
         lang_dir = os.path.join(self.locales_dir, lang, 'LC_MESSAGES')
         if not os.path.isdir(lang_dir):
             runcmd('mkdir -p %s' % lang_dir)

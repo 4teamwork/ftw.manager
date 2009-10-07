@@ -49,13 +49,13 @@ class ReleaseCommand(basecommand.BaseCommand):
     def register_options(self):
         self.parser.add_option('-e', '--only-egg', dest='release_egg_only',
                                action='store_true', default=False,
-                               help=u'Nur Egg erstellen, kein SVN-Tag machen')
+                               help='Nur Egg erstellen, kein SVN-Tag machen')
         self.parser.add_option('-E', '--no-egg', dest='release_egg',
                                action='store_false', default=True,
-                               help=u'Kein Egg erstellen')
+                               help='Kein Egg erstellen')
         self.parser.add_option('-i', '--ignore-doc-errors', dest='ignore_doc_errors',
                                action='store_true', default=False,
-                               help=u'Docstring Fehler (reStructuredText) ignorieren')
+                               help='Docstring Fehler (reStructuredText) ignorieren')
 
     def __call__(self):
         self.check_doc()

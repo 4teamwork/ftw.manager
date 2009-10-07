@@ -7,6 +7,7 @@ Changelog
 
 * using svns INGORE.TXT files as .gitignore after after running "checkout" command
 * implemented switch command for switching between svn and git-svn
+* implemented auto generated docstring containing the help info for each command
 
 
 0.1.6.1
