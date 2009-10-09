@@ -78,6 +78,6 @@ class ColorScheme(singleton.Singleton):
         print self.colorize('This is a info_bold text', 'info_bold')
         sys.exit(0)
 
-ColorScheme().color_test()
+#ColorScheme().color_test()
 
 
