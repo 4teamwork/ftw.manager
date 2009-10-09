@@ -63,7 +63,7 @@ class CheckoutCommand(basecommand.BaseCommand):
         if svn_url:
             print ' * found a package under %s' % svn_url
             msg = 'SVN project trunk url [%s]' % \
-                    output.ColorString(svn_url, output.YELLOW_BOLD)
+                    output.colorize(svn_url, output.BOLD_WARNING)
             def input_validator(v):
                 if not v:
                     return True

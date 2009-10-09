@@ -5,7 +5,7 @@ import output
 
 def runcmd(cmd, log=True, respond=False):
     if log:
-        print '  %', output.ColorString(cmd, output.YELLOW)
+        print '  %', output.colorize(cmd, output.WARNING)
     if respond:
         p = os.popen(cmd, 'r')
         l = p.readlines()
@@ -16,7 +16,7 @@ def runcmd(cmd, log=True, respond=False):
 
 def runcmd_with_exitcode(cmd, log=True, respond=False):
     if log:
-        print '  %', output.ColorString(cmd, output.YELLOW)
+        print '  %', output.colorize(cmd, output.WARNING)
     p = subprocess.Popen(cmd.split(' '), cwd=os.path.abspath('.'), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     exitcode = p.wait()
     if respond:

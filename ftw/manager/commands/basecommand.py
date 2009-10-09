@@ -32,9 +32,9 @@ class BaseCommand(object):
 
     def extend_usage(self):
         usage = self.parser.get_usage()
-        usage += '    Command name:     %s\n' % output.ColorString(self.command_name, output.YELLOW)
+        usage += '    Command name:     %s\n' % output.colorize(self.command_name, output.WARNING)
         if self.command_shortcut:
-            usage += '    Command shortcut: %s\n' % output.ColorString(self.command_shortcut, output.YELLOW)
+            usage += '    Command shortcut: %s\n' % output.colorize(self.command_shortcut, output.WARNING)
         usage += self.__class__.__doc__
         self.parser.set_usage(usage)
 

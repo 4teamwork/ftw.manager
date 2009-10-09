@@ -14,7 +14,7 @@ def prompt(prompt, validator=None):
                 return 'No Way'
     """
     def ask():
-        return raw_input(output.ColorString('  %s > ' % prompt, output.YELLOW))
+        return raw_input(output.colorize('  %s > ' % prompt, output.WARNING))
     if validator:
         def looper(input):
             val = validator(input)

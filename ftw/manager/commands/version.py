@@ -28,8 +28,8 @@ class VersionCommand(basecommand.BaseCommand):
             output.error('Could not find file %s' % path, exit=1)
         version = open(path).read().strip()
         print '  Version of %s: %s' % (
-            output.ColorString(package_name, output.YELLOW),
-            output.ColorString(version, output.YELLOW),
+            output.colorize(package_name, output.WARNING),
+            output.colorize(version, output.WARNING),
         )
 
 basecommand.registerCommand(VersionCommand)

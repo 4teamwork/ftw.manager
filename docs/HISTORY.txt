@@ -5,6 +5,8 @@ Changelog
 0.1.9
 -----
 
+* added color scheme support
+
 
 0.1.8
 -----

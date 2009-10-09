@@ -133,14 +133,14 @@ class ReleaseCommand(basecommand.BaseCommand):
                                     'version.txt')
         trunk_version = open(version_file).read().strip()
         print ' * Current version of trunk:         %s' %\
-                output.ColorString(trunk_version, output.YELLOW)
+                output.colorize(trunk_version, output.WARNING)
         next_version = trunk_version.split('-')[0]
         existing_tags = svn.get_existing_tags('.')
         if next_version in existing_tags.keys():
             output.warning('Tag %s already existing' % next_version)
         # ask for next tag version
         prompt_msg = 'Which version do you want to release now? [%s]' % \
-                        output.ColorString(next_version, output.YELLOW_BOLD)
+                        output.colorize(next_version, output.BOLD_WARNING)
         next_version_input = input.prompt(prompt_msg, lambda v:v in existing_tags.keys() and 'Tag already existing' or True)
         if next_version_input:
             next_version = next_version_input
@@ -148,14 +148,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         next_trunk_version = next_version + '-dev'
         next_trunk_version = self.bump_version_proposal(next_trunk_version)
         prompt_msg = 'Which version should trunk have afterwards? [%s]' % \
-                        output.ColorString(next_trunk_version, output.YELLOW_BOLD)
+                        output.colorize(next_trunk_version, output.BOLD_WARNING)
         next_trunk_version_input = input.prompt(prompt_msg)
         if next_trunk_version_input:
             next_trunk_version = next_trunk_version_input
         print ' * The version of the tag will be:   %s' %\
-                output.ColorString(next_version, output.YELLOW)
+                output.colorize(next_version, output.WARNING)
         print ' * New version of the trunk will be: %s' %\
-                output.ColorString(next_trunk_version, output.YELLOW)
+                output.colorize(next_trunk_version, output.WARNING)
         self.new_tag_version = next_version
         self.new_trunk_version = next_trunk_version
 
@@ -176,14 +176,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         config.readfp(open(pypirc_path))
         basic_namespace = svn.get_package_name('.').split('.')[0]
         for section in config.sections():
-            print '* found target "%s"' % output.ColorString(section,
-                                            output.YELLOW)
+            print '* found target "%s"' % output.colorize(section,
+                                            output.WARNING)
         if basic_namespace in config.sections():
             self.pypi_target = basic_namespace
         else:
             self.pypi_target = config.sections()[0]
         msg = 'Please specify a pypi target for the egg relase [%s]' % \
-                     output.ColorString(self.pypi_target, output.YELLOW_BOLD)
+                     output.colorize(self.pypi_target, output.BOLD_WARNING)
         pypi_target_input = input.prompt(msg, lambda v:\
                             not v or v in config.sections()
                             and True or 'Please select a target listed above')
