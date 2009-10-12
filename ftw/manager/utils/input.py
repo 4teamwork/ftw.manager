@@ -19,7 +19,7 @@ def prompt(prompt, validator=None):
         def looper(input):
             val = validator(input)
             if val!=True:
-                output.warning(val)
+                output.warning(str(val))
                 return True
             else:
                 return False
@@ -29,3 +29,20 @@ def prompt(prompt, validator=None):
         return input
     else:
         return ask()
+
+
+# Boolean
+
+def prompt_bool(text, default=True):
+    negative = ['no', 'nein', 'n', 'false', '0',]
+    positive = ['yes', 'ja', 'j', 'y', 'true', '1', ]
+    if default==True:
+        positive.append('')
+    elif default==False:
+        negative.append('')
+    def validator(value):
+        return value.lower() in negative + positive and 1 or 'Yes or no?'
+    text += default==True and ' [Y/n]' or default==False and ' [y/N]' or ' [y/n]'
+    value = prompt(text, validator)
+    return value in positive
+
