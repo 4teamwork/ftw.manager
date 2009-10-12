@@ -7,6 +7,7 @@ import i18ndude
 import multiinstance
 import release
 import selfupdate
+import setup
 import switch
 import testcmd
 import version

@@ -7,8 +7,8 @@ COLOR_SCHEMES = {
     'dark' : {
         'error'           : '\033[0;31m%s\033[00m',
         'error_bold'      : '\033[1;31m%s\033[00m',
-        'warning'         : '\033[0;33m%s\033[00m',
-        'warning_bold'    : '\033[1;33m%s\033[00m',
+        'warning'         : '\033[0;36m%s\033[00m',
+        'warning_bold'    : '\033[1;36m%s\033[00m',
         'info'            : '\033[0;32m%s\033[00m',
         'info_bold'       : '\033[1;32m%s\033[00m',
     },

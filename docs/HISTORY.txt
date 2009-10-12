@@ -6,6 +6,7 @@ Changelog
 -----
 
 * added color scheme support
+* added "setup" command
 
 
 0.1.8
