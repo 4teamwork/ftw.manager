@@ -5,6 +5,9 @@ Changelog
 0.1.10
 ------
 
+* Added shortcut "cd" for command "checkdocs"
+  [15.10.2009, jbaumann]
+
 * Improved "release" command: committing MANIFEST.in automatically (user is asked)
   [15.10.2009, jbaumann]
 
