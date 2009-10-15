@@ -5,6 +5,8 @@ Changelog
 0.1.10
 ------
 
+* [15.10.2009] Added auto folder creation to svn-check-layout function [jba]
+
 
 0.1.9
 -----

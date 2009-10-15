@@ -4,7 +4,7 @@ contains subversion helper methods
 
 import os
 import xml.dom.minidom
-from ftw.manager.utils import runcmd, runcmd_with_exitcode
+from ftw.manager.utils import runcmd, runcmd_with_exitcode, output, input
 from ftw.manager.utils.memoize import memoize
 
 class NotASubversionCheckout(Exception):
@@ -51,7 +51,7 @@ def get_svn_url(directory_or_url):
         return ''.join(runcmd('svn info %s | grep URL | cut -d " " -f 2' % directory, log=False, respond=True)).strip()
 
 @memoize
-def check_project_layout(directory_or_url, raise_exception=True):
+def check_project_layout(directory_or_url, raise_exception=True, ask_for_creation=True):
     """
     Checks if the project has a default svn layout with the folders
     trunk, tags and branches.
@@ -65,12 +65,29 @@ def check_project_layout(directory_or_url, raise_exception=True):
         url = get_package_root_url(directory_or_url)
     dircontent = runcmd('svn ls %s' % url, log=False, respond=True)
     dircontent = [x.strip()[:-1] for x in dircontent]
-    for dir in ('trunk', 'tags', 'branches'):
+    # check if there are the expected folders
+    excpected = ('trunk', 'tags', 'branches')
+    missing = []
+    for dir in excpected:
         if dir not in dircontent:
-            if raise_exception:
-                raise InvalidProjectLayout
-            else:
-                return False
+            missing.append(dir)
+    # ask what to do, if there are folders missing
+    if len(missing)>0:
+        if ask_for_creation:
+            output.error('Invalid project layout, folders missing: ' + ', '.join(missing))
+            if input.prompt_bool('Would you like to create the missing folders?'):
+                cmd = 'svn mkdir '
+                cmd += ' '.join([os.path.join(url, dir) for dir in missing])
+                cmd += ' -m "created folders: %s for package %s"' % (
+                        ', '.join(missing),
+                        get_package_name(directory_or_url),
+                )
+                runcmd(cmd, log=True, respond=True)
+                return check_project_layout(directory_or_url, raise_exception=raise_exception, ask_for_creation=False)
+        if raise_exception:
+            raise InvalidProjectLayout
+        else:
+            return False
     return True
 
 @memoize

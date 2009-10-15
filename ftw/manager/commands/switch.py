@@ -1,5 +1,8 @@
 # -*- coding: utf8 -*-
 
+import os.path
+import sys
+
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import output
 from ftw.manager.utils import runcmd
@@ -60,11 +63,18 @@ class SwitchCommand(basecommand.BaseCommand):
         runcmd('rm -rf * .*')
         git.checkout_gitsvn(url, location='..')
         git.apply_svn_ignores('.')
+        self.create_egg_info()
 
     def switch_to_svn(self):
         output.part_title('Switching to SVN')
         svn_url = scm.get_svn_url('.')
         runcmd('rm -rf * .*')
         runcmd('svn co %s .' % svn_url)
+        self.create_egg_info()
+
+    def create_egg_info(self):
+        if os.path.exists('setup.py'):
+            output.part_title('Creating egg-infos')
+            runcmd('%s setup.py egg_info' % sys.executable) 
 
 basecommand.registerCommand(SwitchCommand)
