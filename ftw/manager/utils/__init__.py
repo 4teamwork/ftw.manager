@@ -14,13 +14,18 @@ def runcmd(cmd, log=True, respond=False):
     else:
         os.system(cmd)
 
-def runcmd_with_exitcode(cmd, log=True, respond=False):
+def runcmd_with_exitcode(cmd, log=True, respond=False, respond_error=False):
     if log:
         print '  %', output.colorize(cmd, output.WARNING)
     p = subprocess.Popen(cmd.split(' '), cwd=os.path.abspath('.'), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     exitcode = p.wait()
-    if respond:
-        return exitcode, p.stdout.read()
-    else:
+    if not respond and not respond_error:
         return exitcode
+    else:
+        returned = [exitcode]
+        if respond:
+            returned.append(p.stdout.read())
+        if respond_error:
+            returned.append(p.stderr.read())
+        return returned
 

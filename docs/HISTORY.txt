@@ -5,7 +5,12 @@ Changelog
 0.1.10
 ------
 
-* [15.10.2009] Added auto folder creation to svn-check-layout function [jba]
+* Improved command "checkdocs": printing the bad rows of the docstring
+  for faster mistake finding
+  [15.10.2009, jbaumann]
+
+* Added auto folder creation to svn-check-layout function
+  [15.10.2009, jbaumann]
 
 
 0.1.9
