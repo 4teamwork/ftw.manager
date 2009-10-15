@@ -113,6 +113,13 @@ class ReleaseCommand(basecommand.BaseCommand):
             f.write('recursive-include %s *\n' % namespace)
             f.write('global-exclude *pyc\n')
             f.close()
+            print 'created MANIFEST.in with following content:'
+            print '-' * 30
+            print output.colorize(open('MANIFEST.in').read(), output.INFO)
+            print '-' * 30
+            if input.prompt_bool('Would you like to ommit the MANIFEST.in?'):
+                runcmd('svn add MANIFEST.in')
+                runcmd('svn commit -m "added MANIFEST.in for %s"' % svn.get_package_name('.'))
         # check subversion state
         cmd = 'svn st | grep -v ^X | grep -v ^Performing | grep -v ^$'
         if len(runcmd(cmd, log=False, respond=True)):

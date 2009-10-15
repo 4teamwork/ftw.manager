@@ -5,6 +5,9 @@ Changelog
 0.1.10
 ------
 
+* Improved "release" command: committing MANIFEST.in automatically (user is asked)
+  [15.10.2009, jbaumann]
+
 * Improved command "checkdocs": printing the bad rows of the docstring
   for faster mistake finding
   [15.10.2009, jbaumann]
