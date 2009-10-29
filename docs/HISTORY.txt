@@ -5,12 +5,12 @@ Changelog
 0.1.11
 ------
 
+* Added more flexibility for using commands in non-package-root folders.
+  [29.10.2009, jbaumann]
+
 
 0.1.10
 ------
-
-* Added more flexibility for using commands in non-package-root folders.
-  [29.10.2009, jbaumann]
 
 * Added shortcut "cd" for command "checkdocs"
   [15.10.2009, jbaumann]
