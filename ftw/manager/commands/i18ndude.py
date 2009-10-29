@@ -88,6 +88,7 @@ class BuildPotCommand(I18NDudeBaseCommand):
     usage = 'ftw %s' % command_name
 
     def __call__(self):
+        scm.require_package_root_cwd()
         self.check_conditions()
         package_name = scm.get_package_name('.')
         package_root = scm.get_package_root_path('.')
@@ -123,6 +124,7 @@ class SyncPoCommand(I18NDudeBaseCommand):
     usage = 'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):
+        scm.require_package_root_cwd()
         if len(self.args)<1:
             output.error('Language code is required', exit=1)
         lang = self.args[0]

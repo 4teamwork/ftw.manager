@@ -14,6 +14,26 @@ is_subversion = svn.is_subversion
 class NotAScm(Exception):
     pass
 
+def require_package_root_cwd():
+    """ Finds the next package-root relative to the current directory (cwd)
+    and tries to switch the python cwd to that path.
+    """
+    original_cwd = os.getcwd()
+    setattr(os, '_original_cwd', original_cwd)
+    cwd = original_cwd
+    # we need a proper context (providing a svn url). is_package_root will check
+    if not is_package_root(cwd):
+        current_url = get_svn_url(cwd).split('/')
+        root_url = get_package_root_url(cwd).split('/')
+        levels = len(current_url) - len(root_url)
+        if 'trunk' in current_url:
+            levels -= 1
+        if 'tags' in current_url or 'branches' in current_url:
+            levels -= 2
+        if levels>0:
+            # change cwd to root
+            new_cwd = '/'.join(cwd.split('/')[:-levels])
+            os.chdir(new_cwd)
 
 @memoize
 def get_svn_url(directory_or_url):
