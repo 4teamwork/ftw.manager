@@ -12,7 +12,7 @@ eingetragen (http://psc.4teamwork.ch/4teamwork/ftw/ftw.manager).
 
 Installation der neusten Version von ftw.manager::
 
-    sudo easy_enstall-2.4 -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
+    sudo easy_install-2.4 -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
 
 Es sollte die Python-Version verwendet werden, mit welcher auch Zope läuft. Das
 Updaten von ftw.manager auf den neusten Release funktioniert auch mit easy
