@@ -41,8 +41,9 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
                 '/'.join(package_name.split('.')),
                 'locales',
         ))
+        print '  using locales dir:', self.locales_dir
         if not os.path.isdir(self.locales_dir):
-            runcmd('mkdir %s' % self.locales_dir)
+            runcmd('mkdir -p %s' % self.locales_dir)
 
     @property
     @memoize

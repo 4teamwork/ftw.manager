@@ -57,9 +57,9 @@ def get_package_root_path(directory_or_url):
     svn.check_project_layout(url_here)
     url_root = get_package_root_url(directory_or_url)
     url_rel = url_here[len(url_root)+1:].split('/')
-    if url_rel[0] in ('trunk', 'tags'):
+    if url_rel[0] in ('trunk'):
         url_rel.pop(0)
-    elif url_rel[0] in ('branches',):
+    elif url_rel[0] in ('branches', 'tags'):
         url_rel.pop(0)
         url_rel.pop(0)
     else:
