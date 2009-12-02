@@ -167,11 +167,23 @@ class ReleaseCommand(basecommand.BaseCommand):
         self.new_trunk_version = next_trunk_version
 
     def bump_version_proposal(self, version):
-        version_parts = version.split('-')
-        version = version_parts[0].split('.')
-        version[-1] = str(int(version[-1])+1)
-        version_parts[0] = '.'.join(version)
-        return '-'.join(version_parts)
+        try:
+            version_parts = version.split('-')
+            version = version_parts[0].split('.')
+            last_num = version[-1]
+            # increase
+            try:
+                last_num = str( int( last_num ) + 1 )
+            except ValueError:
+                last_num_pos = last_num[-1]
+                last_num_pos = str( int( last_num_pos ) + 1 )
+                last_num = last_num[:-1] + last_num_pos
+            # .. use
+            version[-1] = last_num
+            version_parts[0] = '.'.join(version)
+            return '-'.join(version_parts)
+        except ValueError:
+            return '-- no proposal --'
 
     def check_pyprc(self):
         output.part_title('Checking .pypirc for egg-release targets')

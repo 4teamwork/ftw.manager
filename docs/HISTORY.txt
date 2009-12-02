@@ -5,6 +5,9 @@ Changelog
 0.1.11
 ------
 
+* Release command: improved version proposoal (version as 2.4rc3 are now supported)
+  [02.12.2009, jbaumann]
+
 * Added more flexibility for using commands in non-package-root folders.
   [29.10.2009, jbaumann]
 
