@@ -21,12 +21,12 @@ class ReleaseCommand(basecommand.BaseCommand):
     Bedingungen
 
     *   Die Option *long_description* im *setup.py* muss validierter restructuredText
-        sein
+    sein
     *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
-        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
-        sein, ansonsten muss es der trunk sein.
+    das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
+    sein, ansonsten muss es der trunk sein.
     *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
-        branches und tags besitzen
+    branches und tags besitzen
     *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
     *   Die Version ist in der Datei my/package/version.txt gespeichert
     *   Eine Datei docs/HISTORY.txt ist notwendig
@@ -85,13 +85,13 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not svn.check_project_layout('.', raise_exception=False):
             # we should have the folders trunk, tags, branches in the project
             output.error('Project does not have default layout with trunk, ' +\
-                        'tags and branches. At least one folder is missing.',
-                        exit=True)
+                             'tags and branches. At least one folder is missing.',
+                         exit=True)
         if not self.options.release_egg_only:
             if svn.get_svn_url('.')!=svn.get_package_root_url('.')+'/trunk':
                 # command must be run at the "trunk" folder of a package
                 output.error('Please run this command at the root of the package' +\
-                             '(trunk folder)', exit=True)
+                                 '(trunk folder)', exit=True)
         if not os.path.isfile('setup.py'):
             # setup.py is required
             output.error('Could not find the file ./setup.py', exit=True)
@@ -140,14 +140,14 @@ class ReleaseCommand(basecommand.BaseCommand):
                                     'version.txt')
         trunk_version = open(version_file).read().strip()
         print ' * Current version of trunk:         %s' %\
-                output.colorize(trunk_version, output.WARNING)
+            output.colorize(trunk_version, output.WARNING)
         next_version = trunk_version.split('-')[0]
         existing_tags = svn.get_existing_tags('.')
         if next_version in existing_tags.keys():
             output.warning('Tag %s already existing' % next_version)
         # ask for next tag version
         prompt_msg = 'Which version do you want to release now? [%s]' % \
-                        output.colorize(next_version, output.BOLD_WARNING)
+            output.colorize(next_version, output.BOLD_WARNING)
         next_version_input = input.prompt(prompt_msg, lambda v:v in existing_tags.keys() and 'Tag already existing' or True)
         if next_version_input:
             next_version = next_version_input
@@ -155,14 +155,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         next_trunk_version = next_version + '-dev'
         next_trunk_version = self.bump_version_proposal(next_trunk_version)
         prompt_msg = 'Which version should trunk have afterwards? [%s]' % \
-                        output.colorize(next_trunk_version, output.BOLD_WARNING)
+            output.colorize(next_trunk_version, output.BOLD_WARNING)
         next_trunk_version_input = input.prompt(prompt_msg)
         if next_trunk_version_input:
             next_trunk_version = next_trunk_version_input
         print ' * The version of the tag will be:   %s' %\
-                output.colorize(next_version, output.WARNING)
+            output.colorize(next_version, output.WARNING)
         print ' * New version of the trunk will be: %s' %\
-                output.colorize(next_trunk_version, output.WARNING)
+            output.colorize(next_trunk_version, output.WARNING)
         self.new_tag_version = next_version
         self.new_trunk_version = next_trunk_version
 
@@ -184,16 +184,16 @@ class ReleaseCommand(basecommand.BaseCommand):
         basic_namespace = svn.get_package_name('.').split('.')[0]
         for section in config.sections():
             print '* found target "%s"' % output.colorize(section,
-                                            output.WARNING)
+                                                          output.WARNING)
         if basic_namespace in config.sections():
             self.pypi_target = basic_namespace
         else:
             self.pypi_target = config.sections()[0]
         msg = 'Please specify a pypi target for the egg relase [%s]' % \
-                     output.colorize(self.pypi_target, output.BOLD_WARNING)
+            output.colorize(self.pypi_target, output.BOLD_WARNING)
         pypi_target_input = input.prompt(msg, lambda v:\
-                            not v or v in config.sections()
-                            and True or 'Please select a target listed above')
+                                             not v or v in config.sections()
+                                         and True or 'Please select a target listed above')
         if pypi_target_input:
             self.pypi_target = pypi_target_input
 
@@ -207,7 +207,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             tag_url,
             self.new_tag_version,
             svn.get_package_name('.'),
-        )
+            )
         runcmd(cmd)
 
     def bump_trunk_after_tagging(self):
@@ -224,15 +224,15 @@ class ReleaseCommand(basecommand.BaseCommand):
         version = self.new_trunk_version.split('-')[0]
         data = open(history_file).read().split('\n')
         data = data[:insert_title_on_line] +\
-               ['', version,'-' * len(version), '', ] +\
-               data[insert_title_on_line:]
+            ['', version,'-' * len(version), '', ] +\
+            data[insert_title_on_line:]
         file = open(history_file, 'w')
         file.write('\n'.join(data))
         file.close()
         cmd = 'svn ci -m "bumping versions in trunk of %s after tagging %s"' % (
-                svn.get_package_name('.'),
-                self.new_tag_version,
-        )
+            svn.get_package_name('.'),
+            self.new_tag_version,
+            )
         runcmd(cmd)
 
     def bump_tag_after_tagging(self):
@@ -256,17 +256,17 @@ class ReleaseCommand(basecommand.BaseCommand):
         file.write('\n')
         file.close()
         cmd = 'svn ci -m "bumping versions in tag of %s after tagging %s"' % (
-                svn.get_package_name('.'),
-                self.new_tag_version,
-        )
+            svn.get_package_name('.'),
+            self.new_tag_version,
+            )
         runcmd(cmd)
 
     def release_egg(self):
         output.part_title('Releasing agg to target %s' % self.pypi_target)
         cmd = '%s setup.py mregister sdist bdist_egg mupload -r %s' % (
-              sys.executable,
-              self.pypi_target
-        )
+            sys.executable,
+            self.pypi_target
+            )
         runcmd(cmd)
         runcmd('rm -rf dist build')
 
