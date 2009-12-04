@@ -21,12 +21,12 @@ class ReleaseCommand(basecommand.BaseCommand):
     Bedingungen
 
     *   Die Option *long_description* im *setup.py* muss validierter restructuredText
-    sein
+        sein
     *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
-    das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
-    sein, ansonsten muss es der trunk sein.
+        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
+        sein, ansonsten muss es der trunk sein.
     *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
-    branches und tags besitzen
+        branches und tags besitzen
     *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
     *   Die Version ist in der Datei my/package/version.txt gespeichert
     *   Eine Datei docs/HISTORY.txt ist notwendig
