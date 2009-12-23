@@ -95,9 +95,6 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not os.path.isfile('setup.py'):
             # setup.py is required
             output.error('Could not find the file ./setup.py', exit=True)
-        if not os.path.isfile('setup.cfg'):
-            # setup.cfg is required
-            output.error('Could not find the file ./setup.cfg', exit=True)
         if not os.path.isfile('docs/HISTORY.txt'):
             # docs/HISTORY.txt is required
             output.error('Could not find the file ./docs/HISTORY.txt', exit=True)
@@ -259,14 +256,15 @@ class ReleaseCommand(basecommand.BaseCommand):
         version_txt = open(version_file, 'w')
         version_txt.write(self.new_tag_version)
         version_txt.close()
-        print '* updating setup.cfg : removing dev stuff'
-        data = open('setup.cfg').read().split('\n')
-        file = open('setup.cfg', 'w')
-        for line in data:
-            if not line.startswith('tag_build') and not line.startswith('tag_svn_rev'):
-                file.write(line)
-        file.write('\n')
-        file.close()
+        if os.path.isfile('setup.cfg'):
+            print '* updating setup.cfg : removing dev stuff'
+            data = open('setup.cfg').read().split('\n')
+            file = open('setup.cfg', 'w')
+            for line in data:
+                if not line.startswith('tag_build') and not line.startswith('tag_svn_rev'):
+                    file.write(line)
+            file.write('\n')
+            file.close()
         cmd = 'svn ci -m "bumping versions in tag of %s after tagging %s"' % (
             svn.get_package_name('.'),
             self.new_tag_version,
