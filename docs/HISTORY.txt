@@ -5,6 +5,10 @@ Changelog
 0.1.12
 ------
 
+* Release command: setup.cfg should not be required, since its not required in
+  packages any more
+  [23.12.2009, jbaumann]
+
 
 0.1.11
 ------
