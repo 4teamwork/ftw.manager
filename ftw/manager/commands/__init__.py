@@ -1,5 +1,6 @@
 import checkdocs
 import checkout
+import dependencycheck
 import dependencytests
 import develop
 import help

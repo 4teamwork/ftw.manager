@@ -37,7 +37,7 @@ class ASCIITable(object):
                     widths[col] = len(val) + 2
         char_corner = colorize('+', ERROR)
         char_vertical = colorize('|', WARNING)
-        char_horicontal = colorize('-', YELLOW)
+        char_horicontal = colorize('-', WARNING)
         def hline(sep=char_horicontal):
             chrs = [char_corner]
             for w in widths:

@@ -3,6 +3,9 @@ import os
 import subprocess
 import output
 
+from memoize import memoize
+
+@memoize
 def runcmd(cmd, log=True, respond=False):
     if log:
         print '  %', output.colorize(cmd, output.WARNING)
@@ -14,6 +17,7 @@ def runcmd(cmd, log=True, respond=False):
     else:
         os.system(cmd)
 
+@memoize
 def runcmd_with_exitcode(cmd, log=True, respond=False, respond_error=False):
     if log:
         print '  %', output.colorize(cmd, output.WARNING)

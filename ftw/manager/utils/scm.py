@@ -3,6 +3,9 @@ SCM Wrapper
 """
 
 import os
+import re
+import simplejson
+from xml.dom import minidom
 
 import git
 import subversion as svn
@@ -10,6 +13,7 @@ from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.singleton import Singleton
 from ftw.manager.utils import input
 from ftw.manager.utils import output
+from ftw.manager.utils import runcmd, runcmd_with_exitcode
 
 is_git = git.is_git
 is_subversion = svn.is_subversion
@@ -100,6 +104,94 @@ def is_package_root(directory_or_url):
     second_last = parts[-2]
     return last=='trunk' or second_last in ('tags', 'branches')
 
+
+class PackageInfoMemory(Singleton):
+    """ Stores following informations about packages:
+    * name (key)
+    * tags
+    * untagged changes
+    * svn revision
+    * svn url
+    """
+
+    def __init__(self):
+        if not os.path.isdir(self.cachedir):
+            os.mkdir(self.cachedir)
+
+    @property
+    @memoize
+    def cachedir(self):
+        return os.path.abspath(os.path.expanduser('~/.ftw.manager/infocache'))
+
+    @memoize
+    def get_info(self, package):
+        svn_url = PackageSourceMemory().guess_url(package)
+        if not svn_url:
+            return None
+        data = self.get_cached_info(package)
+        update = False
+        rev = self.get_revision_for(package)
+        if not data:
+            update = True
+        elif rev>data['rev']:
+            update = True
+        if update:
+            svn.check_project_layout(svn_url)
+            data = {
+                'name' : package,
+                'tags' : svn.get_existing_tags(svn_url),
+                'newest_tag' : '',
+                'changes' : False,
+                'rev' : rev,
+                'url' : svn_url,
+                }
+            if data['tags']:
+                # find newest tag
+                tags = [k for k, v in data['tags'].items()]
+                tags.sort(lambda a,b:cmp(data['tags'][a], data['tags'][b]))
+                newest_tag = tags[0]
+                data['newest_tag'] = newest_tag
+                newest_tag_url = os.path.join(svn_url,
+                                              'tags',
+                                              newest_tag)
+                trunk_url = os.path.join(svn_url, 'trunk')
+                rows = runcmd_with_exitcode(
+                    'svn diff %s %s --summarize' % (trunk_url, newest_tag_url),
+                    log=False, respond=True)[1].strip().split('\n')
+                for row in rows:
+                    flag, url = re.split('\W*', row.strip(), maxsplit=1)
+                    url = url.strip()
+                    if url.startswith(os.path.join(trunk_url, package.replace('.', '/'))) \
+                            and not url.endswith('version.txt'):
+                        data['changes'] = True
+                        break
+            else:
+                data['changes'] = True
+            self.set_cached_info(package, data)
+        return data
+
+    def get_revision_for(self, package):
+        url = PackageSourceMemory().guess_url(package)
+        url = '/'.join(url.split('/')[:-1])
+        cmd = 'svn ls --xml %s' % url
+        xmldata = runcmd_with_exitcode(cmd, log=False, respond=True)[1].strip()
+        doc = minidom.parseString(xmldata)
+        for entry in doc.getElementsByTagName('entry'):
+            if entry.getElementsByTagName('name')[0].firstChild.nodeValue.strip()==package:
+                return entry.getElementsByTagName('commit')[0].getAttribute('revision')
+        return None
+
+    def get_cached_info(self, package):
+        path = os.path.join(self.cachedir, package)
+        if os.path.isfile(path):
+            return simplejson.loads(open(path).read())
+        return None
+
+    def set_cached_info(self, package, data):
+        path = os.path.join(self.cachedir, package)
+        file = open(path, 'w')
+        file.write(simplejson.dumps(data))
+        file.close()
 
 
 class PackageSourceMemory(Singleton):
