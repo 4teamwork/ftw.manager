@@ -68,6 +68,7 @@ setup(name='ftw.manager',
           'setuptools',
           # -*- Extra requirements: -*-
           'collective.dist',
+          'simplejson',
       ],
       entry_points = {
             'console_scripts' : [
