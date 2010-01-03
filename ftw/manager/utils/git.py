@@ -15,7 +15,16 @@ def is_git(directory):
     """
     Checks if a directory is a local git repo
     """
-    return 'Repository Root' in ''.join(runcmd('cd %s ; git svn info 2> /dev/null' % directory, log=False, respond=True))
+    directory = os.path.abspath(directory)
+    dir = directory.split('/')
+    while len(dir)>1:
+        path = '/'.join(dir)
+        gitconfig = os.path.join(path, '.git', 'config')
+        if os.path.isfile(gitconfig) and '[svn-remote' in open(gitconfig).read():
+            return True
+        dir.pop()
+    return False
+    #return 'Repository Root' in ''.join(runcmd('cd %s ; git svn info 2> /dev/null' % directory, log=False, respond=True))
 
 @memoize
 def get_package_name(directory_or_url):
@@ -29,8 +38,6 @@ def get_package_root_url(directory_or_url):
     """
     url = get_svn_url(directory_or_url)
     urlparts = url.split('/')
-    if not sum([int(x in urlparts) for x in ('trunk', 'branches', 'tags')])>0:
-        raise InvalidProjectLayout
     for dir in ('trunk', 'branches', 'tags'):
         if dir in urlparts:
             return '/'.join(urlparts[:urlparts.index(dir)])
@@ -78,13 +85,13 @@ def checkout_gitsvn(svn_url, location='.'):
         runcmd('cd %s; git svn clone --stdlayout %s' % (
                 get_gitsvn_cache_path(),
                 root_url,
-        ))
+                ))
     runcmd('cp -r %s %s' % (cache_path, location))
     co_path = os.path.join(location, package_name)
     runcmd('cd %s ; git checkout %s' % (
             co_path,
             gitbranch,
-    ))
+            ))
     runcmd('cd %s ; git reset --hard' % co_path)
     runcmd('cd %s ; git svn rebase' % co_path)
 
@@ -113,9 +120,9 @@ def apply_svn_ignores(path):
                     f.write('\n')
                     f.write('.gitignore')
                     f.close()
-    
+
 @memoize
 def has_local_changes(path):
-    cmd = 'cd %s ; git status | grep "	"' % path
+    cmd = 'cd %s ; git status | grep " "' % path
     return len(runcmd(cmd, log=False, respond=True))>0
 
