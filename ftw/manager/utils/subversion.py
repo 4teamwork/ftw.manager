@@ -34,11 +34,10 @@ def get_package_root_url(directory_or_url):
     """
     url = get_svn_url(directory_or_url)
     urlparts = url.split('/')
-    if not sum([int(x in urlparts) for x in ('trunk', 'branches', 'tags')])>0:
-        raise InvalidProjectLayout
     for dir in ('trunk', 'branches', 'tags'):
         if dir in urlparts:
             return '/'.join(urlparts[:urlparts.index(dir)])
+    return url
 
 @memoize
 def get_svn_url(directory_or_url):
