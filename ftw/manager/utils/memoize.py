@@ -11,4 +11,5 @@ def memoize(func):
     return _mem
 
 def flush_cache(func):
-    delattr(func, '_memoize_dict')
+    if hasattr(func, '_memoize_dict'):
+        delattr(func, '_memoize_dict')
