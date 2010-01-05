@@ -10,3 +10,5 @@ def memoize(func):
         return dic[key]
     return _mem
 
+def flush_cache(func):
+    delattr(func, '_memoize_dict')

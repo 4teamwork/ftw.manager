@@ -5,7 +5,7 @@ contains subversion helper methods
 import os
 import xml.dom.minidom
 from ftw.manager.utils import runcmd, runcmd_with_exitcode, output, input
-from ftw.manager.utils.memoize import memoize
+from ftw.manager.utils.memoize import memoize, flush_cache
 
 class NotASubversionCheckout(Exception):
     pass
@@ -82,6 +82,9 @@ def check_project_layout(directory_or_url, raise_exception=True, ask_for_creatio
                         get_package_name(directory_or_url),
                 )
                 runcmd(cmd, log=True, respond=True)
+                # need to clean caches
+                flush_cache(runcmd)
+                flush_cache(runcmd_with_exitcode)
                 return check_project_layout(directory_or_url, raise_exception=raise_exception, ask_for_creation=False)
         if raise_exception:
             raise InvalidProjectLayout
