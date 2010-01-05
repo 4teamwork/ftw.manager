@@ -5,6 +5,9 @@ Changelog
 0.1.12
 ------
 
+* Fixed bug in utils.git.has_local_changes
+  [05.01.2010, jbaumann]
+
 * Release command: setup.cfg should not be required, since its not required in
   packages any more
   [23.12.2009, jbaumann]

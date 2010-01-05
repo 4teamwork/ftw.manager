@@ -123,6 +123,6 @@ def apply_svn_ignores(path):
 
 @memoize
 def has_local_changes(path):
-    cmd = 'cd %s ; git status | grep " "' % path
+    cmd = 'cd %s ; git status | grep "\t"' % path
     return len(runcmd(cmd, log=False, respond=True))>0
 
