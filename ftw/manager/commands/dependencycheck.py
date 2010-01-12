@@ -20,17 +20,20 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     angegeben sind, von denen es eine neue Version gibt oder ob Änderungen an den
     Packeten gemacht wurden.
 
-    Anwendung:
+    Anwendung
 
-    * Wird der Befehl auf dem Root-Ordner des Packets ausgeführt (also z.B. im
-    "trunk"-Ordner), so werden die im setup.py definierten Abhängigkeiten überprüft.
+    * Wird der Befehl auf dem Root-Ordner des Packets ausgeführt, also z.B. im
+      Ordner "trunk", so werden die im setup.py definierten Abhängigkeiten überprüft
+
     * Wird der Befehl auf einem Ordner ausgeführt, welches ausgecheckte Pakete
-    enthält (z.B. der src-Ordner), so werden diese Pakete aufgelistet.
+      enthält (z.B. der src-Ordner), so werden diese Pakete aufgelistet.
+
     * Die Resultate des Befehls werden gecacht. Mit dem optionalen Parametern
-    --refresh (oder -r) kann bewirkt werden, dass alle Informationen neu abgefragt
-    werden.
+      --refresh (oder -r) kann bewirkt werden, dass alle Informationen neu abgefragt
+      werden.
+
     * Mit dem Parameter --config (oder -c) kann ein buildout.cfg angegeben werden,
-    welches dann nach version-pinnings durchsucht wird.
+      welches dann nach version-pinnings durchsucht wird.
     """
 
     command_name = 'dependencycheck'
