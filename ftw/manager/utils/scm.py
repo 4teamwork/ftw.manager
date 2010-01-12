@@ -158,6 +158,7 @@ class PackageInfoMemory(Singleton):
                 # find newest tag
                 tags = [k for k, v in data['tags'].items()]
                 tags.sort(lambda a,b:cmp(data['tags'][a], data['tags'][b]))
+                tags.reverse()
                 newest_tag = tags[0]
                 data['newest_tag'] = newest_tag
                 newest_tag_url = os.path.join(svn_url,
