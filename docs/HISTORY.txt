@@ -5,6 +5,9 @@ Changelog
 0.1.12
 ------
 
+* Dependency-Check command implemented with support for packages and for src-dirs.
+  [12.01.2010, jbaumann]
+
 * Fixed bug in utils.git.has_local_changes
   [05.01.2010, jbaumann]
 

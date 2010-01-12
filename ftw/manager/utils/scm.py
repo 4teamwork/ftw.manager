@@ -94,6 +94,15 @@ def is_scm(path):
     return is_subversion(path) or is_git(path)
 
 @memoize
+def lazy_is_scm(path):
+    if os.path.isdir(os.path.join(path, '.git')):
+        return True
+    elif os.path.isdir(os.path.join(path, '.svn')):
+        return True
+    else:
+        return False
+
+@memoize
 def is_package_root(directory_or_url):
     svn_url = get_svn_url(directory_or_url)
     svn_url = svn_url.strip()
@@ -124,12 +133,12 @@ class PackageInfoMemory(Singleton):
         return os.path.abspath(os.path.expanduser('~/.ftw.manager/infocache'))
 
     @memoize
-    def get_info(self, package):
+    def get_info(self, package, force_reload=False):
         svn_url = PackageSourceMemory().guess_url(package)
         if not svn_url:
             return None
         data = self.get_cached_info(package)
-        update = False
+        update = force_reload
         rev = self.get_revision_for(package)
         if not data:
             update = True
@@ -161,7 +170,8 @@ class PackageInfoMemory(Singleton):
                 for row in rows:
                     flag, url = re.split('\W*', row.strip(), maxsplit=1)
                     url = url.strip()
-                    if url.startswith(os.path.join(trunk_url, package.replace('.', '/'))) \
+                    if url.startswith(os.path.join(trunk_url,
+                                                   package.replace('.', '/'))) \
                             and not url.endswith('version.txt'):
                         data['changes'] = True
                         break

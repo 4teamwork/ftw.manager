@@ -22,14 +22,17 @@ def runcmd_with_exitcode(cmd, log=True, respond=False, respond_error=False):
     if log:
         print '  %', output.colorize(cmd, output.WARNING)
     p = subprocess.Popen(cmd.split(' '), cwd=os.path.abspath('.'), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    exitcode = p.wait()
+    response, response_error = p.communicate()
+    exitcode = p.poll()
+    if exitcode:
+        exitcode = p.wait()
     if not respond and not respond_error:
         return exitcode
     else:
         returned = [exitcode]
         if respond:
-            returned.append(p.stdout.read())
+            returned.append(response)
         if respond_error:
-            returned.append(p.stderr.read())
+            returned.append(response_error)
         return returned
 

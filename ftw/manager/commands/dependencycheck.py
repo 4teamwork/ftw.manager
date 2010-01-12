@@ -16,15 +16,21 @@ IGNORE_EGGS = [
 
 class DependencyCheckCommand(basecommand.BaseCommand):
     """
-    Der "dependencycheck" Befehl überprüft, ob in den Abhängigkeiten Packete angegeben sind,
-    von denen es eine neue Version gibt oder ob Änderungen an den Packeten gemacht wurden.
+    Der "dependencycheck" Befehl überprüft, ob in den Abhängigkeiten Packete
+    angegeben sind, von denen es eine neue Version gibt oder ob Änderungen an den
+    Packeten gemacht wurden.
 
     Anwendung:
 
-    * Der Befehl muss auf dem Root-Ordner des Packets ausgeführt werden (also z.B. im "trunk"
-    ordner).
-    * Die Resultate des Befehls werden gecacht. Mit optionalen Parametern kann bewirkt werden,
-    dass alle Informationen neu abgefragt werden.
+    * Wird der Befehl auf dem Root-Ordner des Packets ausgeführt (also z.B. im
+    "trunk"-Ordner), so werden die im setup.py definierten Abhängigkeiten überprüft.
+    * Wird der Befehl auf einem Ordner ausgeführt, welches ausgecheckte Pakete
+    enthält (z.B. der src-Ordner), so werden diese Pakete aufgelistet.
+    * Die Resultate des Befehls werden gecacht. Mit dem optionalen Parametern
+    --refresh (oder -r) kann bewirkt werden, dass alle Informationen neu abgefragt
+    werden.
+    * Mit dem Parameter --config (oder -c) kann ein buildout.cfg angegeben werden,
+    welches dann nach version-pinnings durchsucht wird.
     """
 
     command_name = 'dependencycheck'
@@ -49,19 +55,34 @@ class DependencyCheckCommand(basecommand.BaseCommand):
             )
         table = output.ASCIITable(*titles)
         versions = self.package_versions
+        force_reload = self.options.refresh
         for package, v in self.dependency_packages:
+            warn = False
             ctag = package in versions.keys() and str(versions[package]) or ''
-            info = scm.PackageInfoMemory().get_info(package)
+            info = scm.PackageInfoMemory().get_info(package,
+                                                    force_reload=force_reload)
             ntag = info and str(info['newest_tag']) or ''
-            chg = info and str(info['changes']) and 'YES' or ''
+            if ntag and ctag:
+                if ntag<ctag:
+                    ntag = output.colorize(ntag, output.WARNING)
+                    warn = True
+                elif ntag>ctag:
+                    ntag = output.colorize(ntag, output.ERROR)
+                    warn = True
+                elif ntag==ctag:
+                    ntag = output.colorize(ntag, output.INFO)
+            chg = ''
+            if info and info['changes']:
+                chg = output.colorize('YES', output.WARNING)
+                warn = True
             table.push((
-                    package,
+                    warn and output.colorize(package, output.WARNING) or package,
                     ctag,
                     ntag,
                     chg,
                     ))
         table()
-        
+
     @property
     @memoize
     def package_versions(self):
@@ -98,19 +119,29 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     @property
     @memoize
     def egg(self):
-        return distutils.core.run_setup('setup.py')
+        if os.path.isfile('setup.py'):
+            return distutils.core.run_setup('setup.py')
+        else:
+            return None
 
     @property
     @memoize
     def dependency_packages(self):
         dependencies = []
-        for pkg in self.egg.install_requires:
-            name = pkg.split('=')[0].split('<')[0].split('>')[0].strip()
-            version = None
-            if '=' in pkg:
-                version = pkg.split('=')[-1].strip()
-            if name not in IGNORE_EGGS:
-                dependencies.append((name, version))
+        if self.egg:
+            for pkg in self.egg.install_requires:
+                name = pkg.split('=')[0].split('<')[0].split('>')[0].strip()
+                version = None
+                if '=' in pkg:
+                    version = pkg.split('=')[-1].strip()
+                if name not in IGNORE_EGGS:
+                    dependencies.append((name, version))
+        else:
+            # source directory ?
+            for pkg in os.listdir('.'):
+                path = os.path.abspath(pkg)
+                if os.path.isdir(path) and scm.lazy_is_scm(path):
+                    dependencies.append((pkg, None))
         return dependencies
 
 
