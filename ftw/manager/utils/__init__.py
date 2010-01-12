@@ -5,8 +5,12 @@ import output
 
 from memoize import memoize
 
+FORCE_LOG = False
+
 @memoize
 def runcmd(cmd, log=True, respond=False):
+    if FORCE_LOG:
+        log = True
     if log:
         print '  %', output.colorize(cmd, output.WARNING)
     if respond:
@@ -19,6 +23,8 @@ def runcmd(cmd, log=True, respond=False):
 
 @memoize
 def runcmd_with_exitcode(cmd, log=True, respond=False, respond_error=False):
+    if FORCE_LOG:
+        log = True
     if log:
         print '  %', output.colorize(cmd, output.WARNING)
     p = subprocess.Popen(cmd.split(' '), cwd=os.path.abspath('.'), stderr=subprocess.PIPE, stdout=subprocess.PIPE)

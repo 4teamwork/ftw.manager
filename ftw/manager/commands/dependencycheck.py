@@ -45,8 +45,14 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         self.parser.add_option('-c', '--config', dest='buildout',
                                action='store', default=None,
                                help='Buildout config file containing version infos')
+        self.parser.add_option('-v', '--verbose', dest='verbose',
+                               action='store_true', default=False,
+                               help='Print executed commands')
 
     def __call__(self):
+        if self.options.verbose:
+            from ftw.manager import utils
+            utils.FORCE_LOG = True
         titles = (
             'Package',
             'Current Tag',
