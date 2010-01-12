@@ -8,6 +8,9 @@ Changelog
 * Dependency-Check command implemented with support for packages and for src-dirs.
   [12.01.2010, jbaumann]
 
+* Fixed bug in utils.runcmd_with_exitcode, which caused some commands to hang
+  [12.01.2010, jbaumann]
+  
 * Fixed bug in utils.git.has_local_changes
   [05.01.2010, jbaumann]
 
