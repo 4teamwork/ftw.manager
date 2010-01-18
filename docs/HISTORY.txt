@@ -2,8 +2,11 @@ Changelog
 =========
 
 
-0.1.13
-------
+1.0
+---
+
+* Next release is 1.0 :)
+  [18.01.2010, jbaumann]
 
 * Dependency-Check: ask for svn-urls, if the guessing fails
   [18.01.2010, jbaumann]
