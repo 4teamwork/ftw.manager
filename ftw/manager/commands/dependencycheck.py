@@ -114,7 +114,9 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 loaded.append(path)
                 parser.read(path)
                 if parser.has_option('buildout', 'extends'):
-                    for file in parser.get('buildout', 'extends').split():
+                    extend_files = parser.get('buildout', 'extends').split()
+                    parser.remove_option('buildout', 'extends')
+                    for file in extend_files:
                         load_extends(file, os.path.dirname(path))
             load_extends(os.path.basename(self.options.buildout),
                          os.path.abspath(os.path.dirname(self.options.buildout)))

@@ -2,9 +2,12 @@ Changelog
 =========
 
 
-1.1
----
+1.0.1
+-----
 
+* Fixed buildout-config issues with relative paths in other directories.
+  [18.01.2010, jbaumann]
+  
 
 1.0
 ---
