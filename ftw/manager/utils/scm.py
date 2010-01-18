@@ -133,8 +133,8 @@ class PackageInfoMemory(Singleton):
         return os.path.abspath(os.path.expanduser('~/.ftw.manager/infocache'))
 
     @memoize
-    def get_info(self, package, force_reload=False):
-        svn_url = PackageSourceMemory().guess_url(package)
+    def get_info(self, package, force_reload=False, prompt=True):
+        svn_url = PackageSourceMemory().guess_url(package, prompt=prompt)
         if not svn_url:
             return None
         data = self.get_cached_info(package)

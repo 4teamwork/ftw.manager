@@ -5,6 +5,9 @@ Changelog
 0.1.13
 ------
 
+* Dependency-Check: ask for svn-urls, if the guessing fails
+  [18.01.2010, jbaumann]
+  
 
 0.1.12
 ------
