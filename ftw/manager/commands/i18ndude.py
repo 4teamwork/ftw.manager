@@ -12,7 +12,7 @@ class FileSystemRootReached(Exception):
     pass
 
 class I18NDudeBaseCommand(basecommand.BaseCommand):
-    
+
     def check_conditions(self):
         output.part_title('Checking Conditions')
         # we should be in a buildout directory
@@ -24,7 +24,7 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
         # we should have a i18ndude executable in the bin folder
         if not os.path.exists(os.path.join(buildout_dir, 'bin', 'i18ndude')):
             output.error('Could not find i18ndude executable at %s' % \
-                         os.path.join(buildout_dir, 'bin', 'i18ndude'), exit=1)
+                             os.path.join(buildout_dir, 'bin', 'i18ndude'), exit=1)
         self.i18ndude = os.path.join(buildout_dir, 'bin', 'i18ndude')
         # we should be in a local repository
         try:
@@ -40,7 +40,7 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
                 package_root,
                 '/'.join(package_name.split('.')),
                 'locales',
-        ))
+                ))
         print '  using locales dir:', self.locales_dir
         if not os.path.isdir(self.locales_dir):
             runcmd('mkdir -p %s' % self.locales_dir)
@@ -75,12 +75,12 @@ class BuildPotCommand(I18NDudeBaseCommand):
     Voraussetzungen:
 
     Der i18n-dude muss im Buildout eingetragen und installiert sein:
-        [buildout]
-        parts += i18ndude
+    [buildout]
+    parts += i18ndude
 
-        [i18ndude]
-        recipe = zc.recipe.egg
-        eggs = i18ndude
+    [i18ndude]
+    recipe = zc.recipe.egg
+    eggs = i18ndude
     """
 
     command_name = 'i18npot'
@@ -92,24 +92,33 @@ class BuildPotCommand(I18NDudeBaseCommand):
         scm.require_package_root_cwd()
         self.check_conditions()
         package_name = scm.get_package_name('.')
+        if self.options.domain:
+            domain = self.options.domain
+        else:
+            domain = package_name
         package_root = scm.get_package_root_path('.')
         package_dir = os.path.join(package_root, *package_name.split('.'))
-        pot_path = os.path.join(self.locales_dir, '%s.pot' % package_name)
+        pot_path = os.path.join(self.locales_dir, '%s.pot' % domain)
         output.part_title('Rebuilding pot file at %s' % pot_path)
         # rebuild
         cmd = ['%s rebuild-pot' % self.i18ndude]
         cmd.append('--pot %s' % pot_path)
         # manual file
-        manual_file = os.path.join(self.locales_dir, '%s-manual.pot' % package_name)
+        manual_file = os.path.join(self.locales_dir, '%s-manual.pot' % domain)
         if os.path.exists(manual_file):
             print '  merging manual pot file:', manual_file
             cmd.append('--merge %s' % manual_file)
         cmd.append('--create %s %s' % (
-                scm.get_package_name('.'),
+                domain,
                 package_dir,
-        ))
+                ))
         cmd = ' \\\n'.join(cmd)
         runcmd(cmd)
+
+    def register_options(self):
+        self.parser.add_option('-d', '--domain', dest='domain',
+                               action='store', default=None,
+                               help='i18n domain. Default: package name')
 
 basecommand.registerCommand(BuildPotCommand)
 
@@ -132,8 +141,12 @@ class SyncPoCommand(I18NDudeBaseCommand):
         # check
         self.check_conditions()
         package_name = scm.get_package_name('.')
+        if self.options.domain:
+            domain = self.options.domain
+        else:
+            domain = package_name
         # check pot file
-        pot_path = os.path.join(self.locales_dir, '%s.pot' % package_name)
+        pot_path = os.path.join(self.locales_dir, '%s.pot' % domain)
         if not os.path.exists(pot_path):
             output.error('Could not find pot file at: %s' % pot_path, exit=1)
         # check language directory
@@ -141,16 +154,16 @@ class SyncPoCommand(I18NDudeBaseCommand):
         if not os.path.isdir(lang_dir):
             runcmd('mkdir -p %s' % lang_dir)
         # touch po file
-        po_file = os.path.join(lang_dir, '%s.po' % package_name)
+        po_file = os.path.join(lang_dir, '%s.po' % domain)
         if not os.path.isfile(po_file):
             runcmd('touch %s' % po_file)
         # sync
         output.part_title('Syncing language "%s"' % lang)
         cmd = '%s sync --pot %s %s' % (
-                self.i18ndude,
-                pot_path,
-                po_file,
-        )
+            self.i18ndude,
+            pot_path,
+            po_file,
+            )
         runcmd(cmd)
         # remove language
         output.part_title('Removing language code from po file')
@@ -161,6 +174,11 @@ class SyncPoCommand(I18NDudeBaseCommand):
                 file.write(row)
                 file.write('\n')
         file.close()
+
+    def register_options(self):
+        self.parser.add_option('-d', '--domain', dest='domain',
+                               action='store', default=None,
+                               help='i18n domain. Default: package name')
 
 
 basecommand.registerCommand(SyncPoCommand)
