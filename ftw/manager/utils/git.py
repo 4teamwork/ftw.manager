@@ -5,6 +5,7 @@ contains git-svn helper methods
 import os
 from ftw.manager.utils import runcmd
 from ftw.manager.utils import subversion as svn
+from ftw.manager.utils import output
 from ftw.manager.utils.memoize import memoize
 
 class NotAGitsvnRepository(Exception):
@@ -67,10 +68,25 @@ def setup_gitsvn_cache():
 
 def checkout_gitsvn(svn_url, location='.'):
     svn_url = svn_url[-1]=='/' and svn_url[:-1] or svn_url
+    root_url = svn.get_package_root_url(svn_url)
     if not svn.isdir(svn_url):
         raise InvalidSubversionURL
-    svn.check_project_layout(svn_url)
-    root_url = svn.get_package_root_url(svn_url)
+    expected_dirs = ('trunk', 'tags', 'branches')
+    got_dirs = expected_dirs
+    try:
+        svn.check_project_layout(svn_url)
+    except svn.InvalidProjectLayout:
+        # check the directories and print a warning
+        dircontent = runcmd('svn ls %s' % svn_url, log=False, respond=True)
+        dircontent = [x.strip()[:-1] for x in dircontent]
+        got_dirs = []
+        missing_dirs = []
+        for dir in expected_dirs:
+            if dir in dircontent:
+                got_dirs.append(dir)
+            else:
+                missing_dirs.append(dir)
+                output.warning('Directory %s missing!' % dir)
     package_name = svn.get_package_name(svn_url)
     cache_path = os.path.join(get_gitsvn_cache_path(), package_name)
     if os.path.exists(package_name):
@@ -82,10 +98,21 @@ def checkout_gitsvn(svn_url, location='.'):
         runcmd('cd %s; git svn fetch' % cache_path)
         runcmd('cd %s; git svn rebase' % cache_path)
     else:
-        runcmd('cd %s; git svn clone --stdlayout %s' % (
+        if got_dirs==expected_dirs:
+            # we have a standard layout
+            cmd = 'cd %s; git svn clone --stdlayout %s' % (
                 get_gitsvn_cache_path(),
                 root_url,
-                ))
+                )
+        else:
+            # some dirs are missing
+            args = ['--%s=%s' % (d,d) for d in got_dirs]
+            cmd = 'cd %s; git svn clone %s %s' % (
+                get_gitsvn_cache_path(),
+                ' '.join(args),
+                root_url,
+                )
+        runcmd(cmd)
     runcmd('cp -r %s %s' % (cache_path, location))
     co_path = os.path.join(location, package_name)
     runcmd('cd %s ; git checkout %s' % (

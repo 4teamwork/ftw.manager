@@ -81,12 +81,8 @@ class CheckoutCommand(basecommand.BaseCommand):
                 return True
             url_input = input.prompt(msg, input_validator)
             svn_url = url_input.strip()
-        # check svn layout
-        if not svn.check_project_layout(svn_url, raise_exception=False):
-            # we should have the folders trunk, tags, branches in the project
-            output.error('Project does not have default layout with trunk, ' +\
-                        'tags and branches. At least one folder is missing.',
-                        exit=True)
+        # check svn layout, give the user a chance to create the dirs
+        svn.check_project_layout(svn_url, raise_exception=False)
         return svn_url
 
 basecommand.registerCommand(CheckoutCommand)

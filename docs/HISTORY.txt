@@ -9,6 +9,10 @@ Changelog
 1.0.1
 -----
 
+* git-svn checkout: added support for packages without standard svn layout (e.g. a
+  missing "branches" folder).
+  [04.02.2010, jbaumann]
+  
 * Fixed buildout-config issues with relative paths in other directories.
   [18.01.2010, jbaumann]
   
