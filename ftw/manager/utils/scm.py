@@ -185,6 +185,8 @@ class PackageInfoMemory(Singleton):
     @memoize
     def get_history_for(self, package, tag, force_reload=False, prompt=True):
         data = self.get_info(package, force_reload, prompt)
+        if not data:
+            return None
         history = data.get('history', None)
         if history is not None and history.get(tag, False):
             return history[tag]

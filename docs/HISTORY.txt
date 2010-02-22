@@ -5,6 +5,9 @@ Changelog
 1.0.3
 -----
 
+* dependency-check action: added --dev option, which also lists packages with trunk-changes
+  [21.02.2010, jbaumann]
+  
 * dependency-check action: added --history option which generates a history containing all
   changes of upgraded packages
   [21.02.2010, jbaumann]

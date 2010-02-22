@@ -41,6 +41,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
       die Änderungen im Format einer globalen HISTORY.txt-Datei zusammengeführt. Es
       werden nur Pakete beachtet, die in einer neuen Version als die verwendete
       existieren. Dazu sollte die Option --config immer verwendet werden.
+      Wenn die Option --dev verwendent wird, werden alle Pakete aufgelistet, die nicht
+      getaggte Änderungen im trunk haben.
     """
 
     command_name = 'dependencycheck'
@@ -60,7 +62,12 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                                help='Print executed commands')
         self.parser.add_option('-H', '--history', dest='history',
                                action='store_true', default=False,
-                               help='Generate history file with all packages with a new version')
+                               help='Generate history file with all packages with a new ' +\
+                                   'version')
+        self.parser.add_option('-d', '--dev', dest='history_dev',
+                               action='store_true', default=False,
+                               help='List packages with modified trunk when using ' +\
+                                   '--history option')
 
     def __call__(self):
         if self.options.verbose:
@@ -111,41 +118,62 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     def print_history(self):
         versions = self.package_versions
         force_reload = self.options.refresh
-        old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.*?)\[(.*?)\]')
+        packages_data = {}
+        list_trunk_modifications = self.options.history_dev
         for package, v in self.dependency_packages:
+            if self.options.verbose:
+                print package
             ctag = package in versions.keys() and str(versions[package]) or ''
             info = scm.PackageInfoMemory().get_info(package,
                                                     force_reload=force_reload, prompt=False)
             ntag = info and str(info['newest_tag']) or ''
-            if ntag and ctag and ntag!=ctag:
-                history = scm.PackageInfoMemory().get_history_for(package, ntag, prompt=False).strip().split('\n')
-                diff = history[history.index(ntag):history.index(ctag)]
-                # change tag headlines to: * package ntag, remove empty lines
-                # and indent any other row with 4 spaces
-                skip_next = False
-                for i, line in enumerate(diff):
-                    line = aggressive_decode(line).encode('utf8')
-                    next_line = len(diff)>(i+1) and diff[i+1] or None
-                    if skip_next:
-                        skip_next = False
-                        continue
-                    elif len(line.strip())==0:
-                        continue
-                    elif next_line and (next_line==len(line)*'-' or next_line==len(line)*'='):
-                        # current line is a tag-name, next line contains only '-' or '='
-                        print ''
-                        print '*', package, '-', line.strip()
-                        skip_next = True
+            if list_trunk_modifications and info and info['changes']:
+                history = scm.PackageInfoMemory().get_history_for(package, 'trunk',
+                                                                  prompt=False)
+                if not history:
+                    continue
+                history = history.strip().split('\n')
+                if ctag not in history:
+                    print '* ERROR in', package, ': could not find tag', ctag, \
+                        'in changelog'
+                    continue
+                packages_data[package] = history[2:history.index(ctag)]
+            elif ntag and ctag and ntag!=ctag:
+                history = scm.PackageInfoMemory().get_history_for(package,
+                                                                  ntag, prompt=False)
+                if not history:
+                    continue
+                history = history.strip().split('\n')
+                packages_data[package] = history[history.index(ntag):history.index(ctag)]
+        
+        # change tag headlines to: * package ntag, remove empty lines
+        # and indent any other row with 4 spaces
+        old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.*?)\[(.*?)\]')
+        skip_next = False
+        for package, diff in packages_data.items():
+            for i, line in enumerate(diff):
+                line = aggressive_decode(line).encode('utf8')
+                next_line = len(diff)>(i+1) and diff[i+1] or None
+                if skip_next:
+                    skip_next = False
+                    continue
+                elif len(line.strip())==0:
+                    continue
+                elif next_line and (next_line==len(line)*'-' or next_line==len(line)*'='):
+                    # current line is a tag-name, next line contains only '-' or '='
+                    print ''
+                    print '*', package, '-', line.strip()
+                    skip_next = True
+                else:
+                    # check the format
+                    old_entry = old_entry_format.search(line)
+                    if old_entry:
+                        indent, foo, date, text, author = old_entry.groups()
+                        print '  ', indent, '*', text.strip()
+                        date_author = date and '%s, %s' % (date, author) or author
+                        print '    ', indent, '[%s]' % date_author
                     else:
-                        # check the format
-                        old_entry = old_entry_format.search(line)
-                        if old_entry:
-                            indent, foo, date, text, author = old_entry.groups()
-                            print '  ', indent, '*', text.strip()
-                            date_author = date and '%s, %s' % (date, author) or author
-                            print '    ', indent, '[%s]' % date_author
-                        else:
-                            print '   ', line
+                        print '   ', line
 
     @property
     @memoize
@@ -208,6 +236,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 path = os.path.abspath(pkg)
                 if os.path.isdir(path) and scm.lazy_is_scm(path):
                     dependencies.append((pkg, None))
+        dependencies.sort()
         return dependencies
 
 
