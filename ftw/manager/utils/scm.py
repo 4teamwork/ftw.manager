@@ -153,6 +153,7 @@ class PackageInfoMemory(Singleton):
                 'changes' : False,
                 'rev' : rev,
                 'url' : svn_url,
+                'history' : None,
                 }
             if data['tags']:
                 # find newest tag
@@ -180,6 +181,24 @@ class PackageInfoMemory(Singleton):
                 data['changes'] = True
             self.set_cached_info(package, data)
         return data
+
+    @memoize
+    def get_history_for(self, package, tag, force_reload=False, prompt=True):
+        data = self.get_info(package, force_reload, prompt)
+        history = data.get('history', None)
+        if history is not None and history.get(tag, False):
+            return history[tag]
+        else:
+            history = {}
+            svn_url = PackageSourceMemory().guess_url(package, prompt=prompt)
+            subpath = tag=='trunk' and 'trunk' or 'tags/%s' % tag
+            file_url = os.path.join(svn_url, subpath, 'docs', 'HISTORY.txt')
+            cmd = 'svn cat %s' % file_url
+            history[tag] = runcmd_with_exitcode(cmd, log=False, respond=True)[1]
+            data = self.get_cached_info(package)
+            data['history'] = history
+            self.set_cached_info(package, data)
+            return history[tag]
 
     def get_revision_for(self, package):
         url = PackageSourceMemory().guess_url(package)
