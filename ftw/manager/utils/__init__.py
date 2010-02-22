@@ -42,3 +42,20 @@ def runcmd_with_exitcode(cmd, log=True, respond=False, respond_error=False):
             returned.append(response_error)
         return returned
 
+def aggressive_decode(value, encoding='utf-8'):
+    if isinstance(value, unicode):
+        return value
+    other_encodings = filter(lambda e:e is not encoding, [
+            'utf8',
+            'iso-8859-1',
+            'latin1',
+            ])
+    encodings = [encoding] + other_encodings
+    if not isinstance(value, str):
+        value = str(value)
+    for enc in encodings:
+        try:
+            return value.decode(enc)
+        except UnicodeDecodeError:
+            pass
+    raise
