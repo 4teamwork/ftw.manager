@@ -144,6 +144,14 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 if not history:
                     continue
                 history = history.strip().split('\n')
+                if ctag not in history:
+                    print '* ERROR in', package, ': could not find tag', ctag, \
+                        'in changelog'
+                    continue
+                if ntag not in history:
+                    print '* ERROR in', package, ': could not find tag', ntag, \
+                        'in changelog'
+                    continue
                 packages_data[package] = history[history.index(ntag):history.index(ctag)]
         
         # change tag headlines to: * package ntag, remove empty lines
