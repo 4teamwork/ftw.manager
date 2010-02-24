@@ -156,7 +156,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         
         # change tag headlines to: * package ntag, remove empty lines
         # and indent any other row with 4 spaces
-        old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.*?)\[(.*?)\]')
+        old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.{2,}}?)\[(.*?)\]')
         skip_next = False
         for package, diff in packages_data.items():
             for i, line in enumerate(diff):
