@@ -4,6 +4,8 @@ import os
 import re
 import distutils.core
 import ConfigParser
+import tempfile
+import urllib2
 
 from ftw.manager.commands import basecommand
 from ftw.manager.utils.memoize import memoize
@@ -70,13 +72,16 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                                    '--history option')
 
     def __call__(self):
-        if self.options.verbose:
-            from ftw.manager import utils
-            utils.FORCE_LOG = True
-        if self.options.history:
-            self.print_history()
-        else:
-            self.print_table()
+        try:
+            if self.options.verbose:
+                from ftw.manager import utils
+                utils.FORCE_LOG = True
+            if self.options.history:
+                self.print_history()
+            else:
+                self.print_table()
+        finally:
+            self.delete_downloaded_files()
 
     def print_table(self):
         titles = (
@@ -200,9 +205,11 @@ class DependencyCheckCommand(basecommand.BaseCommand):
             # load extends
             def load_extends(file, dir):
                 path = os.path.join(dir, file)
-                if path in loaded or file.startswith('http'):
+                if path in loaded:
                     return
                 loaded.append(path)
+                if file.startswith('http'):
+                    path = self.download_file(file)
                 parser.read(path)
                 if parser.has_option('buildout', 'extends'):
                     extend_files = parser.get('buildout', 'extends').split()
@@ -247,5 +254,29 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         dependencies.sort()
         return dependencies
 
+    def download_file(self, url):
+        """ Download file from *url*, store it in a tempfile and return its path
+        """
+        if not getattr(self, '_temporary_downloaded', None):
+            # we need to keep a reference to the tempfile, otherwise it will be deleted
+            # imidiately
+            self._temporary_downloaded = []
+        request = urllib2.Request(url)
+        response = urllib2.urlopen(request)
+        data = response.read()
+        file_ = tempfile.NamedTemporaryFile()
+        self._temporary_downloaded.append(file_)
+        file_.write(data)
+        file_.flush()
+        return file_.name
+
+    def delete_downloaded_files(self):
+        for file_ in self._temporary_downloaded:
+            try:
+                file_.close()
+            except:
+                pass
+            if os.path.exists(file_.name):
+                os.remove(file_)
 
 basecommand.registerCommand(DependencyCheckCommand)

@@ -5,6 +5,9 @@ Changelog
 1.0.4
 -----
 
+* dependency-check action: added support for http-extends
+  [16.03.2010, jbaumann]
+  
 * dependency-check action: improved history cleanup
   [24.02.2010, jbaumann]
   
