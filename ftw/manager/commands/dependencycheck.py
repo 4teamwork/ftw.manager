@@ -271,7 +271,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         return file_.name
 
     def delete_downloaded_files(self):
-        for file_ in self._temporary_downloaded:
+        for file_ in getattr(self, '_temporary_downloaded', []):
             try:
                 file_.close()
             except:

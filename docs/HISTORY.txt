@@ -9,6 +9,9 @@ Changelog
 1.0.4
 -----
 
+* dependency-check action: fixed bug in download cache for buildout configs
+  [17.03.2010, jbaumann]
+  
 * dependency-check action: added support for http-extends
   [16.03.2010, jbaumann]
   
