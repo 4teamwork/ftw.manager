@@ -14,18 +14,7 @@ class FileSystemRootReached(Exception):
 class I18NDudeBaseCommand(basecommand.BaseCommand):
 
     def check_conditions(self):
-        output.part_title('Checking Conditions')
-        # we should be in a buildout directory
-        try:
-            buildout_dir = self.buildout_dir
-            print '  found buildout at:', buildout_dir
-        except FileSystemRootReached:
-            output.error('Could not find buildout directory. Run bin/buildout first', exit=1)
-        # we should have a i18ndude executable in the bin folder
-        if not os.path.exists(os.path.join(buildout_dir, 'bin', 'i18ndude')):
-            output.error('Could not find i18ndude executable at %s' % \
-                             os.path.join(buildout_dir, 'bin', 'i18ndude'), exit=1)
-        self.i18ndude = os.path.join(buildout_dir, 'bin', 'i18ndude')
+        self.i18ndude = 'i18ndude'
         # we should be in a local repository
         try:
             package_name = scm.get_package_name('.')

@@ -9,6 +9,9 @@ Changelog
 1.0.6
 -----
 
+* Added i18ndude as dependency. Its not necessary any more to add it to buildout.
+  [18.03.2010, jbaumann]
+  
 * Removed bad characters from auto generated docu
   [18.03.2010, jbaumann]
   
