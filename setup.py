@@ -11,10 +11,13 @@ generated_description = False
 try:
     from ftw.manager import ftwCommand
     from ftw.manager import commands
+    from ftw.manager import config
     generated_description = True
 except ImportError:
     pass
 if generated_description:
+    # disable syntax highlighting
+    config.Configuration.temporary_disable_syntax_highlighting()
     # reset sys.argv
     argv = sys.argv[:]
     sys.argv = argv[:1]

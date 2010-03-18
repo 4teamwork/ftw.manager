@@ -1,5 +1,5 @@
 
-import os.path
+import os
 import ConfigParser
 from StringIO import StringIO
 
@@ -11,6 +11,7 @@ DEFAULT_CONFIGURATION = '''
 syntax = false
 scheme = light
 '''
+SYNTAX_DISABLED_KEY = 'FTW_MANAGER_SYNTAX_DISABLED'
 
 class Configuration(singleton.Singleton):
 
@@ -32,6 +33,8 @@ class Configuration(singleton.Singleton):
     @property
     @memoize
     def syntax_enabled(self):
+        if os.environ.get(SYNTAX_DISABLED_KEY, '').lower()=='true':
+            return False
         default = False
         if not self.color_scheme:
             return False
@@ -59,3 +62,6 @@ class Configuration(singleton.Singleton):
     def write_config(self):
         self.config.write(open(self.config_path, 'w'))
 
+    @staticmethod
+    def temporary_disable_syntax_highlighting():
+        os.environ[SYNTAX_DISABLED_KEY] = 'true'
