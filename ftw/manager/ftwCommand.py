@@ -15,6 +15,9 @@ class FTWCommand(object):
     commands = []
 
     def __init__(self):
+        # sort commands
+        self.commands.sort(lambda a,b:cmp(a.command_name, b.command_name))
+        # setup parser
         self.parser = OptionParser(version=self.version, usage=self.usage)
         self.extend_usage()
 

@@ -5,6 +5,9 @@ Changelog
 1.0.6
 -----
 
+* Help: Sort commands
+  [18.03.2010, jbaumann]
+  
 
 1.0.5
 -----
