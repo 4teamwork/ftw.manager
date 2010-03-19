@@ -9,6 +9,13 @@ Changelog
 1.0.7
 -----
 
+* Release command: added support for git-svn
+  [19.03.2010, jbaumann]
+  
+* Release command bug fixed: after modifying setup.cfg in tag there were no
+  more carriage returns
+  [19.03.2010, jbaumann]
+
 * Added i18ndude as dependency. Its not necessary any more to add it to buildout.
   [18.03.2010, jbaumann]
 

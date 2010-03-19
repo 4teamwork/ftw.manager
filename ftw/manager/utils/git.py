@@ -153,3 +153,10 @@ def has_local_changes(path):
     cmd = 'cd %s ; git status | grep "\t"' % path
     return len(runcmd(cmd, log=False, respond=True))>0
 
+def pull_changes(path):
+    cmd = 'cd %s ; git svn fetch ; git svn rebase' % path
+    return runcmd(cmd, log=True, respond=True)
+
+def push_committed_changes(path):
+    cmd = 'cd %s ; git svn dcommit' % path
+    return runcmd(cmd, log=True, respond=True)

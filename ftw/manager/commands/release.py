@@ -10,6 +10,8 @@ from ftw.manager.utils import *
 from ftw.manager.utils import output
 from ftw.manager.utils import input
 from ftw.manager.utils import subversion as svn
+from ftw.manager.utils import scm
+from ftw.manager.utils import git
 from ftw.manager.utils.memoize import memoize
 
 class ReleaseCommand(basecommand.BaseCommand):
@@ -79,16 +81,20 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     def analyse(self):
         output.part_title('Checking subversion project')
-        if not svn.is_subversion('.'):
-            # without subversion it doesnt work...
-            output.error('Not in a subversion checkout', exit=True)
-        if not svn.check_project_layout('.', raise_exception=False):
+        if not scm.is_scm('.'):
+            # without subversion or gitsvn it doesnt work...
+            output.error('Current directory is not a subversion checkout, nor a git-svn repo',
+                         exit=True)
+        if scm.is_git('.'):
+            git.pull_changes('.')
+        root_svn = scm.get_package_root_url('.')
+        if not svn.check_project_layout(root_svn, raise_exception=False):
             # we should have the folders trunk, tags, branches in the project
             output.error('Project does not have default layout with trunk, ' +\
                              'tags and branches. At least one folder is missing.',
                          exit=True)
         if not self.options.release_egg_only:
-            if svn.get_svn_url('.')!=svn.get_package_root_url('.')+'/trunk':
+            if scm.get_svn_url('.')!=scm.get_package_root_url('.')+'/trunk':
                 # command must be run at the "trunk" folder of a package
                 output.error('Please run this command at the root of the package' +\
                                  '(trunk folder)', exit=True)
@@ -98,7 +104,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not os.path.isfile('docs/HISTORY.txt'):
             # docs/HISTORY.txt is required
             output.error('Could not find the file ./docs/HISTORY.txt', exit=True)
-        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         if not os.path.isfile(version_file):
             # version.txt is required
@@ -106,7 +112,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not self.options.release_egg_only and not os.path.isfile('MANIFEST.in'):
             output.warning('Could not find the file ./MANIFEST.in, creating one')
             f = open('MANIFEST.in', 'w')
-            namespace = svn.get_package_name('.').split('.')[0]
+            namespace = scm.get_package_name('.').split('.')[0]
             f.write('recursive-include %s *\n' % namespace)
             f.write('global-exclude *pyc\n')
             f.close()
@@ -114,12 +120,17 @@ class ReleaseCommand(basecommand.BaseCommand):
             print '-' * 30
             print output.colorize(open('MANIFEST.in').read(), output.INFO)
             print '-' * 30
-            if input.prompt_bool('Would you like to ommit the MANIFEST.in?'):
-                runcmd('svn add MANIFEST.in')
-                runcmd('svn commit -m "added MANIFEST.in for %s"' % svn.get_package_name('.'))
+            if input.prompt_bool('Would you like to commit the MANIFEST.in?'):
+                if scm.is_subversion('.'):
+                    runcmd('svn add MANIFEST.in')
+                    runcmd('svn commit -m "added MANIFEST.in for %s"' %
+                           scm.get_package_name('.'))
+                elif scm.is_git('.'):
+                    runcmd('git add MANIFEST.in')
+                    runcmd('git commit -am "added MANIFEST.in for %s"' %
+                           scm.get_package_name('.'))
         # check subversion state
-        cmd = 'svn st | grep -v ^X | grep -v ^Performing | grep -v ^$'
-        if len(runcmd(cmd, log=False, respond=True)):
+        if scm.has_local_changes('.'):
             output.error('You have local changes, please commit them first.',
                          exit=True)
 
@@ -129,17 +140,19 @@ class ReleaseCommand(basecommand.BaseCommand):
         output.part_title('Checking setup.py docstring (restructuredtext)')
         cmd = '%s setup.py check --restructuredtext --strict' % sys.executable
         if runcmd_with_exitcode(cmd, log=0)!=0:
-            output.error('You have errors in your docstring (README.txt, HISTORY.txt, ...)', exit=1)
+            output.error('You have errors in your docstring (README.txt, HISTORY.txt, ...)'+\
+                             '\nRun "ftw checkdocs" for more details.', exit=1)
 
     def check_versions(self):
         output.part_title('Checking package versions')
-        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         trunk_version = open(version_file).read().strip()
         print ' * Current version of trunk:         %s' %\
             output.colorize(trunk_version, output.WARNING)
         next_version = trunk_version.split('-')[0]
-        existing_tags = svn.get_existing_tags('.')
+        root_svn = scm.get_package_root_url('.')
+        existing_tags = svn.get_existing_tags(root_svn)
         if next_version in existing_tags.keys():
             output.warning('Tag %s already existing' % next_version)
         # ask for next tag version
@@ -190,38 +203,44 @@ class ReleaseCommand(basecommand.BaseCommand):
             output.error('Could not find the file %s' % pypirc_path, exit=True)
         config = ConfigParser.ConfigParser()
         config.readfp(open(pypirc_path))
-        basic_namespace = svn.get_package_name('.').split('.')[0]
+        basic_namespace = scm.get_package_name('.').split('.')[0]
         for section in config.sections():
             print '* found target "%s"' % output.colorize(section,
                                                           output.WARNING)
         if basic_namespace in config.sections():
             self.pypi_target = basic_namespace
         else:
-            self.pypi_target = config.sections()[0]
+            self.pypi_target = ''
         msg = 'Please specify a pypi target for the egg relase [%s]' % \
             output.colorize(self.pypi_target, output.BOLD_WARNING)
         pypi_target_input = input.prompt(msg, lambda v:\
-                                             not v or v in config.sections()
+                                             (self.pypi_target and not v) or v in
+                                         config.sections()
                                          and True or 'Please select a target listed above')
         if pypi_target_input:
             self.pypi_target = pypi_target_input
 
     def create_tag(self):
         output.part_title('Creating subversion tag')
-        root_url = svn.get_package_root_url('.')
-        trunk_url = os.path.join(root_url, 'trunk')
-        tag_url = os.path.join(root_url, 'tags', self.new_tag_version)
-        cmd = 'svn cp %s %s -m "creating tag %s for package %s"' % (
-            trunk_url,
-            tag_url,
-            self.new_tag_version,
-            svn.get_package_name('.'),
-            )
-        runcmd(cmd)
+        if scm.is_subversion('.'):
+            root_url = scm.get_package_root_url('.')
+            trunk_url = os.path.join(root_url, 'trunk')
+            tag_url = os.path.join(root_url, 'tags', self.new_tag_version)
+            cmd = 'svn cp %s %s -m "creating tag %s for package %s"' % (
+                trunk_url,
+                tag_url,
+                self.new_tag_version,
+                svn.get_package_name('.'),
+                )
+            runcmd(cmd)
+        elif scm.is_git('.'):
+            cmd = 'git svn tag %s' % self.new_tag_version
+            runcmd(cmd)
+            git.pull_changes('.')
 
     def bump_trunk_after_tagging(self):
         output.part_title('Bumping versions in trunk')
-        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         print '* updating %s' % version_file
         version_txt = open(version_file, 'w')
@@ -238,19 +257,32 @@ class ReleaseCommand(basecommand.BaseCommand):
         file = open(history_file, 'w')
         file.write('\n'.join(data))
         file.close()
-        cmd = 'svn ci -m "bumping versions in trunk of %s after tagging %s"' % (
-            svn.get_package_name('.'),
+        ci_msg = 'bumping versions in trunk of %s after tagging %s' % (
+            scm.get_package_name('.'),
             self.new_tag_version,
             )
-        runcmd(cmd)
+        if scm.is_subversion('.'):
+            cmd = 'svn ci -m "%s"' % ci_msg
+            runcmd(cmd)
+        elif scm.is_git('.'):
+            cmd = 'git commit -a -m "%s"' % ci_msg
+            runcmd(cmd)
+            git.push_committed_changes('.')
 
     def bump_tag_after_tagging(self):
-        tag_url = os.path.join(svn.get_package_root_url('.'), 'tags',
-                               self.new_tag_version)
-        cmd = 'svn switch %s' % tag_url
-        runcmd(cmd)
+        if scm.is_subversion('.'):
+            tag_url = os.path.join(scm.get_package_root_url('.'), 'tags',
+                                   self.new_tag_version)
+            cmd = 'svn switch %s' % tag_url
+            runcmd(cmd)
+        elif scm.is_git('.'):
+            cmd = 'git checkout remotes/tags/%s; git checkout -b %s' % (
+                self.new_tag_version,
+                self.new_tag_version
+                )
+            runcmd(cmd)
         output.part_title('Bumping versions in tag')
-        version_file = os.path.join(svn.get_package_name('.').replace('.', '/'),
+        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         print '* updating %s' % version_file
         version_txt = open(version_file, 'w')
@@ -263,13 +295,19 @@ class ReleaseCommand(basecommand.BaseCommand):
             for line in data:
                 if not line.startswith('tag_build') and not line.startswith('tag_svn_rev'):
                     file.write(line)
+                    file.write('\n')
             file.write('\n')
             file.close()
-        cmd = 'svn ci -m "bumping versions in tag of %s after tagging %s"' % (
-            svn.get_package_name('.'),
+        ci_msg = "bumping versions in tag of %s after tagging %s"  % (
+            scm.get_package_name('.'),
             self.new_tag_version,
             )
-        runcmd(cmd)
+        if scm.is_subversion('.'):
+            cmd = 'svn ci -m "%s"' % ci_msg
+            runcmd(cmd)
+        elif scm.is_git('.'):
+            cmd = 'git commit -a -m "%s" ; git svn dcommit' % ci_msg
+            runcmd(cmd)
 
     def release_egg(self):
         output.part_title('Releasing agg to target %s' % self.pypi_target)
@@ -282,10 +320,15 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     def switch_to_trunk(self):
         output.part_title('Cleaning up local repository')
-        tag_url = os.path.join(svn.get_package_root_url('.'), 'trunk')
-        cmd = 'svn switch %s' % tag_url
-        runcmd(cmd)
-
+        if scm.is_subversion('.'):
+            tag_url = os.path.join(scm.get_package_root_url('.'), 'trunk')
+            cmd = 'svn switch %s' % tag_url
+            runcmd(cmd)
+        elif scm.is_git('.'):
+            git.push_committed_changes('.')
+            cmd = 'git checkout master'
+            cmd += ' ; git branch -D %s' % self.new_tag_version
+            runcmd(cmd)
 
 
 
