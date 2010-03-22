@@ -7,6 +7,9 @@ from ftw.manager.utils import singleton
 from ftw.manager.utils.memoize import memoize
 
 DEFAULT_CONFIGURATION = '''
+[general]
+default_vcs = svn
+
 [output]
 syntax = false
 scheme = light
@@ -51,6 +54,15 @@ class Configuration(singleton.Singleton):
             return default
         else:
             return self.config.get('output', 'scheme')
+
+    @property
+    @memoize
+    def default_vcs(self):
+        default = 'svn'
+        if not self.config.has_option('general', 'default_vcs'):
+            return default
+        else:
+            return self.config.get('general', 'default_vcs')
 
     def initialize_configuration(self):
         if not os.path.exists(self.config_path):
