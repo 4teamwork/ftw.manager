@@ -1,5 +1,6 @@
 
 import os
+from ftw.manager import config
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import runcmd
 from ftw.manager.utils import output
@@ -25,22 +26,29 @@ class CheckoutCommand(basecommand.BaseCommand):
             output.error('package_name is required', exit=1)
         package_name = self.args[0]
         git.setup_gitsvn_cache()
-        # already checked out once?
-        cache_path = os.path.join(git.get_gitsvn_cache_path(), package_name)
-        if not os.path.isdir(cache_path):
+        default_vcs = config.Configuration().default_vcs
+        if default_vcs=='git':
+            # already checked out once?
+            cache_path = os.path.join(git.get_gitsvn_cache_path(), package_name)
+            if not os.path.isdir(cache_path):
+                svn_url = self.get_svn_url(package_name)
+                git.checkout_gitsvn(svn_url)
+            else:
+                # cache_path existing ; just update and clone
+                runcmd('cd %s; git reset --hard' % cache_path)
+                runcmd('cd %s; git svn fetch' % cache_path)
+                runcmd('cd %s; git svn rebase' % cache_path)
+                runcmd('cp -r %s .' % cache_path)
+                runcmd('cd %s ; git checkout %s' % (
+                        package_name,
+                        'master',
+                        ))
+                git.apply_svn_ignores(package_name)
+        elif default_vcs=='svn':
             svn_url = self.get_svn_url(package_name)
-            git.checkout_gitsvn(svn_url)
-        else:
-            # cache_path existing ; just update and clone
-            runcmd('cd %s; git reset --hard' % cache_path)
-            runcmd('cd %s; git svn fetch' % cache_path)
-            runcmd('cd %s; git svn rebase' % cache_path)
-            runcmd('cp -r %s .' % cache_path)
-            runcmd('cd %s ; git checkout %s' % (
-                    package_name,
-                    'master',
-            ))
-            git.apply_svn_ignores(package_name)
+            runcmd('svn co %s %s' % (
+                    svn_url,
+                    package_name))
 
     def get_svn_url(self, package_name):
         # what's the svn url?

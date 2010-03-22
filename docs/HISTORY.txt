@@ -5,6 +5,9 @@ Changelog
 1.0.9
 -----
 
+* Checkout command: added support for subversion
+  [22.03.2010, jbaumann]
+  
 * Config: Added new config option "default VCS"
   [22.03.2010, jbaumann]
 
