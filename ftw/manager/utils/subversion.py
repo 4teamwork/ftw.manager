@@ -73,7 +73,8 @@ def check_project_layout(directory_or_url, raise_exception=True, ask_for_creatio
     # ask what to do, if there are folders missing
     if len(missing)>0:
         if ask_for_creation:
-            output.error('Invalid project layout, folders missing: ' + ', '.join(missing))
+            output.error('[%s] Invalid project layout, folders missing: ' %
+                         get_package_name(url) + ', '.join(missing))
             if input.prompt_bool('Would you like to create the missing folders?'):
                 cmd = 'svn mkdir '
                 cmd += ' '.join([os.path.join(url, dir) for dir in missing])

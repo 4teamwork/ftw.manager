@@ -5,6 +5,9 @@ Changelog
 1.0.10
 ------
 
+* Added package name to error message "invalid project layout"
+  [29.03.2010, jbaumann]
+  
 * Fixed URL in setup.py
   [22.03.2010, jbaumann]
   
