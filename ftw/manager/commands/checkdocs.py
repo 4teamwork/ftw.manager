@@ -1,12 +1,15 @@
 
-import re
-import os
-import sys
+from StringIO import StringIO
+from docutils.core import publish_file
 from ftw.manager.commands import basecommand
-from ftw.manager.utils import runcmd_with_exitcode
 from ftw.manager.utils import output
+from ftw.manager.utils import runcmd_with_exitcode
 from ftw.manager.utils.memoize import memoize
 import distutils.core
+import os
+import re
+import sys
+import tempfile
 
 class CheckdocsCommand(basecommand.BaseCommand):
     """
@@ -25,6 +28,14 @@ class CheckdocsCommand(basecommand.BaseCommand):
         cmd = '%s setup.py check --restructuredtext --strict' % sys.executable
         if self.options.show:
             self.show_description()
+            return
+        elif self.options.browser:
+            description = '\n'.join(self.get_description())
+            response = open('long_description.html', 'w+')
+            publish_file(writer_name='html',
+                         destination=response,
+                         source=StringIO(description))
+            runcmd_with_exitcode('open long_description.html')
             return
         code, response, error = runcmd_with_exitcode(cmd, log=True, respond=True, respond_error=True)
         if code==0:
@@ -68,6 +79,9 @@ class CheckdocsCommand(basecommand.BaseCommand):
         self.parser.add_option('-s', '--show-description', dest='show',
                                action='store_true', default=False,
                                help='show long-description of setup.py (with line numbers)')
+        self.parser.add_option('-b', '--show-inbrowser', dest='browser',
+                               action='store_true', default=False,
+                               help='Show description converted into HTML in your default browser')
         self.parser.add_option('-o', '--off-rows', dest='offrows',
                                action='store', type='int', default=2,
                                help='show N rows before and after a bad row (only if not using -s)')

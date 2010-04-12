@@ -5,6 +5,9 @@ Changelog
 1.0.10
 ------
 
+* Added --show-in-browser option for checkdocs command
+  [12.04.2010, jbaumann]
+  
 * Added package name to error message "invalid project layout"
   [29.03.2010, jbaumann]
   
