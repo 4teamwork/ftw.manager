@@ -251,6 +251,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 path = os.path.abspath(pkg)
                 if os.path.isdir(path) and scm.lazy_is_scm(path):
                     dependencies.append((pkg, None))
+        dependencies = list(set(dependencies))
         dependencies.sort()
         return dependencies
 

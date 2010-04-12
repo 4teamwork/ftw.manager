@@ -5,6 +5,9 @@ Changelog
 1.0.10
 ------
 
+* Dependencycheck: do not list the same egg multiple times
+  [12.04.2010, jbaumann]
+  
 * Added --show-in-browser option for checkdocs command
   [12.04.2010, jbaumann]
   
