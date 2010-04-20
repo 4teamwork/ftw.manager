@@ -5,6 +5,9 @@ Changelog
 1.0.11
 ------
 
+* Dependencycheck: list also the package itself
+  [20.04.2010, jbaumann]
+
 
 1.0.10
 ------

@@ -236,7 +236,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     @property
     @memoize
     def dependency_packages(self):
-        dependencies = []
+        dependencies = [(scm.get_package_name('.'), None)]
         if self.egg:
             for pkg in self.egg.install_requires:
                 name = pkg.split('=')[0].split('<')[0].split('>')[0].strip()
