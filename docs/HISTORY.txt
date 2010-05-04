@@ -5,6 +5,9 @@ Changelog
 1.0.11
 ------
 
+* Release: Added support for releasing from a branch
+  [04.05.2010, jbaumann]
+
 * Dependencycheck: list also the package itself
   [20.04.2010, jbaumann]
 
