@@ -93,7 +93,6 @@ class ReleaseCommand(basecommand.BaseCommand):
                              'tags and branches. At least one folder is missing.',
                          exit=True)
         if not self.options.release_egg_only:
-            import pdb; pdb.set_trace()
             if scm.get_svn_url('.') not in (scm.get_package_root_url('.')+'/trunk',
                                         scm.get_package_root_url('.')+'/branches',):
                 # command must be run at the "trunk" folder of a package
