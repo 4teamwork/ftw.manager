@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Dependencycheck: added -l option for specifying depth limit
+  [09.05.2010, jbaumann]
+
 * Added debug mode (-D) which starts pdb post-mortem
   [09.05.2010, jbaumann]
 

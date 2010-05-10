@@ -2,21 +2,27 @@
 SCM Wrapper
 """
 
-import os
-import re
-import simplejson
-from xml.dom import minidom
-
-import git
-import subversion as svn
-from ftw.manager.utils.memoize import memoize
-from ftw.manager.utils.singleton import Singleton
 from ftw.manager.utils import input
 from ftw.manager.utils import output
-from ftw.manager.utils import runcmd, runcmd_with_exitcode
+from ftw.manager.utils import runcmd_with_exitcode
+from ftw.manager.utils.memoize import memoize
+from ftw.manager.utils.singleton import Singleton
+from xml.dom import minidom
+import distutils.core
+import git
+import os
+import re
+import shutil
+import simplejson
+import subversion as svn
+import tempfile
 
 is_git = git.is_git
 is_subversion = svn.is_subversion
+IGNORE_EGGS = [
+    'setuptools',
+    'Plone',
+    ]
 
 class NotAScm(Exception):
     pass
@@ -113,6 +119,67 @@ def is_package_root(directory_or_url):
     second_last = parts[-2]
     return last=='trunk' or second_last in ('tags', 'branches')
 
+@memoize
+def get_egginfo_for(package, trunk=True, branch=False,
+                    tag=False, name='', extra_require=None):
+    """ Checks out a package and returns its setup module
+    """
+    if (trunk and branch and tag) or (not trunk and not branch and not tag):
+        raise ValueError('Excepts one and only one of trunk, branch ' +\
+                             'and tag to be positive')
+    if branch or tag and not name:
+        raise ValueError('Provide a branch/tag name')
+    dir = tempfile.mkdtemp(suffix='-' + package)
+    prev_cwd = os.getcwd()
+    os.chdir(dir)
+    egg = None
+    try:
+        pkg_url = PackageSourceMemory().guess_url(package)
+        if trunk:
+            co_url = os.path.join(pkg_url, 'trunk')
+        elif branch:
+            co_url = os.path.join(pkg_url, 'branches', name)
+        elif tag:
+            co_url = os.path.join(pkg_url, 'tags', name)
+        cmd = 'svn co %s %s' % (co_url, dir)
+        if runcmd_with_exitcode(cmd, log=False)!=0:
+            raise Exception('Failed to checkout %s' % package)
+        if not os.path.isfile('setup.py'):
+            raise Exception('Could not find setup.py in checkout of %s' % package)
+        egg = distutils.core.run_setup('setup.py')
+    except:
+        os.chdir(prev_cwd)
+        shutil.rmtree(dir)
+        raise
+    else:
+        os.chdir(prev_cwd)
+        shutil.rmtree(dir)
+    return egg
+
+def get_egg_dependencies(egg, with_extra=None):
+    """ Returns a splitted list of egg dependencies of the distutils egg object
+    [
+    ('my.egg', None, None),
+    ('another.egg', 'a_extra', '1.2'),
+    ]
+    """
+    entries = list(egg.install_requires)
+    if with_extra:
+        raise NotImplementedError
+    dependencies = []
+    for entry in entries:
+        name = entry.split('=')[0].split('<')[0].split('>')[0].strip()
+        extra = None
+        if '[' in name:
+            extra = name.split('[')[1].split(']')[0]
+            name = name.split('[')[0]
+        version = None
+        if '=' in entry:
+            version = entry.split('=')[-1].strip()
+        if name not in IGNORE_EGGS:
+            dependencies.append((name, extra, version))
+    return dependencies
+
 
 class PackageInfoMemory(Singleton):
     """ Stores following informations about packages:
@@ -174,9 +241,9 @@ class PackageInfoMemory(Singleton):
                     url = url.strip()
                     if url.startswith(os.path.join(trunk_url,
                                                    package.replace('.', '/'))) \
-                            and not url.endswith('version.txt'):
-                        data['changes'] = True
-                        break
+                                                   and not url.endswith('version.txt'):
+                                                   data['changes'] = True
+                                                   break
             else:
                 data['changes'] = True
             self.set_cached_info(package, data)
@@ -224,6 +291,46 @@ class PackageInfoMemory(Singleton):
         file = open(path, 'w')
         file.write(simplejson.dumps(data))
         file.close()
+
+    def get_dependencies_for(self, package, trunk=True, branch=False,
+                             tag=False, name='', force_reload=False,
+                             prompt=False):
+        """ Returns a list of dependencies (may contain version pinnings) of
+        a package in trunk, branch or tag
+        """
+        # validate parameters
+        if (trunk and branch and tag) or (not trunk and not branch and not tag):
+            raise ValueError('Excepts one and only one of trunk, branch ' +\
+                                 'and tag to be positive')
+        if branch or tag and not name:
+            raise ValueError('Provide a branch/tag name')
+        # get subdir
+        subdir = None
+        if trunk:
+            subdir = 'trunk'
+        elif branch:
+            subdir = os.path.join('branches', name)
+        elif tag:
+            subdir = os.path.join('tags', name)
+        # get package info
+        data = self.get_info(package, force_reload, prompt)
+        if not data:
+            return None
+        # use dependency, if existing
+        if not force_reload and data.get('dependencies', None):
+            if data['dependencies'].get(subdir, False):
+                return data['dependencies'][subdir]
+        # .. if not existing, get egginfo and update
+        try:
+            egg = get_egginfo_for(package, trunk=trunk, branch=branch,
+                                  tag=tag, name=name)
+        except:
+            return []
+        dependencies = get_egg_dependencies(egg)
+        if not data.get('dependencies', None):
+            data['dependencies'] = {}
+        data['dependencies'][subdir] = dependencies
+        return dependencies
 
 
 class PackageSourceMemory(Singleton):

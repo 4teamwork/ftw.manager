@@ -13,10 +13,6 @@ from ftw.manager.utils import aggressive_decode
 from ftw.manager.utils import scm
 from ftw.manager.utils import output
 
-IGNORE_EGGS = [
-    'setuptools',
-    'Plone',
-    ]
 
 class DependencyCheckCommand(basecommand.BaseCommand):
     """
@@ -70,6 +66,9 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                                action='store_true', default=False,
                                help='List packages with modified trunk when using ' +\
                                    '--history option')
+        self.parser.add_option('-l', '--limit', dest='limit',
+                               action='store', default=0,
+                               help='Set depth limit (default 0)')
 
     def __call__(self):
         try:
@@ -93,31 +92,40 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         table = output.ASCIITable(*titles)
         versions = self.package_versions
         force_reload = self.options.refresh
-        for package, v in self.dependency_packages:
-            warn = False
-            ctag = package in versions.keys() and str(versions[package]) or ''
-            info = scm.PackageInfoMemory().get_info(package,
+        limit = int(self.options.limit)
+        def _add_rows(dependencies, indent=0):
+            for package, extra, v in dependencies:
+                warn = False
+                ctag = package in versions.keys() and str(versions[package]) or ''
+                info = scm.PackageInfoMemory().get_info(package,
                                                     force_reload=force_reload)
-            ntag = info and str(info['newest_tag']) or ''
-            if ntag and ctag:
-                if ntag<ctag:
-                    ntag = output.colorize(ntag, output.WARNING)
+                ntag = info and str(info['newest_tag']) or ''
+                if ntag and ctag:
+                    if ntag<ctag:
+                        ntag = output.colorize(ntag, output.WARNING)
+                        warn = True
+                    elif ntag>ctag:
+                        ntag = output.colorize(ntag, output.ERROR)
+                        warn = True
+                    elif ntag==ctag:
+                        ntag = output.colorize(ntag, output.INFO)
+                chg = ''
+                if info and info['changes']:
+                    chg = output.colorize('YES', output.WARNING)
                     warn = True
-                elif ntag>ctag:
-                    ntag = output.colorize(ntag, output.ERROR)
-                    warn = True
-                elif ntag==ctag:
-                    ntag = output.colorize(ntag, output.INFO)
-            chg = ''
-            if info and info['changes']:
-                chg = output.colorize('YES', output.WARNING)
-                warn = True
-            table.push((
-                    warn and output.colorize(package, output.WARNING) or package,
+                name = extra and '%s[%s]' % (package, extra) or package
+                name = '  ' * indent + name
+                table.push((
+                    warn and output.colorize(name, output.WARNING) or name,
                     ctag,
                     ntag,
                     chg,
                     ))
+                if indent<limit:
+                    sub_deps = scm.PackageInfoMemory().get_dependencies_for(package)
+                    if sub_deps:
+                        _add_rows(sub_deps, indent + 1)
+        _add_rows(self.dependency_packages)
         table()
 
     def print_history(self):
@@ -125,7 +133,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         force_reload = self.options.refresh
         packages_data = {}
         list_trunk_modifications = self.options.history_dev
-        for package, v in self.dependency_packages:
+        for package, extra, v in self.dependency_packages:
             if self.options.verbose:
                 print package
             ctag = package in versions.keys() and str(versions[package]) or ''
@@ -195,7 +203,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         """
         # -- pinned in the dependencies
         pins = {}
-        for pkg, version in self.dependency_packages:
+        for pkg, extra, version in self.dependency_packages:
             if version and pkg not in pins.keys():
                 pins[pkg] = version
         # -- pinnend in the buildout config
@@ -236,21 +244,15 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     @property
     @memoize
     def dependency_packages(self):
-        dependencies = [(scm.get_package_name('.'), None)]
+        dependencies = [(scm.get_package_name('.'), None, None)]
         if self.egg:
-            for pkg in self.egg.install_requires:
-                name = pkg.split('=')[0].split('<')[0].split('>')[0].strip()
-                version = None
-                if '=' in pkg:
-                    version = pkg.split('=')[-1].strip()
-                if name not in IGNORE_EGGS:
-                    dependencies.append((name, version))
+            dependencies += scm.get_egg_dependencies(self.egg)
         else:
             # source directory ?
             for pkg in os.listdir('.'):
                 path = os.path.abspath(pkg)
                 if os.path.isdir(path) and scm.lazy_is_scm(path):
-                    dependencies.append((pkg, None))
+                    dependencies.append((pkg, None, None))
         dependencies = list(set(dependencies))
         dependencies.sort()
         return dependencies
