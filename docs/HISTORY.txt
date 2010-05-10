@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Added debug mode (-D) which starts pdb post-mortem
+  [09.05.2010, jbaumann]
+
 * Release: Fixed bug in branch-release
   [06.05.2010, jbaumann]
 
