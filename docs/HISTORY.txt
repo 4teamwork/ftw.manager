@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Release command: removed bdist_egg command
+  [19.05.2010, jbaumann]
+
 * Dependencycheck: added -l option for specifying depth limit
   [09.05.2010, jbaumann]
 
