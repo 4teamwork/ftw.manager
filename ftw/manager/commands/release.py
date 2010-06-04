@@ -117,6 +117,9 @@ class ReleaseCommand(basecommand.BaseCommand):
             f = open('MANIFEST.in', 'w')
             namespace = scm.get_package_name('.').split('.')[0]
             f.write('recursive-include %s *\n' % namespace)
+            f.write('recursive-include docs *\n')
+            f.write('include setup.py\n')
+            f.write('include README.txt\n')
             f.write('global-exclude *pyc\n')
             f.close()
             print 'created MANIFEST.in with following content:'

@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Release command: added some more stuff to default MANIFEST.in
+  [04.06.2010, jbaumann]
+
 * Release command: removed bdist_egg command
   [19.05.2010, jbaumann]
 
