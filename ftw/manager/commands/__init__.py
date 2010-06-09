@@ -12,4 +12,23 @@ import setup
 import switch
 import testcmd
 import version
+import versioninfo
 import zopeinstance
+
+# make pyflakes happy
+checkdocs
+checkout
+dependencycheck
+dependencytests
+develop
+help
+i18ndude
+multiinstance
+release
+selfupdate
+setup
+switch
+testcmd
+version
+versioninfo
+zopeinstance

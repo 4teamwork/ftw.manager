@@ -5,6 +5,11 @@ Changelog
 1.0.12
 ------
 
+* Issue #13 ftw.manager: Befehl zum analysieren der dependencies
+  https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/13
+  Added new command `versioninfo`
+  [09.06.2010, jbaumann]
+
 * Moved dependency of `i18ndude` to a extras_require ("i18ndude") and
   added extras_require "all"
   [09.06.2010, jbaumann]
