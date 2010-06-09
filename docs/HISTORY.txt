@@ -5,6 +5,10 @@ Changelog
 1.0.12
 ------
 
+* Moved dependency of `i18ndude` to a extras_require ("i18ndude") and
+  added extras_require "all"
+  [09.06.2010, jbaumann]
+
 * Release command: added some more stuff to default MANIFEST.in
   [04.06.2010, jbaumann]
 

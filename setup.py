@@ -5,12 +5,13 @@ import sys
 version = open('ftw/manager/version.txt').read().strip()
 
 long_description = open("README.txt").read() + "\n" + \
-                        open(os.path.join("docs", "HISTORY.txt")).read()
+    open(os.path.join("docs", "HISTORY.txt")).read()
 
 generated_description = False
 try:
     from ftw.manager import ftwCommand
     from ftw.manager import commands
+    commands # register commands / make flymake happy
     from ftw.manager import config
     generated_description = True
 except ImportError:
@@ -49,6 +50,11 @@ if generated_description:
     sys.argv[:] = argv
 
 
+extras_require = {
+    'i18ndude': ('i18ndude',),
+    }
+extras_require['all'] = zip(*extras_require.values())
+
 setup(name='ftw.manager',
       version=version,
       description="ftw.manager provides commands for subversion, psc and egg-handling",
@@ -68,15 +74,15 @@ setup(name='ftw.manager',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          'setuptools',
-          # -*- Extra requirements: -*-
-          'collective.dist',
-          'simplejson',
-          'i18ndude',
-      ],
+        'setuptools',
+        # -*- Extra requirements: -*-
+        'collective.dist',
+        'simplejson',
+        ],
+      extras_require=extras_require,
       entry_points = {
-            'console_scripts' : [
-                'ftw = ftw.manager.ftwCommand:main',
+        'console_scripts' : [
+            'ftw = ftw.manager.ftwCommand:main',
             ],
-      },
+        },
       )
