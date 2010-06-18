@@ -95,7 +95,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         table = output.ASCIITable(*titles)
         versions = self.package_versions
         force_reload = self.options.refresh
-        limit = int(self.options.limit)
+        limit = int(self.options.limit) + 1
         def _add_rows(dependencies, indent=0):
             for package, extra, v in dependencies:
                 warn = False
@@ -249,6 +249,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     @memoize
     def dependency_packages(self):
         dependencies = [(scm.get_package_name('.'), None, None)]
+        if int(self.options.limit)>0:
+            return dependencies
         if self.egg:
             dependencies += scm.get_egg_dependencies(self.egg)
         else:

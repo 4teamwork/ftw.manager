@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Dependencycheck: eliminated overhead when check dependencies recursively
+  [18.06.2010, jbaumann]
+
 * Release command: added --quiet option
   [18.06.2010, jbaumann]
 
