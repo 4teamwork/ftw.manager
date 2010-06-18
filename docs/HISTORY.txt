@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Release command: when using git commit the trunk after all
+  [18.06.2010, jbaumann]
+
 * Issue #21 ftw.publisher: probleme mit MANIFEST.in
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/21/
   [18.06.2010, jbaumann]

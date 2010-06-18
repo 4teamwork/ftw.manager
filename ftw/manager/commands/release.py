@@ -388,6 +388,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             cmd = 'git checkout %s' % folder
             cmd += ' ; git branch -D %s' % self.new_tag_version
             runcmd(cmd)
+            runcmd('git svn dcommit')
 
 
 
