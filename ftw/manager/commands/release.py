@@ -22,10 +22,10 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     *   Die Option *long_description* im *setup.py* muss validierter restructuredText sein
     *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
-        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
-        sein, ansonsten muss es der trunk sein.
+    das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
+    sein, ansonsten muss es der trunk sein.
     *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
-        branches und tags besitzen
+    branches und tags besitzen
     *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
     *   Die Version ist in der Datei my/package/version.txt gespeichert
     *   Eine Datei docs/HISTORY.txt ist notwendig
@@ -60,6 +60,7 @@ class ReleaseCommand(basecommand.BaseCommand):
     def __call__(self):
         self.check_doc()
         self.analyse()
+        self.pre_build_check()
         if self.options.release_egg:
             self.check_pyprc()
         if not self.options.release_egg_only:
@@ -75,6 +76,49 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not self.options.release_egg_only:
             self.switch_to_back()
         # swith back to trunk
+
+    def pre_build_check(self):
+        """ Check if a build will work later. Check this before doing anything
+        by building and loading the egg.
+        """
+        output.part_title('Make a test-build for preventing bad dists')
+        cwd = os.getcwd()
+        # make a sdist
+        runcmd('%s setup.py sdist' % sys.executable)
+        os.chdir('dist')
+        # switch dir
+        print output.colorize('cd dist', output.INFO)
+        # extract
+        runcmd('tar -xf *.tar.gz')
+        # find extracted dir / chdir
+        distdir = None
+        for file_ in os.listdir('.'):
+            if os.path.isdir(file_):
+                distdir = file_
+                break
+        if not distdir:
+            output.error('Something is wrong: could not find extracted dist directory',
+                         exit=1)
+        os.chdir(distdir)
+        print output.colorize('cd %s' % distdir, output.INFO)
+        # test setup.py
+        cmd = '%s setup.py egg_info' % sys.executable
+        state, response, error = runcmd_with_exitcode(cmd,
+                                                      respond=True,
+                                                      respond_error=True)
+        # cd back to original dir
+        os.chdir(cwd)
+        # remove stuff
+        runcmd('rm -rf dist')
+        # did it work?
+        if state != 0:
+            output.error('Something\'s wrong: could not load setup.py on distribution, ' +\
+                             'you may have a problem with your setup.py / MANIFEST.in:',
+                         exit=(not error and True or False))
+            if response:
+                print output.colorize(response, output.INFO)
+            if error:
+                output.error(error, exit=True)
 
     def analyse(self):
         output.part_title('Checking subversion project')
