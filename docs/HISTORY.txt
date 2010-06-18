@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Release command: added --quiet option
+  [18.06.2010, jbaumann]
+
 * Issue #13 ftw.manager: Befehl zum analysieren der dependencies
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/13
   Added new command `versioninfo`

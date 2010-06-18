@@ -69,6 +69,9 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         self.parser.add_option('-l', '--limit', dest='limit',
                                action='store', default=0,
                                help='Set depth limit (default 0)')
+        self.parser.add_option('-q', '--quiet', dest='quiet',
+                               help='Do not ask anything',
+                               action='store_true', default=False)
 
     def __call__(self):
         try:
@@ -98,7 +101,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 warn = False
                 ctag = package in versions.keys() and str(versions[package]) or ''
                 info = scm.PackageInfoMemory().get_info(package,
-                                                    force_reload=force_reload)
+                                                        force_reload=force_reload,
+                                                        prompt=(not self.options.quiet))
                 ntag = info and str(info['newest_tag']) or ''
                 if ntag and ctag:
                     if ntag<ctag:
