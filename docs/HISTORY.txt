@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Fixed bug in `dependencycheck` command
+  [21.06.2010, jbaumann]
+
 * Release command: when using git commit the trunk after all
   [18.06.2010, jbaumann]
 

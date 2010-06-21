@@ -292,6 +292,7 @@ class PackageInfoMemory(Singleton):
         file.write(simplejson.dumps(data))
         file.close()
 
+    @memoize
     def get_dependencies_for(self, package, trunk=True, branch=False,
                              tag=False, name='', force_reload=False,
                              prompt=False):

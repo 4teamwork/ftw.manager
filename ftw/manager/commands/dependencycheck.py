@@ -95,7 +95,9 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         table = output.ASCIITable(*titles)
         versions = self.package_versions
         force_reload = self.options.refresh
-        limit = int(self.options.limit) + 1
+        limit = int(self.options.limit)
+        if limit < 0:
+            limit += 1
         def _add_rows(dependencies, indent=0):
             for package, extra, v in dependencies:
                 warn = False
