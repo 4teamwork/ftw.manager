@@ -128,7 +128,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     chg,
                     ))
                 if indent<limit:
-                    sub_deps = scm.PackageInfoMemory().get_dependencies_for(package)
+                    sub_deps = scm.PackageInfoMemory().get_dependencies_for(package,
+                                                                            with_extra=extra)
                     if sub_deps:
                         _add_rows(sub_deps, indent + 1)
         _add_rows(self.dependency_packages)
@@ -254,7 +255,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         if int(self.options.limit)>0:
             return dependencies
         if self.egg:
-            dependencies += scm.get_egg_dependencies(self.egg)
+            dependencies += scm.get_egg_dependencies(self.egg, with_extra='*')
         else:
             # source directory ?
             for pkg in os.listdir('.'):

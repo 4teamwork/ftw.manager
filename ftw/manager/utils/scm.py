@@ -24,6 +24,9 @@ IGNORE_EGGS = [
     'Plone',
     ]
 
+_marker = object()
+
+
 class NotAScm(Exception):
     pass
 
@@ -163,21 +166,26 @@ def get_egg_dependencies(egg, with_extra=None):
     ('another.egg', 'a_extra', '1.2'),
     ]
     """
+    def _prepare_dependencies(entries):
+        for entry in entries:
+            name = entry.split('=')[0].split('<')[0].split('>')[0].strip()
+            extra = None
+            if '[' in name:
+                extra = name.split('[')[1].split(']')[0]
+                name = name.split('[')[0]
+            version = None
+            if '=' in entry:
+                version = entry.split('=')[-1].strip()
+            if name not in IGNORE_EGGS:
+                yield (name, extra, version)
+    # ---
+
     entries = list(egg.install_requires)
-    if with_extra:
-        raise NotImplementedError
-    dependencies = []
-    for entry in entries:
-        name = entry.split('=')[0].split('<')[0].split('>')[0].strip()
-        extra = None
-        if '[' in name:
-            extra = name.split('[')[1].split(']')[0]
-            name = name.split('[')[0]
-        version = None
-        if '=' in entry:
-            version = entry.split('=')[-1].strip()
-        if name not in IGNORE_EGGS:
-            dependencies.append((name, extra, version))
+    dependencies = list(_prepare_dependencies(entries))
+    if with_extra and egg.extras_require:
+        for extra, entries in egg.extras_require.items():
+            if extra == with_extra or with_extra == '*':
+                dependencies.extend(list(_prepare_dependencies(entries)))
     return dependencies
 
 
@@ -295,7 +303,7 @@ class PackageInfoMemory(Singleton):
     @memoize
     def get_dependencies_for(self, package, trunk=True, branch=False,
                              tag=False, name='', force_reload=False,
-                             prompt=False):
+                             prompt=False, with_extra=None):
         """ Returns a list of dependencies (may contain version pinnings) of
         a package in trunk, branch or tag
         """
@@ -313,24 +321,30 @@ class PackageInfoMemory(Singleton):
             subdir = os.path.join('branches', name)
         elif tag:
             subdir = os.path.join('tags', name)
+        if with_extra:
+            subdir += '[%s]' % with_extra
         # get package info
         data = self.get_info(package, force_reload, prompt)
         if not data:
             return None
         # use dependency, if existing
         if not force_reload and data.get('dependencies', None):
-            if data['dependencies'].get(subdir, False):
+            if data['dependencies'].get(subdir, _marker) != _marker:
                 return data['dependencies'][subdir]
         # .. if not existing, get egginfo and update
         try:
             egg = get_egginfo_for(package, trunk=trunk, branch=branch,
-                                  tag=tag, name=name)
+                                  tag=tag, name=name, extra_require=with_extra)
         except:
-            return []
-        dependencies = get_egg_dependencies(egg)
+            output.error('Error while loading setup.py of %s (%s)' % (
+                    package,
+                    subdir))
+            raise
+        dependencies = get_egg_dependencies(egg, with_extra)
         if not data.get('dependencies', None):
             data['dependencies'] = {}
         data['dependencies'][subdir] = dependencies
+        self.set_cached_info(package, data)
         return dependencies
 
 

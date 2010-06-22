@@ -108,7 +108,7 @@ def get_existing_tags(directory_or_url):
     }
     """
     tags_dir = os.path.join(get_package_root_url(directory_or_url), 'tags')
-    xml_data = ''.join(runcmd('svn list %s --xml' % tags_dir, log=False, respond=True))
+    xml_data = ''.join(runcmd('svn ls --xml %s' % tags_dir, log=False, respond=True))
     dom = xml.dom.minidom.parseString(xml_data)
     tags = {}
     for entry in dom.getElementsByTagName('entry'):
