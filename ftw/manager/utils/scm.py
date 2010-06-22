@@ -335,11 +335,12 @@ class PackageInfoMemory(Singleton):
         try:
             egg = get_egginfo_for(package, trunk=trunk, branch=branch,
                                   tag=tag, name=name, extra_require=with_extra)
-        except:
-            output.error('Error while loading setup.py of %s (%s)' % (
+        except Exception, exc:
+            output.error('Error while loading setup.py of %s (%s): %s' % (
                     package,
-                    subdir))
-            raise
+                    subdir,
+                    str(exc)))
+            return []
         dependencies = get_egg_dependencies(egg, with_extra)
         if not data.get('dependencies', None):
             data['dependencies'] = {}

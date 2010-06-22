@@ -5,6 +5,9 @@ Changelog
 1.0.12
 ------
 
+* Made dependency resolution more robust
+  [22.06.2010, jbaumann]
+
 * `dependencycheck`: performance optimisation: use always the same svn command for that
   it will be cached be @memoize
   [22.06.2010, jbaumann]
