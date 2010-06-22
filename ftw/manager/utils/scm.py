@@ -4,7 +4,7 @@ SCM Wrapper
 
 from ftw.manager.utils import input
 from ftw.manager.utils import output
-from ftw.manager.utils import runcmd_with_exitcode
+from ftw.manager.utils import runcmd_with_exitcode, runcmd
 from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.singleton import Singleton
 from xml.dom import minidom
@@ -281,7 +281,7 @@ class PackageInfoMemory(Singleton):
         url = PackageSourceMemory().guess_url(package)
         url = '/'.join(url.split('/')[:-1])
         cmd = 'svn ls --xml %s' % url
-        xmldata = runcmd_with_exitcode(cmd, log=False, respond=True)[1].strip()
+        xmldata = ''.join(runcmd(cmd, log=False, respond=True))
         doc = minidom.parseString(xmldata)
         for entry in doc.getElementsByTagName('entry'):
             if entry.getElementsByTagName('name')[0].firstChild.nodeValue.strip()==package:

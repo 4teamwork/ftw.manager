@@ -124,12 +124,14 @@ def listdir(url):
     Returns list of elements in this directory (url)
     e.g. ['trunk/', 'branches/', 'README.txt']
     """
-    cmd = 'svn list %s' % url
-    exitcode, data = runcmd_with_exitcode(cmd, log=False, respond=True)
-    if exitcode==0:
-        return ''.join(data).strip().split('\n')
-    else:
-        return None
+    xml_data = ''.join(runcmd('svn ls --xml %s' % url, log=False, respond=True))
+    dom = xml.dom.minidom.parseString(xml_data)
+    names = []
+    for entry in dom.getElementsByTagName('entry'):
+        node = entry.getElementsByTagName('name')[0]
+        name = ''.join([child.toxml() for child in node.childNodes])
+        names.append(name)
+    return name
 
 @memoize
 def isdir(url):

@@ -5,6 +5,10 @@ Changelog
 1.0.12
 ------
 
+* `dependencycheck`: performance optimisation: use always the same svn command for that
+  it will be cached be @memoize
+  [22.06.2010, jbaumann]
+
 * `dependencycheck`: respect extras_require
   quit when setup.py of a dependency is not working
   [22.06.2010, jbaumann]
