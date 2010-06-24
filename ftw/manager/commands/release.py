@@ -22,10 +22,10 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     *   Die Option *long_description* im *setup.py* muss validierter restructuredText sein
     *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
-        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
-        sein, ansonsten muss es der trunk sein.
+    das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
+    sein, ansonsten muss es der trunk sein.
     *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
-        branches und tags besitzen
+    branches und tags besitzen
     *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
     *   Die Version ist in der Datei my/package/version.txt gespeichert
     *   Eine Datei docs/HISTORY.txt ist notwendig
@@ -156,30 +156,8 @@ class ReleaseCommand(basecommand.BaseCommand):
         if not os.path.isfile(version_file):
             # version.txt is required
             output.error('Could not find the file %s' % version_file, exit=True)
-        if not self.options.release_egg_only and not os.path.isfile('MANIFEST.in'):
-            output.warning('Could not find the file ./MANIFEST.in, creating one')
-            f = open('MANIFEST.in', 'w')
-            namespace = scm.get_package_name('.').split('.')[0]
-            f.write('recursive-include %s *\n' % namespace)
-            f.write('recursive-include docs *\n')
-            f.write('include setup.py\n')
-            f.write('include README.txt\n')
-            f.write('global-exclude *pyc\n')
-            f.close()
-            print 'created MANIFEST.in with following content:'
-            print '-' * 30
-            print output.colorize(open('MANIFEST.in').read(), output.INFO)
-            print '-' * 30
-            if input.prompt_bool('Would you like to commit the MANIFEST.in?'):
-                if scm.is_subversion('.'):
-                    runcmd('svn add MANIFEST.in')
-                    runcmd('svn commit -m "added MANIFEST.in for %s"' %
-                           scm.get_package_name('.'))
-                elif scm.is_git('.'):
-                    runcmd('git add MANIFEST.in')
-                    runcmd('git commit -am "added MANIFEST.in for %s"' %
-                           scm.get_package_name('.'))
-                    runcmd('git svn dcommit')
+        # check MANIFEST.in
+        self.check_manifest()
         # check subversion state
         if scm.has_local_changes('.'):
             output.error('You have local changes, please commit them first.',
@@ -390,6 +368,92 @@ class ReleaseCommand(basecommand.BaseCommand):
             runcmd(cmd)
             runcmd('git svn dcommit')
 
+    def check_manifest(self):
+        """ Checks the MANIFEST.in file and gives advices. It returns if the
+        release action can be continued
+        """
+        if self.options.release_egg_only:
+            return True
 
+        namespace = scm.get_package_name('.').split('.')[0]
+
+        required_lines = (
+            'recursive-include %s *' % namespace,
+            'recursive-include docs *',
+            'include *.txt',
+            'global-exclude *.pyc',
+            'global-exclude *.mo',
+            )
+
+        unused_lines = (
+            'include setup.py',
+            'include README.txt',
+            'include CONTRIBUTORS.txt',
+            'global-exclude *pyc',
+            'global-exclude *mo',
+            )
+
+        created = False
+        modified = False
+        commit_message = ''
+
+        if not os.path.isfile('MANIFEST.in'):
+            output.warning('Could not find the file ./MANIFEST.in, creating one')
+            f = open('MANIFEST.in', 'w')
+            f.write('\n'.join(required_lines))
+            f.close()
+            print 'created MANIFEST.in with following content:'
+            print output.colorize(open('MANIFEST.in').read(), output.INFO)
+            print ''
+            commit_message = 'added MANIFEST.in for %s' % scm.get_package_name('.')
+            created = True
+
+        else:
+            # check the existing file
+            current_lines = [x.strip() for x in open('MANIFEST.in').readlines()]
+            missing_lines = [x for x in required_lines
+                             if x.strip() not in current_lines]
+            files_to_remove = [x for x in unused_lines
+                               if x.strip() in current_lines]
+
+            if len(missing_lines) > 0 or len(files_to_remove) > 0:
+                new_lines = current_lines
+
+                if len(missing_lines) > 0:
+                    output.warning('./MANIFEST.in: added some required lines:')
+                    print output.colorize('\n'.join(missing_lines), output.INFO)
+                    print ''
+                    new_lines += missing_lines
+
+                if len(files_to_remove) > 0:
+                    output.warning('./MANIFEST.in: removed some unused lines:')
+                    print output.colorize('\n'.join(files_to_remove), output.ERROR)
+                    print ''
+                    new_lines = filter(lambda x:x.strip() not in files_to_remove,
+                                       new_lines)
+
+                f = open('MANIFEST.in', 'w')
+                f.write('\n'.join(new_lines))
+                f.close()
+                commit_message = 'updated MANIFEST.in for %s' % scm.get_package_name('.')
+                modified = True
+
+        if created or modified:
+            # commit it ?
+            if input.prompt_bool('Would you like to commit the MANIFEST.in?'):
+                if scm.is_subversion('.'):
+                    if created:
+                        runcmd('svn add MANIFEST.in')
+                    runcmd('svn commit -m "%s"' % commit_message)
+                    return True
+                elif scm.is_git('.'):
+                    runcmd('git add MANIFEST.in')
+                    runcmd('git commit -am "%s"' % commit_message)
+                    runcmd('git svn dcommit')
+                    return True
+            return False
+
+        else:
+            return True
 
 basecommand.registerCommand(ReleaseCommand)

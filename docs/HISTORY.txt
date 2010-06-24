@@ -5,6 +5,10 @@ Changelog
 1.2
 ---
 
+* Issue #23 ftw.manager release: MANIFEST.in besser prüfen
+  https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/23
+  [24.06.2010, jbaumann]
+
 
 1.1
 ---
