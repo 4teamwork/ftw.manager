@@ -72,6 +72,10 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         self.parser.add_option('-q', '--quiet', dest='quiet',
                                help='Do not ask anything',
                                action='store_true', default=False)
+        self.parser.add_option('-p', '--pinning-proposal', dest='pinning_proposal',
+                               help='Show a list of packages to upgrade with their newest ' +\
+                                   'version in version pinning format.',
+                               action='store_true', default=False)
 
     def __call__(self):
         try:
@@ -96,11 +100,12 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         versions = self.package_versions
         force_reload = self.options.refresh
         limit = int(self.options.limit)
+        pinnings = {}
         if limit < 0:
             limit += 1
         def _add_rows(dependencies, indent=0):
             for package, extra, v in dependencies:
-                warn = False
+                color = None
                 ctag = package in versions.keys() and str(versions[package]) or ''
                 info = scm.PackageInfoMemory().get_info(package,
                                                         force_reload=force_reload,
@@ -109,20 +114,22 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 if ntag and ctag:
                     if ntag<ctag:
                         ntag = output.colorize(ntag, output.WARNING)
-                        warn = True
+                        color = output.WARNING
                     elif ntag>ctag:
                         ntag = output.colorize(ntag, output.ERROR)
-                        warn = True
+                        color = output.ERROR
+                        pinnings[package] = ntag
                     elif ntag==ctag:
                         ntag = output.colorize(ntag, output.INFO)
+                        color = output.INFO
                 chg = ''
                 if info and info['changes']:
                     chg = output.colorize('YES', output.WARNING)
-                    warn = True
+                    color = output.WARNING
                 name = extra and '%s[%s]' % (package, extra) or package
                 name = '  ' * indent + name
                 table.push((
-                    warn and output.colorize(name, output.WARNING) or name,
+                    color and output.colorize(name, color) or name,
                     ctag,
                     ntag,
                     chg,
@@ -134,6 +141,14 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                         _add_rows(sub_deps, indent + 1)
         _add_rows(self.dependency_packages)
         table()
+        # ---- show pinning proposal
+        if self.options.pinning_proposal:
+            print ''
+            print '=' * 50
+            print 'PINNING PROPOSAL'
+            print ''
+            for pkg, vers in pinnings.items():
+                print pkg, '=', vers
 
     def print_history(self):
         versions = self.package_versions

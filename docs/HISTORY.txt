@@ -5,6 +5,12 @@ Changelog
 1.1.2
 -----
 
+* `depenedncycheck`: added new option `--pinning-proposal`
+  [29.06.2010, jbaumann]
+
+* `dependencycheck`: added some more colors
+  [28.06.2010, jbaumann]
+
 
 1.1.1
 -----
