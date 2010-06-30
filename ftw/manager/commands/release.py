@@ -232,11 +232,16 @@ class ReleaseCommand(basecommand.BaseCommand):
             output.error('Could not find the file %s' % pypirc_path, exit=True)
         config = ConfigParser.ConfigParser()
         config.readfp(open(pypirc_path))
+        indexservers = config.get('distutils', 'index-servers').strip().split('\n')
+        sections = []
         basic_namespace = scm.get_package_name('.').split('.')[0]
-        for section in config.sections():
-            print '* found target "%s"' % output.colorize(section,
+        for srv in indexservers:
+            # test if its properly configured
+            if config.has_section(srv):
+                print '* found target "%s"' % output.colorize(srv,
                                                           output.WARNING)
-        if basic_namespace in config.sections():
+                sections.append(srv)
+        if basic_namespace in sections:
             self.pypi_target = basic_namespace
         else:
             self.pypi_target = ''
@@ -244,7 +249,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             output.colorize(self.pypi_target, output.BOLD_WARNING)
         pypi_target_input = input.prompt(msg, lambda v:\
                                              (self.pypi_target and not v) or v in
-                                         config.sections()
+                                         sections
                                          and True or 'Please select a target listed above')
         if pypi_target_input:
             self.pypi_target = pypi_target_input

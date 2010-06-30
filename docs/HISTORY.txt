@@ -5,6 +5,10 @@ Changelog
 1.1.2
 -----
 
+* Issue #24 ftw.manager: Bessere .pypirc plausibilisierung beim releasen
+  https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/24/
+  [30.06.2010, jbaumann]
+
 * `depenedncycheck`: added new option `--pinning-proposal`
   [29.06.2010, jbaumann]
 

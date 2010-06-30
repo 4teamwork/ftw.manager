@@ -122,6 +122,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     elif ntag==ctag:
                         ntag = output.colorize(ntag, output.INFO)
                         color = output.INFO
+                elif ntag:
+                    pinnings[package] = ntag
                 chg = ''
                 if info and info['changes']:
                     chg = output.colorize('YES', output.WARNING)
