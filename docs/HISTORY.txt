@@ -5,6 +5,9 @@ Changelog
 1.1.3
 -----
 
+* `versioninfo`: added support for other index_urls than pypi (PSC) and added some colours
+  [02.07.2010, jbaumann]
+
 
 1.1.2
 -----

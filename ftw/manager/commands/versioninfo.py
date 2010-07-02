@@ -7,6 +7,7 @@ from setuptools import package_index
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import scm
 from ftw.manager.utils.output import error
+from ftw.manager.utils import output
 from ftw.manager.utils.memoize import memoize
 import os
 
@@ -36,34 +37,47 @@ class VersioninfoCommand(basecommand.BaseCommand):
 
     def __call__(self):
         pinnings = self._get_pinnings_by_package()
-        def _format_line(pkg, extra, version, file):
+        def _format_line(pkg, extra, version, file, current=False):
             pkgname = pkg
             if extra:
                 pkgname += '[%s]' % extra
-            return ' '.join((' ' * 5, pkgname, '=', version, '@', file))
+            if current:
+                indent = ' ' * 4 + '*'
+            else:
+                indent = ' ' * 5
+            txt = ' '.join((indent, pkgname, '=', version, '@', file))
+            if current:
+                return output.colorize(txt, output.WARNING)
+            else:
+                return txt
         first = True
-        current_version = None
         for pkg, dep_extra, dep_version in self._get_packages():
+            current_version = None
             if first:
                 first = False
             else:
                 print ''
-                print '-' * 50
                 print ''
-            print pkg
+            print output.colorize(pkg, output.INFO)
             if dep_version:
                 current_version = None
                 print _format_line(pkg, dep_extra, dep_version, './setup.py')
             if pkg in pinnings.keys():
-                for file, extra, version in pinnings[pkg]:
+                pkg_pinnings = pinnings[pkg][:]
+                pkg_pinnings.reverse()
+                for file, extra, version in pkg_pinnings:
                     if not current_version:
                         current_version = version
-                    print _format_line(pkg, extra, version, file)
+                        print _format_line(pkg, extra, version, file, current=True)
+                    else:
+                        print _format_line(pkg, extra, version, file)
             if self.options.new:
-                print 'newer distributions than %s:' % current_version
                 new_dists = self._get_newer_versions_for(pkg, current_version)
-                for dist in new_dists:
-                    print ' ' * 5, dist
+                if len(new_dists) > 0:
+                    print output.colorize('newer distributions than %s:' % current_version,
+                                          output.ERROR)
+                    for dist in new_dists:
+                        print ' ' * 5, output.colorize(dist, output.ERROR)
 
     def register_options(self):
         self.parser.add_option('-n', '--new', dest='new',
@@ -77,18 +91,21 @@ class VersioninfoCommand(basecommand.BaseCommand):
                                help='Buildout config file containing version infos')
 
     def _get_newer_versions_for(self, pkg, version):
+        if version == None:
+            version = ''
         try:
             self.pi
         except AttributeError:
             self.pi = package_index.PackageIndex()
             self.pi.add_find_links(self.find_links)
         req = Requirement.parse(pkg)
+        self.pi.package_pages[req.key] = self.find_links
         self.pi.find_packages(req)
         parsed_version = parse_version(version)
         new_dists = []
         for dist in self.pi[req.key]:
             if dist.parsed_version > parsed_version:
-                new_dists.append('%s %s' % (dist.project_name, dist.version))
+                new_dists.append('%s = %s' % (dist.project_name, dist.version))
         return tuple(set(new_dists))
         
 
