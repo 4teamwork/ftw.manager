@@ -313,24 +313,22 @@ class PackageInfoMemory(Singleton):
                                  'and tag to be positive')
         if branch or tag and not name:
             raise ValueError('Provide a branch/tag name')
-        # get subdir
-        subdir = None
-        if trunk:
-            subdir = 'trunk'
-        elif branch:
-            subdir = os.path.join('branches', name)
-        elif tag:
-            subdir = os.path.join('tags', name)
-        if with_extra:
-            subdir += '[%s]' % with_extra
+
         # get package info
         data = self.get_info(package, force_reload, prompt)
         if not data:
+            # we expect that get_info already has set some infos, so this case
+            # should usually not happen, but its not an error.
             return None
-        # use dependency, if existing
+
+        subdir = self._calculate_svn_subpath(trunk=trunk, branch=branch, tag=tag,
+                                             name=name, with_extra=with_extra)
+
+        # use cached dependency infos from package info, if existing
         if not force_reload and data.get('dependencies', None):
             if data['dependencies'].get(subdir, _marker) != _marker:
                 return data['dependencies'][subdir]
+
         # .. if not existing, get egginfo and update
         try:
             egg = get_egginfo_for(package, trunk=trunk, branch=branch,
@@ -347,6 +345,75 @@ class PackageInfoMemory(Singleton):
         data['dependencies'][subdir] = dependencies
         self.set_cached_info(package, data)
         return dependencies
+
+    @memoize
+    def get_maintainer_for(self, package, trunk=True, branch=False,
+                           tag=False, name='', force_reload=False,
+                           prompt=False, with_extra=None):
+        """ Returns the maintainer of a package in trunk / branch / tag.
+        The maintainer is cached in the package infos. The with_extra may
+        be used for caching purpose.
+        """
+        # validate parameters
+        if (trunk and branch and tag) or (not trunk and not branch and not tag):
+            raise ValueError('Excepts one and only one of trunk, branch ' +\
+                                 'and tag to be positive')
+        if branch or tag and not name:
+            raise ValueError('Provide a branch/tag name')
+
+        # get package info
+        data = self.get_info(package, force_reload, prompt)
+        if not data:
+            # we expect that get_info already has set some infos, so this case
+            # should usually not happen, but its not an error.
+            return None
+
+        subdir = self._calculate_svn_subpath(trunk=trunk, branch=branch, tag=tag,
+                                             name=name, with_extra=with_extra)
+
+        # use cached maintainer infos from package info, if existing
+        if not force_reload and data.get('maintainer', None):
+            if data['maintainer'].get(subdir, _marker) != _marker:
+                return data['maintainer'][subdir]
+
+        # .. if not existing, get egginfo and update
+        try:
+            egg = get_egginfo_for(package, trunk=trunk, branch=branch,
+                                  tag=tag, name=name, extra_require=with_extra)
+        except Exception, exc:
+            output.error('Error while loading setup.py of %s (%s): %s' % (
+                    package,
+                    subdir,
+                    str(exc)))
+            return []
+
+        maintainer = egg.get_maintainer()
+
+        # the maintainer may be changed in a branch or tag, so we store it for
+        # every "version" of a package (trunk, branches, tags). Use the subdir
+        # as key in the caching dictionary
+        if not data.get('maintainer', None):
+            data['maintainer'] = {}
+        data['maintainer'][subdir] = maintainer
+        self.set_cached_info(package, data)
+        return maintainer
+
+    def _calculate_svn_subpath(self, trunk=True, branch=False,
+                               tag=False, name='', with_extra=None):
+        """calculate svn path relative to package root, since infos may
+        change in different branches
+
+        """
+        subdir = None
+        if trunk:
+            subdir = 'trunk'
+        elif branch:
+            subdir = os.path.join('branches', name)
+        elif tag:
+            subdir = os.path.join('tags', name)
+        if with_extra:
+            subdir += '[%s]' % with_extra
+        return subdir
 
 
 class PackageSourceMemory(Singleton):

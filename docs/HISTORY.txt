@@ -5,6 +5,11 @@ Changelog
 1.1.3
 -----
 
+* Issue #28 ftw.manager: Anzeige des Maintainers in Dependencycheck
+  https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/28/
+  `dependencycheck`: Show maintainer in dependency table
+  [19.07.2010, jbaumann]
+
 * `versioninfo`: added support for other index_urls than pypi (PSC) and added some colours
   [02.07.2010, jbaumann]
 

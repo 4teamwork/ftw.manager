@@ -95,6 +95,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
             'Current Tag',
             'Newest Tag',
             'Untagged Changes',
+            'Maintainer',
             )
         table = output.ASCIITable(*titles)
         versions = self.package_versions
@@ -110,6 +111,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 info = scm.PackageInfoMemory().get_info(package,
                                                         force_reload=force_reload,
                                                         prompt=(not self.options.quiet))
+                maintainer = scm.PackageInfoMemory().get_maintainer_for(package,
+                                                                        with_extra=extra) or ''
                 ntag = info and str(info['newest_tag']) or ''
                 if ntag and ctag:
                     if ntag<ctag:
@@ -135,6 +138,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     ctag,
                     ntag,
                     chg,
+                    maintainer,
                     ))
                 if indent<limit:
                     sub_deps = scm.PackageInfoMemory().get_dependencies_for(package,
