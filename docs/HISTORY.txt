@@ -5,6 +5,9 @@ Changelog
 1.1.3
 -----
 
+* `depenedencycheck`: Added proper support for `--limit` when generating history
+  [21.07.2010, jbaumann]
+
 * Issue #28 ftw.manager: Anzeige des Maintainers in Dependencycheck
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/28/
   `dependencycheck`: Show maintainer in dependency table

@@ -134,12 +134,12 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 name = extra and '%s[%s]' % (package, extra) or package
                 name = '  ' * indent + name
                 table.push((
-                    color and output.colorize(name, color) or name,
-                    ctag,
-                    ntag,
-                    chg,
-                    maintainer,
-                    ))
+                        color and output.colorize(name, color) or name,
+                        ctag,
+                        ntag,
+                        chg,
+                        maintainer,
+                        ))
                 if indent<limit:
                     sub_deps = scm.PackageInfoMemory().get_dependencies_for(package,
                                                                             with_extra=extra)
@@ -161,7 +161,30 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         force_reload = self.options.refresh
         packages_data = {}
         list_trunk_modifications = self.options.history_dev
-        for package, extra, v in self.dependency_packages:
+        limit = int(self.options.limit)
+        if limit > 0:
+            packages = []
+            # packages is only *this* package, so lets walk up the dependencies
+            def _follow_dependencies(pkg, level=0, extra=None, version=None):
+                # add it to the package list
+                if pkg not in packages:
+                    packages.append([pkg, extra, version])
+                if level != limit:
+                    # load some infos about the package and cache them
+                    scm.PackageInfoMemory().get_info(pkg, prompt=False)
+                    # load and follow the dependencies
+                    deps = scm.PackageInfoMemory().get_dependencies_for(pkg,
+                                                                        with_extra=extra)
+                    if deps:
+                        for subpkg, subextra, subversion in deps:
+                            _follow_dependencies(subpkg, level=level + 1, extra=subextra,
+                                                 version=subversion)
+            _follow_dependencies(scm.get_package_name('.'))
+            packages.sort()
+        else:
+            packages = self.dependency_packages
+
+        for package, extra, v in packages:
             if self.options.verbose:
                 print package
             ctag = package in versions.keys() and str(versions[package]) or ''
@@ -194,7 +217,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                         'in changelog'
                     continue
                 packages_data[package] = history[history.index(ntag):history.index(ctag)]
-        
+
         # change tag headlines to: * package ntag, remove empty lines
         # and indent any other row with 4 spaces
         old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.{2,}}?)\[(.*?)\]')
