@@ -3,6 +3,7 @@ import checkout
 import dependencycheck
 import dependencytests
 import develop
+import eggcheck
 import help
 import i18ndude
 import multiinstance
@@ -21,6 +22,7 @@ checkout
 dependencycheck
 dependencytests
 develop
+eggcheck
 help
 i18ndude
 multiinstance
