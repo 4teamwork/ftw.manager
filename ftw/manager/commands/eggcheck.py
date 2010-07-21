@@ -243,7 +243,7 @@ class EggCheckCommand(BaseCommand):
         self.notify_part('Check dependencies')
         # get current requires
         requires = self.egginfo.install_requires
-        print ' current requireements:'
+        print ' current requirements:'
         for egg in requires:
             print '    -', egg
         print ''
@@ -366,6 +366,7 @@ class EggCheckCommand(BaseCommand):
                                     output.WARNING)
 
         if len(propose_requires)==0:
+            self.notify(True)
             return
         propose_requires.sort()
         print ''
