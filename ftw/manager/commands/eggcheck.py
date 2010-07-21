@@ -1,6 +1,9 @@
-import os.path
 from ftw.manager.commands.basecommand import BaseCommand, registerCommand
 from ftw.manager.utils import output
+import distutils.core
+import os.path
+
+WIKI_PYTHON_EGGS = 'http://devwiki.4teamwork.ch/PythonEggs'
 
 
 class EggCheckCommand(BaseCommand):
@@ -62,15 +65,37 @@ class EggCheckCommand(BaseCommand):
             raise Exception('Could not find setup.py')
         self.check_setup_py()
 
+    @property
+    def egginfo(self):
+        """Returns a distuls setup instance
+        """
+        try:
+            return self._egg_info
+        except AttributeError:
+            self._egg_info = distutils.core.run_setup('setup.py')
+            return self._egg_info
+
     def check_setup_py(self):
         """setup.py checks
         """
         self.notify_part('Check setup.py')
+
         self.notify_check('Maintainer should be defined')
-        self.notify(False, 'maintainer is defined as variable but is not used'
-                    'in setup call', 'add "maintainer=maintainer," to the setup call', 1)
+        # is it set in setup() call?
+        if self.egginfo.get_maintainer():
+            self.notify(True)
+        else:
+            if len(filter(lambda row:row.startswith('maintainer'),
+                          open('setup.py').read())) > 0:
+                self.notify(False, 'maintainer is defined as variable but is not used '
+                        'in setup call', 'add "maintainer=maintainer," to the setup call', 1)
+            else:
+                self.notify(False, 'maintainer is not defined in the egg at all',
+                            'check %s on how to define a maintainer' % WIKI_PYTHON_EGGS)
+
         self.notify_check('version.txt file exists')
         self.notify(True)
+
         self.notify_check('Version is taken form version.txt')
         self.notify(False, 'version is not taken from version.txt',
                     "Use: version=open('XXXX').read().strip()", 0)
