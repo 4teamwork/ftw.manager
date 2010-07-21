@@ -8,7 +8,10 @@ from memoize import memoize
 FORCE_LOG = False
 
 @memoize
-def runcmd(cmd, log=True, respond=False):
+def runcmd(*args, **kwargs):
+    return runcmd_unmemoized(*args, **kwargs)
+
+def runcmd_unmemoized(cmd, log=True, respond=False):
     if FORCE_LOG:
         log = True
     if log:

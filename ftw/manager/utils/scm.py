@@ -4,7 +4,7 @@ SCM Wrapper
 
 from ftw.manager.utils import input
 from ftw.manager.utils import output
-from ftw.manager.utils import runcmd_with_exitcode, runcmd
+from ftw.manager.utils import runcmd_with_exitcode, runcmd, runcmd_unmemoized
 from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.singleton import Singleton
 from xml.dom import minidom
@@ -199,19 +199,57 @@ def add_and_commit_files(message, files='*'):
         files = [files]
     if is_subversion('.'):
         if commit_all_files:
-            runcmd('svn add *')
+            runcmd_unmemoized('svn add *')
         else:
             for file_ in files:
-                runcmd('svn add %s' % file_)
-        runcmd('svn commit -m "%s"' % message)
+                runcmd_unmemoized('svn add %s' % file_)
     elif is_git('.'):
         if commit_all_files:
-            runcmd('git add .')
+            runcmd_unmemoized('git add .')
         else:
             for file_ in files:
                 runcmd('git add %s' % file_)
-        runcmd('git commit -m "%s"' % message)
-        runcmd('git svn dcommit')
+    else:
+        raise Exception('unknown scm')
+    commit_files(message, files=files)
+
+def commit_files(message, files=''):
+    """Commit some files
+    """
+    commit_all_files = files in ('*', '.')
+    if not commit_all_files and type(files) in (unicode, str):
+        files = [files]
+
+    if is_subversion('.'):
+        if commit_all_files:
+            runcmd_unmemoized('svn commit -m "%s"' % (message))
+        else:
+            runcmd_unmemoized('svn commit -m "%s" %s' % (message,
+                                                         ' '.join(files)))
+
+    elif is_git('.'):
+        if commit_all_files:
+            runcmd_unmemoized('git add .')
+        else:
+            for file_ in files:
+                runcmd('git add %s' % file_)
+        runcmd_unmemoized('git commit -m "%s"' % message)
+        runcmd_unmemoized('git svn dcommit')
+
+    else:
+        raise Exception('unkown scm')
+
+def remove_files(files):
+    """Removes and untrack each file of `files`.
+    This just runs commands like "svn remove bla.txt", but it does not commit
+
+    """
+    if type(files) in (unicode, str):
+        files = (files,)
+    if is_subversion('.'):
+        runcmd_unmemoized('svn remove %s' % ' '.join(files))
+    elif is_git('.'):
+        runcmd_unmemoized('git rm %s' % ' '.join(files))
 
 
 class PackageInfoMemory(Singleton):

@@ -19,9 +19,14 @@ class EggCheckCommand(BaseCommand):
     * setup.py
     ** maintainer should be defined
     ** version should be read from version.txt, which sould exist
-    ** package namespaces shouls be defined properly (they are usually
-    wrong after renaming packages)
-    ** various metadata stuff
+    ** package namespaces shouls be defined properly
+    ** various metadata stuff (name, description, author, email, license)
+    * install_requires is checked by parsing all imports and some zcml statements
+    * various paster problems are checked
+    ** do not use CHANGES.txt or CONTRIBUTORS.txt
+    ** do not use interfaces as folder
+    ** viewlets and portlets should not be within a browser directory
+    ** setup.cfg should not exist
     """
 
     command_name = 'eggcheck'
@@ -439,6 +444,85 @@ class EggCheckCommand(BaseCommand):
         if not failure:
             self.notify(True)
 
+
+    def check_paster_stuff(self):
+        """ Paster does some bad things, so lets fix them.
+        """
+        self.notify_part('Check paster problems')
+        setuppy = open('setup.py').read()
+        package_base_path = scm.get_package_name('.').replace('.', '/')
+
+        # CHANGES.txt
+        self.notify_check('CHANGES.txt should not be used')
+        changes_used = False
+        if 'CHANGES.txt' in setuppy:
+            self.notify(False, 'CHANGES.txt is used in setup.py somehow',
+                        'Fix setup.py: remove the CHANGES.txt stuff', 1)
+            changes_used = True
+        if os.path.exists('CHANGES.txt'):
+            self.notify(False, 'A ./CHANGES.txt exists',
+                        'Remove the CHANGES.txt, we use the docs/HISTORY.txt', 1)
+            if not changes_used:
+                if input.prompt_bool('Should I remove the CHANGES.txt for you?'):
+                    scm.remove_files('CHANGES.txt')
+                    scm.commit_files('Removed unused CHANGES.txt', 'CHANGES.txt')
+                    self.notify_fix_completed()
+        elif not changes_used:
+            self.notify(True)
+
+        # CONTRIBUTORS.txt
+        self.notify_check('CONTRIBUTORS.txt should not be used')
+        contributors_used = False
+        if 'CONTRIBUTORS.txt' in setuppy:
+            self.notify(False, 'CONTRIBUTORS.txt is used in setup.py somehow',
+                        'Fix setup.py: remove the CONTRIBUTORS.txt stuff', 1)
+            contributors_used = True
+        if os.path.exists('CONTRIBUTORS.txt'):
+            self.notify(False, 'A ./CONTRIBUTORS.txt exists',
+                        'Remove the CONTRIBUTORS.txt', 1)
+            if not contributors_used:
+                if input.prompt_bool('Should I remove the CONTRIBUTORS.txt for you?'):
+                    scm.remove_files('CONTRIBUTORS.txt')
+                    scm.commit_files('Removed unused CONTRIBUTORS.txt',
+                                     'CONTRIBUTORS.txt')
+                    self.notify_fix_completed()
+        elif not contributors_used:
+            self.notify(True)
+
+        # interfaces not as folder
+        self.notify_check('%s.interfaces should not be a folder' % scm.get_package_name('.'))
+        path = os.path.join(package_base_path, 'interfaces')
+        if os.path.isdir(path):
+            self.notify(False, '%s is a folder' % path,
+                        'Use a interfaces.py, not a interfaces folder', 2)
+        else:
+            self.notify(True)
+
+        # viewlets / portlets
+        self.notify_check('Portlets and viewlets folders')
+        dirs = ('viewlets', 'portlets')
+        all_ok = True
+        for dir in dirs:
+            bad_path = os.path.join(package_base_path, 'browser', dir)
+            good_path = os.path.join(package_base_path, dir)
+            if os.path.exists(bad_path):
+                all_ok = False
+                self.notify(False, 'Directory exists at: %s' % bad_path,
+                            'Move it to %s' % good_path, 2)
+        if all_ok:
+            self.notify(True)
+
+        # setup.cfg
+        self.notify_check('Do not use setup.cfg')
+        if os.path.exists('setup.cfg'):
+            self.notify(False, 'Found a setup.cfg', 'Remove the setup.cfg', 1)
+            if input.prompt_bool('Should I remove the setup.cfg?'):
+                scm.remove_files('setup.cfg')
+                scm.commit_files('Removed setup.cfg', 'setup.cfg')
+                self.notify_fix_completed()
+        else:
+            self.notify(True)
+
     def check_requires(self):
         """ Checks, if there are missing dependencies
         """
@@ -620,11 +704,6 @@ class EggCheckCommand(BaseCommand):
                                      'setup.py')
             self.notify_fix_completed()
 
-
-    def check_paster_stuff(self):
-        """ Paster does some bad things, so lets fix them.
-        """
-        self.notify_part('Check paster problems')
 
     def find_egg_in_index(self, pkg):
         # There is a problem when using find-links for eggs which are on the pypi
