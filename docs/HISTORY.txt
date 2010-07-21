@@ -5,6 +5,11 @@ Changelog
 1.1.3
 -----
 
+* `eggcheck`: Implemented first version according to
+  Issue #27 ftw.manager: Neuer Befehl zum Prüfen eines eggs
+  https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/27
+  [21.07.2010, jbaumann]
+
 * `depenedencycheck`: Added proper support for `--limit` when generating history
   [21.07.2010, jbaumann]
 
