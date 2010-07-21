@@ -365,6 +365,8 @@ class EggCheckCommand(BaseCommand):
                                     'and I could find a egg with such a name',
                                     output.WARNING)
 
+        if len(propose_requires)==0:
+            return
         propose_requires.sort()
         print ''
         print '  There are some requirements missing. I propose to add these:'
