@@ -27,7 +27,7 @@ class EggCheckCommand(BaseCommand):
     PROBLEM_LEVELS = (
         ('ERROR', output.BOLD_ERROR),
         ('WARNING', output.BOLD_WARNING),
-        ('PROBLEM', output.WARNING)
+        ('NOTICE', output.WARNING)
         )
 
     def __call__(self):
@@ -89,7 +89,7 @@ class EggCheckCommand(BaseCommand):
                         self._validate_setup_py()
                         scm.add_and_commit_files('setup.py: register maintainer',
                                                  'setup.py')
-                        print output.colorize('Fix completed successfully', output.INFO)
+                        self.notify_fix_completed()
                     print ''
             else:
                 self.notify(False, 'maintainer is not defined in the egg at all',
@@ -111,10 +111,10 @@ class EggCheckCommand(BaseCommand):
                 file_.write(version)
                 file_.close()
                 scm.add_and_commit_files('Added version.txt file', versiontxt_path)
-                print output.colorize('Fix completed successfully', output.INFO)
+                self.notify_fix_completed()
                 print ''
 
-        # Version
+        # VERSION
         self.notify_check('Version is taken form version.txt')
         rows = open('setup.py').read().split('\n')
         version_rows = filter(lambda row:row.startswith('version ='), rows)
@@ -134,7 +134,80 @@ class EggCheckCommand(BaseCommand):
                 file_.close()
                 self._validate_setup_py()
                 scm.add_and_commit_files('setup.py: using version.txt', 'setup.py')
+                self.notify_fix_completed()
         else:
+            self.notify(True)
+
+        # NAMESPACES
+        self.notify_check('Check namespaces')
+        guessed_namespaces = []
+        namespace_parts = scm.get_package_name('.').split('.')
+        for i, space in enumerate(namespace_parts[:-1]):
+            guessed_namespaces.append('.'.join(namespace_parts[:i+1]))
+        if set(guessed_namespaces) == set(self.egginfo.namespace_packages):
+            self.notify(True)
+        else:
+            print '  current namespaces: ', str(self.egginfo.namespace_packages)
+            print '  expected namespaces:', str(guessed_namespaces)
+            print '  package name:       ', scm.get_package_name('.')
+            self.notify(False, 'I think your namespace_packages declaration is wrong')
+            if input.prompt_bool('Should I try to fix it?'):
+                guessed_namespaces.sort()
+                rows = open('setup.py').read().split('\n')
+                nsrows = filter(lambda x:x.strip().startswith('namespace_packages'), rows)
+                if len(nsrows) != 1:
+                    output.error('Could not fix it: expected one and only one line '
+                                 'beginning with "namespace_packages" in setup.py..',
+                                 exit=True)
+                else:
+                    new_row = nsrows[0].split('=')[0] + '=' + str(guessed_namespaces) + ','
+                    rows[rows.index(nsrows[0])] = new_row
+                    file_ = open('setup.py', 'w')
+                    file_.write('\n'.join(rows))
+                    file_.close()
+                    self._validate_setup_py()
+                    scm.add_and_commit_files('setup.py: fixed namespace_packages',
+                                             'setup.py')
+                    self.notify_fix_completed()
+
+        # VARIOUS CHECKS
+        self.notify_check('Various setup.py checks')
+        failure = False
+
+        # .. name
+        if self.egginfo.get_name() != scm.get_package_name('.'):
+            failure = True
+            self.notify(False, 'Name: Expected name in setup.py to be ' + \
+                            '"%s" ' % scm.get_package_name('.') + \
+                            'but it was "%s"' % self.egginfo.get_name())
+
+        # maintainer in description
+        if self.egginfo.get_maintainer() not in self.egginfo.get_description():
+            failure = True
+            self.notify(False, 'Description: Maintainer is not defined in description',
+                        'Check out %s' % WIKI_PYTHON_EGGS, 2)
+
+        # author: use maintainer
+        if self.egginfo.get_author() != '%s, 4teamwork GmbH' % self.egginfo.get_maintainer():
+            failure = True
+            self.notify(False, 'Author: Maintainer should be used for generating the author',
+                        'Check out %s' % WIKI_PYTHON_EGGS, 2)
+
+        # author email
+        if self.egginfo.get_author_email() != 'mailto:info@4teamwork.ch':
+            failure = True
+            self.notify(False, 'Author email: the email should be'
+                        ' "mailto:info@4teamwork.ch"',
+                        'Check out %s' % WIKI_PYTHON_EGGS, 2)
+
+        # license
+        if self.egginfo.get_license() != 'GPL2':
+            failure = True
+            self.notify(False, 'License: the license should be "GPL2"',
+                        'Check out %s' % WIKI_PYTHON_EGGS, 2)
+
+        # .. ok?
+        if not failure:
             self.notify(True)
 
     def notify_part(self, part_title):
@@ -161,6 +234,10 @@ class EggCheckCommand(BaseCommand):
                 output.colorize(problem, prob_color)
             if solution:
                 print '  SOLUTION:', solution
+        print ''
+
+    def notify_fix_completed(self):
+        print output.colorize('Fix completed successfully', output.INFO)
         print ''
 
     def _validate_setup_py(self, respond=True, respond_error=True):
