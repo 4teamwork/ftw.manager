@@ -93,17 +93,34 @@ class VersioninfoCommand(basecommand.BaseCommand):
     def _get_newer_versions_for(self, pkg, version):
         if version == None:
             version = ''
+        # There is a problem when using find-links for eggs which are on the pypi
+        # so we need to use two different indexes
+        # - self.pi : index using find-links
         try:
             self.pi
         except AttributeError:
             self.pi = package_index.PackageIndex()
             self.pi.add_find_links(self.find_links)
+        # - self.pypi : index only for pypi
+        try:
+            self.pypi
+        except AttributeError:
+            self.pypi = package_index.PackageIndex()
+
+        # first we try it using find-links
+        index = self.pi
         req = Requirement.parse(pkg)
-        self.pi.package_pages[req.key] = self.find_links
-        self.pi.find_packages(req)
+        index.package_pages[req.key] = self.find_links
+        try:
+            index.find_packages(req)
+        except TypeError:
+            # .. that didnt work, so lets try it without find-links.. we need to
+            # use the "fresh" self.pypi index
+            index = self.pypi
+            index.find_packages(req)
         parsed_version = parse_version(version)
         new_dists = []
-        for dist in self.pi[req.key]:
+        for dist in index[req.key]:
             if dist.parsed_version > parsed_version:
                 new_dists.append('%s = %s' % (dist.project_name, dist.version))
         return tuple(set(new_dists))
