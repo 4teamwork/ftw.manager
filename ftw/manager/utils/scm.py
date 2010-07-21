@@ -189,6 +189,31 @@ def get_egg_dependencies(egg, with_extra=None):
     return dependencies
 
 
+def add_and_commit_files(message, files='*'):
+    """Adds and commits files to the scm. The repository
+    must be .
+    Use files='*' to commit all changed files
+    """
+    commit_all_files = files in ('*', '.')
+    if not commit_all_files and type(files) in (unicode, str):
+        files = [files]
+    if is_subversion('.'):
+        if commit_all_files:
+            runcmd('svn add *')
+        else:
+            for file_ in files:
+                runcmd('svn add %s' % file_)
+        runcmd('svn commit -m "%s"' % message)
+    elif is_git('.'):
+        if commit_all_files:
+            runcmd('git add .')
+        else:
+            for file_ in files:
+                runcmd('git add %s' % file_)
+        runcmd('git commit -m "%s"' % message)
+        runcmd('git svn dcommit')
+
+
 class PackageInfoMemory(Singleton):
     """ Stores following informations about packages:
     * name (key)

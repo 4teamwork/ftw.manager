@@ -1,5 +1,5 @@
 from ftw.manager.commands.basecommand import BaseCommand, registerCommand
-from ftw.manager.utils import output
+from ftw.manager.utils import output, input, scm
 import distutils.core
 import os.path
 
@@ -63,6 +63,9 @@ class EggCheckCommand(BaseCommand):
         """
         if not os.path.exists('setup.py'):
             raise Exception('Could not find setup.py')
+        if scm.has_local_changes('.'):
+            output.error('You have local changes, please commit them first.',
+                         exit=True)
         self.check_setup_py()
 
     @property
@@ -80,15 +83,36 @@ class EggCheckCommand(BaseCommand):
         """
         self.notify_part('Check setup.py')
 
+        # MAINTAINER
         self.notify_check('Maintainer should be defined')
-        # is it set in setup() call?
-        if self.egginfo.get_maintainer():
+        maintainer = self.egginfo.get_maintainer()
+        if maintainer and maintainer!='UNKNOWN':
             self.notify(True)
         else:
             if len(filter(lambda row:row.startswith('maintainer'),
-                          open('setup.py').read())) > 0:
+                          open('setup.py').read().split('\n'))) > 0:
                 self.notify(False, 'maintainer is defined as variable but is not used '
-                        'in setup call', 'add "maintainer=maintainer," to the setup call', 1)
+                            'in setup call', 'add "maintainer=maintainer," to the setup call', 1)
+                if input.prompt_bool('Should I try to fix it?'):
+                    rows = open('setup.py').read().split('\n')
+                    file_ = open('setup.py', 'w')
+                    found = False
+                    for i, row in enumerate(rows):
+                        file_.write(row)
+                        if i != len(rows) - 1:
+                            file_.write('\n')
+                        if row.strip().startswith('author_email='):
+                            file_.write(' ' * 6)
+                            file_.write('maintainer=maintainer,')
+                            file_.write('\n')
+                            found = True
+                    file_.close()
+                    if not found:
+                        output.error('Could not find keyword author_email in your setup.py, '
+                                     'you have to fix it manually, sorry.', exit=1)
+                    else:
+                        scm.add_and_commit_files('setup.py: register maintainer',
+                                                 'setup.py')
             else:
                 self.notify(False, 'maintainer is not defined in the egg at all',
                             'check %s on how to define a maintainer' % WIKI_PYTHON_EGGS)
