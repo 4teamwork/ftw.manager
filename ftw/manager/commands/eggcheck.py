@@ -1,8 +1,14 @@
+from StringIO import StringIO
 from ftw.manager.commands.basecommand import BaseCommand, registerCommand
-from ftw.manager.utils import output, input, scm, runcmd_with_exitcode
+from ftw.manager.utils import output, input, scm, runcmd_with_exitcode, runcmd
+from ftw.manager.utils.memoize import memoize
+from pkg_resources import parse_version, Requirement
+from setuptools import package_index
 import distutils.core
 import os.path
+import re
 import sys
+
 
 WIKI_PYTHON_EGGS = 'http://devwiki.4teamwork.ch/PythonEggs'
 
@@ -30,6 +36,26 @@ class EggCheckCommand(BaseCommand):
         ('NOTICE', output.WARNING)
         )
 
+    IGNORE_IMPORTS_FROM = (
+        'pkgutil.',
+        'Acquisition',
+        'ZPublisher',
+        'OFS',
+        'Products.Five',
+        'persistent',
+        'StringIO',
+        'PIL',
+        'AccessControl',
+        'zExceptions',
+        'xml.',
+        )
+
+    FIND_LINKS = [
+        'http://pypi.python.org/simple',
+        'http://downloads.4teamwork.ch/simple',
+        'http://psc.4teamwork.ch/simple'
+        ]
+
     def __call__(self):
         """Run the checks
         """
@@ -39,6 +65,7 @@ class EggCheckCommand(BaseCommand):
             output.error('You have local changes, please commit them first.',
                          exit=True)
         self.check_setup_py()
+        self.check_dependencies()
 
     def register_options(self):
         pass
@@ -209,6 +236,198 @@ class EggCheckCommand(BaseCommand):
         # .. ok?
         if not failure:
             self.notify(True)
+
+    def check_dependencies(self):
+        """ Checks, if there are missing dependencies
+        """
+        self.notify_part('Check dependencies')
+        # get current requires
+        requires = self.egginfo.install_requires
+        print ' current requireements:'
+        for egg in requires:
+            print '    -', egg
+        print ''
+
+        self.notify_check('Check imports on python files and zcml stuff')
+        propose_requires = []
+
+        # contains ipath:file mapping of python and zcml imports
+        ipath_file_mapping = {}
+
+        # SEARCH PYTHON FILES
+        # make a grep on python files
+        py_grep_results = runcmd("find . -name '*.py' -exec grep -Hr 'import ' {} \;",
+                                 respond=True)
+        # cleanup:
+        # - strip rows
+        # - remove the rows with spaces (they are not realle imports)
+        # - remove "as xxx"
+        py_grep_results = filter(lambda row: ' ' in row,
+                                 [row.strip().split(' as ')[0] for row in py_grep_results])
+
+        for row in py_grep_results:
+            file_, statement = row.split(':')
+            # make a import path
+            ipath = statement.replace('from ', '').replace(' import ',
+                                                           '.').replace('import', '').strip()
+            ipath = ipath.replace('...', '').replace('>>>', '')
+            ipath_parts = ipath.split('.')
+
+            # ignore namespace imports (python internals etc)
+            if len(ipath_parts) == 1:
+                continue
+
+            ipath_file_mapping[ipath] = file_
+
+        # SEARCH ZCML FILES
+        cmd = "find . -name '*.zcml' -exec grep -Hr '\(layer\|for\)=' {} \;"
+        zcml_grep_results = runcmd(cmd, respond=True)
+
+        # cleanup results
+        zcml_xpr = re.compile('(for|layer)="(.*?)("|$)')
+        for row in zcml_grep_results:
+            file_, stmt = row.split(':')
+            stmt = stmt.strip()
+            match = zcml_xpr.search(stmt)
+            if not match:
+                # maybe we have a more complicated statement (e.g. multiline)
+                break
+            ipath = match.groups()[1].strip()
+
+            if not ipath.startswith('.'):
+                ipath_file_mapping[ipath] = file_
+
+
+        # HANDLE ALL IMPORTS
+        for ipath, file_ in ipath_file_mapping.items():
+            ipath_parts = ipath.split('.')
+            # ignore local imports
+            if ipath.startswith(scm.get_package_name('.')):
+                continue
+
+            # is it already required?
+            found = False
+            for egg in requires:
+                if ipath.startswith(egg):
+                    found = True
+                    break
+            if not found:
+                # is it already proposed?
+                for egg in propose_requires:
+                    if ipath.startswith(egg):
+                        found = True
+                        break
+            if not found:
+                # is it ignored?
+                for egg in self.IGNORE_IMPORTS_FROM:
+                    if ipath.startswith(egg):
+                        found = True
+                        break
+            if found:
+                continue
+
+            # maybe we have a module which import relatively
+            module_path = os.path.join(os.path.dirname(file_),
+                                        ipath_parts[0])
+            if os.path.isfile(module_path + '.py') or \
+                    os.path.isfile(module_path + '/__init__.py'):
+                continue
+
+            # start on level 2 and for searching egg
+            guessed_egg_names = ['.'.join(ipath_parts[:i])
+                                 for i, part in enumerate(ipath_parts)
+                                 if i > 1]
+
+            # does one of the eggs exist?
+            found = False
+
+            # .. in pypi
+            for egg_name in guessed_egg_names:
+                if len(self.find_egg_in_index(egg_name)) > 0:
+                    if egg_name.strip() not in propose_requires:
+                        propose_requires.append(egg_name.strip())
+                    found = True
+                    break
+
+            # .. or do we have one in the svn cache?
+            if not found:
+                for egg_name in guessed_egg_names:
+                    if scm.guess_package_url(egg_name):
+                        if egg_name.strip() not in propose_requires:
+                            propose_requires.append(egg_name.strip())
+                        found = True
+                        break
+
+            if not found:
+                print '  ', output.colorize(ipath, output.INFO), 'in', \
+                    output.colorize(file_, output.INFO), \
+                    output.colorize('is not covered by requirements '
+                                    'and I could find a egg with such a name',
+                                    output.WARNING)
+
+        propose_requires.sort()
+        print ''
+        print '  There are some requirements missing. I propose to add these:'
+        for egg in propose_requires:
+            print '   ', egg
+        print ''
+
+        # try to add them automatically:
+        if input.prompt_bool('Should I try to add them?'):
+            rows = open('setup.py').read().split('\n')
+            # find "install_requires"
+            frows = filter(lambda row:row.strip().startswith('install_requires='),
+                           rows)
+            if len(frows) != 1:
+                output.error('Somethings wrong with your setup.py: expected only '
+                             'one row containing "install_requires=", but '
+                             'got %i' % len(frows), exit=1)
+            insert_at = rows.index(frows[0]) + 1
+            for egg in propose_requires:
+                rows.insert(insert_at, ' ' * 8 + "'%s'," % egg)
+            file_ = open('setup.py', 'w')
+            file_.write('\n'.join(rows))
+            file_.close()
+            self._validate_setup_py()
+            scm.add_and_commit_files('setup.py: added missing dependencies',
+                                     'setup.py')
+            self.notify_fix_completed()
+
+    def find_egg_in_index(self, pkg):
+        # There is a problem when using find-links for eggs which are on the pypi
+        # so we need to use two different indexes
+        # - self.pi : index using find-links
+        try:
+            self.pi
+        except AttributeError:
+            self.pi = package_index.PackageIndex()
+            self.pi.add_find_links(self.FIND_LINKS)
+        # - self.pypi : index only for pypi
+        try:
+            self.pypi
+        except AttributeError:
+            self.pypi = package_index.PackageIndex()
+
+        # first we try it using find-links
+        index = self.pi
+        req = Requirement.parse(pkg)
+        index.package_pages[req.key] = self.FIND_LINKS
+        # supress the find_packages output ...
+        try:
+            ori_stdout = sys.stdout
+            sys.stdout = StringIO()
+            try:
+                index.find_packages(req)
+            except TypeError:
+                # .. that didnt work, so lets try it without find-links.. we need to
+                # use the "fresh" self.pypi index
+                index = self.pypi
+                index.find_packages(req)
+        except:
+            sys.stdout = ori_stdout
+        else:
+            sys.stdout = ori_stdout
+        return index[req.key]
 
     def notify_part(self, part_title):
         """Print a part heading to the stdout
