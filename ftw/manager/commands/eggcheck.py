@@ -21,6 +21,7 @@ class EggCheckCommand(BaseCommand):
     ** version should be read from version.txt, which sould exist
     ** package namespaces shouls be defined properly
     ** various metadata stuff (name, description, author, email, license)
+    ** we should be able to run `setup.py egg_info`
     * install_requires is checked by parsing all imports and some zcml statements
     * various paster problems are checked
     ** do not use CHANGES.txt or CONTRIBUTORS.txt
@@ -443,6 +444,19 @@ class EggCheckCommand(BaseCommand):
         # .. ok?
         if not failure:
             self.notify(True)
+
+        # run egg_info
+        self.notify_check('we should be able to run `setup.py egg_info`')
+        state, output, errors = self._validate_setup_py()
+        if output:
+            print '   ', output.replace('\n', '\n    ')
+        if errors:
+            print '   ', errors.replace('\n', '\n    ')
+        if state==0:
+            self.notify(True)
+        else:
+            state.notify(False, 'Cant run `python setup.py egg_info`, see '
+                         'errors above', 0)
 
 
     def check_paster_stuff(self):
