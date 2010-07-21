@@ -56,6 +56,7 @@ class EggCheckCommand(BaseCommand):
         'Products.CMFEditions',
         'Products.CMFFormController',
         'Products.CMFPlacefulWorkflow',
+        'Products.CMFPlone',
         'Products.CMFQuickInstallerTool',
         'Products.CMFUid',
         'Products.DCWorkflow',
@@ -68,6 +69,7 @@ class EggCheckCommand(BaseCommand):
         'Products.PlacelessTranslationService',
         'Products.PloneLanguageTool',
         'Products.PlonePAS',
+        'Products.PloneTestCase',
         'Products.PluggableAuthService',
         'Products.PluginRegistry',
         'Products.PortalTransforms',
@@ -79,6 +81,7 @@ class EggCheckCommand(BaseCommand):
         'Record',
         'RestrictedPython',
         'StringIO',
+        'Testing.ZopeTestCase',
         'ThreadLock',
         'ZConfig',
         'ZODB3',
@@ -88,6 +91,7 @@ class EggCheckCommand(BaseCommand):
         'archetypes.kss',
         'archetypes.referencebrowserwidget',
         'borg.localrole',
+        'collective.testcaselayer',
         'docutils',
         'five.customerize',
         'five.formlib',
@@ -140,14 +144,21 @@ class EggCheckCommand(BaseCommand):
         'setuptools',
         'tempstorage',
         'transaction',
+        'unittest',
         'wicked',
         'xml.',
         'z3c.autoinclude',
         'zExceptions',
         'zLOG',
         'zdaemon',
+        'zope.annotation',
+        'zope.app.annotation',
+        'zope.app.component',
         'zope.app.container',
+        'zope.app.form',
+        'zope.app.intid',
         'zope.app.locales',
+        'zope.app.pagetemplate',
         'zope.app.publication',
         'zope.app.publisher',
         'zope.app.schema',
@@ -161,6 +172,7 @@ class EggCheckCommand(BaseCommand):
         'zope.dottedname',
         'zope.event',
         'zope.exceptions',
+        'zope.formlib',
         'zope.i18n',
         'zope.i18n',
         'zope.i18nmessageid',
@@ -352,9 +364,11 @@ class EggCheckCommand(BaseCommand):
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
         # author: use maintainer
-        if self.egginfo.get_author() != '%s, 4teamwork GmbH' % self.egginfo.get_maintainer():
+        expected_author = '%s, 4teamwork GmbH' % self.egginfo.get_maintainer()
+        if self.egginfo.get_author() != expected_author:
             failure = True
-            self.notify(False, 'Author: Maintainer should be used for generating the author',
+            self.notify(False, 'Author: Expected author to be "%s""' % expected_author + \
+                        ' but it is "%s"' % self.egginfo.get_author(),
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
         # author email
@@ -380,10 +394,20 @@ class EggCheckCommand(BaseCommand):
         self.notify_part('Check dependencies')
         # get current requires
         requires = self.egginfo.install_requires
-        print ' current requirements:'
+
+        # extend it with extra requires
+        for ename, erequires in self.egginfo.extras_require.items():
+            requires.extend(erequires)
+
+        print ' current requirements (including extras):'
         for egg in requires:
             print '    -', egg
         print ''
+
+        # add the requirements without extras too
+        for egg in requires[:]:
+            if '[' in egg:
+                requires.append(egg.split('[')[0])
 
         self.notify_check('Check imports on python files and zcml stuff')
         propose_requires = []
@@ -410,6 +434,9 @@ class EggCheckCommand(BaseCommand):
             ipath = ipath.replace('...', '').replace('>>>', '')
             ipath_parts = ipath.split('.')
 
+            if '#' in ipath:
+                continue
+
             # ignore namespace imports (python internals etc)
             if len(ipath_parts) == 1:
                 continue
@@ -430,6 +457,11 @@ class EggCheckCommand(BaseCommand):
                 # maybe we have a more complicated statement (e.g. multiline)
                 break
             ipath = match.groups()[1].strip()
+
+            ipath = ipath.replace('*', '').strip()
+
+            if '#' in ipath:
+                continue
 
             if not ipath.startswith('.'):
                 ipath_file_mapping[ipath] = file_
@@ -501,6 +533,9 @@ class EggCheckCommand(BaseCommand):
                     output.colorize('is not covered by requirements '
                                     'and I could find a egg with such a name',
                                     output.WARNING)
+
+        if scm.get_package_name('.') in propose_requires:
+            propose_requires.remove(scm.get_package_name('.'))
 
         if len(propose_requires)==0:
             self.notify(True)
