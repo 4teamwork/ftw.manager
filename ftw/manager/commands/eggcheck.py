@@ -232,6 +232,12 @@ class EggCheckCommand(BaseCommand):
     def check_setup_py(self):
         """setup.py checks
         """
+        # usually run when something has changed. so lets
+        # remove our cached egginfo stuff
+        try:
+            del self._egg_info
+        except:
+            pass
         self.notify_part('Check setup.py')
 
         # MAINTAINER
@@ -396,8 +402,9 @@ class EggCheckCommand(BaseCommand):
         requires = self.egginfo.install_requires
 
         # extend it with extra requires
-        for ename, erequires in self.egginfo.extras_require.items():
-            requires.extend(erequires)
+        if self.egginfo.extras_require:
+            for ename, erequires in self.egginfo.extras_require.items():
+                requires.extend(erequires)
 
         print ' current requirements (including extras):'
         for egg in requires:
