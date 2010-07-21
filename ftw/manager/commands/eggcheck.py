@@ -223,6 +223,19 @@ class EggCheckCommand(BaseCommand):
         'http://psc.4teamwork.ch/simple'
         ]
 
+    def register_options(self):
+        self.parser.add_option('-s', '--check-setup', default=False,
+                               action='store_true', dest='check_setup',
+                               help='Check basic stuff in setup.py (maintainer, '
+                               'version, etc)')
+        self.parser.add_option('-p', '--check-paster', default=False,
+                               action='store_true', dest='check_paster',
+                               help='Check problems caused by paster')
+        self.parser.add_option('-r', '--check-requires', default=False,
+                               action='store_true', dest='check_requires',
+                               help='Check install_requires: search all python imports'
+                               ' and zcml directives')
+
     def __call__(self):
         """Run the checks
         """
@@ -231,11 +244,31 @@ class EggCheckCommand(BaseCommand):
         if scm.has_local_changes('.'):
             output.error('You have local changes, please commit them first.',
                          exit=True)
-        self.check_setup_py()
-        self.check_dependencies()
 
-    def register_options(self):
-        pass
+        self.checks = []
+
+        all_checks = []
+        # get all checks from parser
+        for option in self.parser.option_list:
+            # get all options with a dest= starting with check_
+            if option.dest and option.dest.startswith('check_'):
+                opt_value = getattr(self.options, option.dest)
+                short_name = option.dest[len('check_'):]
+                if opt_value:
+                    self.checks.append(short_name)
+                all_checks.append(short_name)
+
+        # if there are no checks activated by parementer, activate all
+        if not len(self.checks):
+            self.checks = all_checks
+
+        # run the checks
+        if 'setup' in self.checks:
+            self.check_setup_py()
+        if 'paster' in self.checks:
+            self.check_paster_stuff()
+        if 'requires' in self.checks:
+            self.check_requires()
 
     @property
     def egginfo(self):
@@ -250,12 +283,6 @@ class EggCheckCommand(BaseCommand):
     def check_setup_py(self):
         """setup.py checks
         """
-        # usually run when something has changed. so lets
-        # remove our cached egginfo stuff
-        try:
-            del self._egg_info
-        except:
-            pass
         self.notify_part('Check setup.py')
 
         # MAINTAINER
@@ -392,7 +419,7 @@ class EggCheckCommand(BaseCommand):
         if self.egginfo.get_author() != expected_author:
             failure = True
             self.notify(False, 'Author: Expected author to be "%s""' % expected_author + \
-                        ' but it is "%s"' % self.egginfo.get_author(),
+                            ' but it is "%s"' % self.egginfo.get_author(),
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
         # author email
@@ -412,7 +439,7 @@ class EggCheckCommand(BaseCommand):
         if not failure:
             self.notify(True)
 
-    def check_dependencies(self):
+    def check_requires(self):
         """ Checks, if there are missing dependencies
         """
         self.notify_part('Check dependencies')
@@ -593,6 +620,12 @@ class EggCheckCommand(BaseCommand):
                                      'setup.py')
             self.notify_fix_completed()
 
+
+    def check_paster_stuff(self):
+        """ Paster does some bad things, so lets fix them.
+        """
+        self.notify_part('Check paster problems')
+
     def find_egg_in_index(self, pkg):
         # There is a problem when using find-links for eggs which are on the pypi
         # so we need to use two different indexes
@@ -664,6 +697,12 @@ class EggCheckCommand(BaseCommand):
         works.
 
         """
+        # usually run when something has changed. so lets
+        # remove our cached egginfo stuff
+        try:
+            del self._egg_info
+        except:
+            pass
         cmd = '%s setup.py egg_info' % sys.executable
         return runcmd_with_exitcode(cmd, respond=respond,
                                     respond_error=respond_error)
