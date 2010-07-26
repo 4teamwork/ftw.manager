@@ -24,6 +24,7 @@ class EggCheckCommand(BaseCommand):
     ** the docs/HISTORY.txt file should be embedded
     ** we should be able to run `setup.py egg_info`
     * install_requires is checked by parsing all imports and some zcml statements
+    * the long_description in setup.py (and included files) should be rEST
     * various paster problems are checked
     ** do not use CHANGES.txt or CONTRIBUTORS.txt
     ** do not use interfaces as folder
@@ -238,6 +239,9 @@ class EggCheckCommand(BaseCommand):
         self.parser.add_option('-p', '--check-paster', default=False,
                                action='store_true', dest='check_paster',
                                help='Check problems caused by paster')
+        self.parser.add_option('-d', '--check-description', default=False,
+                               action='store_true', dest='check_description',
+                               help='Checks the long description / validates rEST')
         self.parser.add_option('-r', '--check-requires', default=False,
                                action='store_true', dest='check_requires',
                                help='Check install_requires: search all python imports'
@@ -274,6 +278,8 @@ class EggCheckCommand(BaseCommand):
             self.check_setup_py()
         if 'paster' in self.checks:
             self.check_paster_stuff()
+        if 'description' in self.checks:
+            self.check_description()
         if 'requires' in self.checks:
             self.check_requires()
 
@@ -545,6 +551,18 @@ class EggCheckCommand(BaseCommand):
                 self.notify_fix_completed()
         else:
             self.notify(True)
+
+    def check_description(self):
+        """ Validates the restructured text of the long_description and included files
+        """
+        self.notify_part('Check the long_description')
+        self.notify_check('long_description should be restructured text')
+        cmd = '%s setup.py check --restructuredtext --strict' % sys.executable
+        if runcmd_with_exitcode(cmd, log=0) == 0:
+            self.notify(True)
+        else:
+            self.notify(False, 'You have restructured text errors in your long_description.',
+                        'Run "ftw checkdocs" for detailed errors.', 0)
 
     def check_requires(self):
         """ Checks, if there are missing dependencies
