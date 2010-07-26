@@ -1,4 +1,4 @@
-rom StringIO import StringIO
+from StringIO import StringIO
 from ftw.manager.commands.basecommand import BaseCommand, registerCommand
 from ftw.manager.utils import output, input, scm, runcmd_with_exitcode, runcmd
 from pkg_resources import Requirement
@@ -178,7 +178,6 @@ class EggCheckCommand(BaseCommand):
         'python-gettext',
         'pytz',
         'roman',
-        'setuptools',
         'tempstorage',
         'transaction',
         'unittest',
@@ -670,6 +669,16 @@ class EggCheckCommand(BaseCommand):
         for egg in requires[:]:
             if '[' in egg:
                 requires.append(egg.split('[')[0])
+
+        self.notify_check('Its not necessary to import some default plone / zope stuff')
+        failures = False
+        for egg in requires:
+            if egg in self.IGNORE_IMPORTS_FROM:
+                self.notify(False, 'Maybe you should remove the requirement %s' % egg,
+                            problem_level=2)
+                failures = True
+        if not failures:
+            self.notify(True)
 
         self.notify_check('Check imports on python files and zcml stuff')
         propose_requires = []
