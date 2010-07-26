@@ -54,10 +54,10 @@ def require_package_root_cwd():
 
 @memoize
 def get_svn_url(directory_or_url):
-    if is_git(directory_or_url):
-        return git.get_svn_url(directory_or_url)
-    elif is_subversion(directory_or_url):
+    if is_subversion(directory_or_url):
         return svn.get_svn_url(directory_or_url)
+    elif is_git(directory_or_url):
+        return git.get_svn_url(directory_or_url)
     raise NotAScm
 
 @memoize
