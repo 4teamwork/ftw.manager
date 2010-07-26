@@ -21,6 +21,7 @@ class EggCheckCommand(BaseCommand):
     ** version should be read from version.txt, which sould exist
     ** package namespaces shouls be defined properly
     ** various metadata stuff (name, description, author, email, license)
+    ** the docs/HISTORY.txt file should be embedded
     ** we should be able to run `setup.py egg_info`
     * install_requires is checked by parsing all imports and some zcml statements
     * various paster problems are checked
@@ -420,6 +421,14 @@ class EggCheckCommand(BaseCommand):
             self.notify(False, 'Description: Maintainer is not defined in description',
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
+        # docs/HISTORY.txt
+        setuppy = open('setup.py').read()
+        if 'HISTORY.txt' not in setuppy or \
+                not os.path.exists('docs/HISTORY.txt') or \
+                open('docs/HISTORY.txt').read() not in self.egginfo.get_long_description():
+            self.notify(False, 'docs/HISTORY.txt embedded be used in long_description',
+                        'Check long_description on %s' % WIKI_PYTHON_EGGS)
+
         # author: use maintainer
         expected_author = '%s, 4teamwork GmbH' % self.egginfo.get_maintainer()
         if self.egginfo.get_author() != expected_author:
@@ -447,9 +456,9 @@ class EggCheckCommand(BaseCommand):
 
         # run egg_info
         self.notify_check('we should be able to run `setup.py egg_info`')
-        state, output, errors = self._validate_setup_py()
-        if output:
-            print '   ', output.replace('\n', '\n    ')
+        state, out, errors = self._validate_setup_py()
+        if out:
+            print '   ', out.replace('\n', '\n    ')
         if errors:
             print '   ', errors.replace('\n', '\n    ')
         if state==0:
