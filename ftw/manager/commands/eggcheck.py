@@ -246,6 +246,9 @@ class EggCheckCommand(BaseCommand):
                                action='store_true', dest='check_requires',
                                help='Check install_requires: search all python imports'
                                ' and zcml directives')
+        self.parser.add_option('-z', '--check-zcml', default=False,
+                               action='store_true', dest='check_zcml',
+                               help='ZCML checks (locales registration, ...)')
 
     def __call__(self):
         """Run the checks
@@ -282,6 +285,8 @@ class EggCheckCommand(BaseCommand):
             self.check_description()
         if 'requires' in self.checks:
             self.check_requires()
+        if 'zcml' in self.checks:
+            self.check_zcml()
 
     @property
     def egginfo(self):
@@ -744,6 +749,43 @@ class EggCheckCommand(BaseCommand):
             scm.add_and_commit_files('setup.py: added missing dependencies',
                                      'setup.py')
             self.notify_fix_completed()
+
+    def check_zcml(self):
+        """ ZCML Checks:
+        - locales registration
+
+        """
+        self.notify_part('ZCML checks')
+
+        locales_directories = []
+        # locations
+        self.notify_check('Location of locales directory')
+        failed = False
+        pkg_root_path = './%s' % scm.get_package_name('.').replace('.', '/')
+        for dirpath, dirnames, filenames in os.walk('.'):
+            if 'locales' in dirnames:
+                locales_directories.append((dirpath, 'locales'))
+                if dirpath != pkg_root_path:
+                    failed = True
+                    self.notify(False, 'Found locales-directory in suspicious location: '
+                                '%s/locales' % dirpath,
+                                'Expected locales directory in %s' % pkg_root_path, 2)
+        if not failed:
+            self.notify(True)
+
+        # registration
+        self.notify_check('Check registration of locales dirs')
+        failed = False
+        for dirpath, dirname in locales_directories:
+            zcmlpath = os.path.join(dirpath, 'configure.zcml')
+            if not os.path.exists(zcmlpath):
+                self.notify(False, 'Could not find zcml file at %s' % zcmlpath)
+                failed = True
+            elif '"%s"' % dirname not in open(zcmlpath).read():
+                self.notify(False, '%s/%s seems not to be registered in ' % (
+                        dirpath, dirname, zcmlpath))
+        if not failed:
+            self.notify(True)
 
 
     def find_egg_in_index(self, pkg):
