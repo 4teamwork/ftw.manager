@@ -19,6 +19,7 @@ import tempfile
 
 is_git = git.is_git
 is_subversion = svn.is_subversion
+is_git_svn = git.is_git_svn
 IGNORE_EGGS = [
     'setuptools',
     'Plone',
@@ -234,7 +235,9 @@ def commit_files(message, files=''):
             for file_ in files:
                 runcmd('git add %s' % file_)
         runcmd_unmemoized('git commit -m "%s"' % message)
-        runcmd_unmemoized('git svn dcommit')
+        if is_git_svn('.'):
+            runcmd_unmemoized('git svn dcommit')
+
 
     else:
         raise Exception('unkown scm')

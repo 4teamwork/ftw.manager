@@ -21,15 +21,38 @@ def is_git(directory):
     while len(dir)>1:
         path = '/'.join(dir)
         gitconfig = os.path.join(path, '.git', 'config')
+        if os.path.isfile(gitconfig):
+            return True
+        dir.pop()
+    return False
+
+def is_git_svn(directory):
+    directory = os.path.abspath(directory)
+    dir = directory.split('/')
+    while len(dir)>1:
+        path = '/'.join(dir)
+        gitconfig = os.path.join(path, '.git', 'config')
         if os.path.isfile(gitconfig) and '[svn-remote' in open(gitconfig).read():
             return True
         dir.pop()
     return False
-    #return 'Repository Root' in ''.join(runcmd('cd %s ; git svn info 2> /dev/null' % directory, log=False, respond=True))
+    
 
 @memoize
 def get_package_name(directory_or_url):
-    return get_package_root_url(directory_or_url).split('/')[-1]
+    if not directory_or_url.startswith('http://') and \
+            not directory_or_url.startswith('svn://') and \
+            is_git(directory_or_url) and not is_git_svn(directory_or_url):
+        # directory_or_url is a path and we are in a non-svn git repo, so we have no URL
+        # in this case we just take the foldername as package-name, which contains the .git
+        dir = os.path.abspath(directory_or_url).split('/')
+        while len(dir):
+            if os.path.exists(os.path.join('/'.join(dir), '.git')):
+                return dir[-1]
+            else:
+                dir.pop()
+    else:
+        return get_package_root_url(directory_or_url).split('/')[-1]
 
 @memoize
 def get_package_root_url(directory_or_url):
@@ -70,7 +93,7 @@ def checkout_gitsvn(svn_url, location='.'):
     svn_url = svn_url[-1]=='/' and svn_url[:-1] or svn_url
     root_url = svn.get_package_root_url(svn_url)
     if not svn.isdir(svn_url):
-        raise InvalidSubversionURL
+        raise svn.InvalidSubversionURL
     expected_dirs = ('trunk', 'tags', 'branches')
     got_dirs = expected_dirs
     try:
