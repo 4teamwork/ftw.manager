@@ -10,10 +10,10 @@ Installation
 
 It's recommended to install it with a prepared buildout, because the
 it has various heavy dependencies which may install zope to your
-site-packges when you use easy_install - which is really bad.
+site-packages when you use easy_install - which is really bad.
 
 You can install it with the python version you prefer, but a version
-of >= 2.4 is recommended. The python version you choose for boostraping
+of >= 2.4 is recommended. The python version you choose for bootstrapping
 is used for any commands run by `ftw.manager` (such as building and
 releasing packages, checking python code with pyflakes or creating
 translations with i18ndude).
