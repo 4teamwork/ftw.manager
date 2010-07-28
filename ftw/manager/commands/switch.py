@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 import os.path
 import sys
@@ -35,6 +35,7 @@ class SwitchCommand(basecommand.BaseCommand):
     usage = 'ftw %s' % command_name
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         self.check_conditions()
         if scm.is_subversion('.'):
             self.switch_to_git()
@@ -48,7 +49,6 @@ class SwitchCommand(basecommand.BaseCommand):
         # check repo
         if not scm.is_scm('.'):
             output.error('Not in a local repository', exit=True)
-        svn_url = scm.get_svn_url('.')
         # check location
         if not scm.is_package_root('.'):
             output.error('Please run this command at the root of the package' +\

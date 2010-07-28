@@ -23,6 +23,7 @@ class DevelopCommand(basecommand.BaseCommand):
         usage = 'ftw %s [main_package] [options]' % command_name
 
         def __call__(self):
+            scm.tested_for_scms(('svn', 'gitsvn'), '.')
             self.check_conditions()
             self.remove_egg()
             if self.options.revert:

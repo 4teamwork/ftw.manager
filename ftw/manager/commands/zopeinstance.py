@@ -1,9 +1,9 @@
-
+from ftw.manager.utils import runcmd
+from ftw.manager.utils.output import error
+import basecommand
 import os
 import sys
-import basecommand
-from ftw.manager.utils.output import error
-from ftw.manager.utils import runcmd
+
 
 class ZopeInstanceCommand(basecommand.BaseCommand):
     """
@@ -11,7 +11,7 @@ class ZopeInstanceCommand(basecommand.BaseCommand):
     This may be useful called from a editor (e.g. vim).
 
     Example:
-        % ftw zi fg
+    % ftw zi fg
     """
 
     command_name = 'zopeinstance'
@@ -23,15 +23,16 @@ class ZopeInstanceCommand(basecommand.BaseCommand):
     def __call__(self):
         path = ['.']
         zopeFound = False
-        instance = []
         while not zopeFound:
             dir = os.listdir('/'.join(path))
-            if '/'==os.path.abspath('/'.join(path)):
-                error('File system root reached: no zope instance found ..', exit=True)
+            if '/' == os.path.abspath('/'.join(path)):
+                error('File system root reached: no zope instance found ..',
+                      exit=True)
             elif 'bin' in dir:
-                binContents = os.listdir('/'.join(path+['bin']))
-                instances = filter(lambda x:x.startswith('instance'), binContents)
-                if len(instances)>0:
+                binContents = os.listdir('/'.join(path + ['bin']))
+                instances = filter(lambda x: x.startswith('instance'),
+                                   binContents)
+                if len(instances) > 0:
                     zopeFound = True
                 else:
                     path.append('..')
@@ -42,5 +43,3 @@ class ZopeInstanceCommand(basecommand.BaseCommand):
         runcmd(cmd, log=True)
 
 basecommand.registerCommand(ZopeInstanceCommand)
-
-

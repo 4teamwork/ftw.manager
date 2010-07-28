@@ -1,4 +1,3 @@
-
 from StringIO import StringIO
 from docutils.core import publish_file
 from ftw.manager.commands import basecommand
@@ -9,7 +8,7 @@ import distutils.core
 import os
 import re
 import sys
-import tempfile
+
 
 class CheckdocsCommand(basecommand.BaseCommand):
     """
@@ -18,7 +17,8 @@ class CheckdocsCommand(basecommand.BaseCommand):
 
     command_name = 'checkdocs'
     command_shortcut = 'cd'
-    description = 'Checks if the description defined in setup.py is reStructured Text valid.'
+    description = 'Checks if the description defined in setup.py is ' + \
+        'reStructured Text valid.'
     usage = 'ftw %s' % command_name
 
     def __call__(self):
@@ -37,8 +37,10 @@ class CheckdocsCommand(basecommand.BaseCommand):
                          source=StringIO(description))
             runcmd_with_exitcode('open long_description.html')
             return
-        code, response, error = runcmd_with_exitcode(cmd, log=True, respond=True, respond_error=True)
-        if code==0:
+        code, response, error = runcmd_with_exitcode(cmd, log=True,
+                                                     respond=True,
+                                                     respond_error=True)
+        if code == 0:
             print '* docs okay'
         else:
             xpr = re.compile('\(line ([\d]*)\)')
@@ -52,7 +54,8 @@ class CheckdocsCommand(basecommand.BaseCommand):
                     start_line = line_nr - self.options.offrows
                     start_line = start_line > 0 and start_line or 0
                     end_line = line_nr + self.options.offrows + 1
-                    end_line = end_line < len(description) and end_line or len(description)
+                    end_line = end_line < len(description) and \
+                        end_line or len(description)
                     line_range = range(start_line, end_line)
                     self.show_description(line_range, higlight=line_nr)
                     print ''
@@ -69,8 +72,8 @@ class CheckdocsCommand(basecommand.BaseCommand):
         if not rows:
             rows = range(len(description))
         for i in rows:
-            p = '%i:' % (i+1) + ' ' + description[i]
-            if i==higlight:
+            p = '%i:' % (i + 1) + ' ' + description[i]
+            if i == higlight:
                 print output.colorize(p, output.WARNING)
             else:
                 print p
@@ -78,13 +81,15 @@ class CheckdocsCommand(basecommand.BaseCommand):
     def register_options(self):
         self.parser.add_option('-s', '--show-description', dest='show',
                                action='store_true', default=False,
-                               help='show long-description of setup.py (with line numbers)')
+                               help='show long-description of setup.py ' +\
+                                   '(with line numbers)')
         self.parser.add_option('-b', '--show-inbrowser', dest='browser',
                                action='store_true', default=False,
-                               help='Show description converted into HTML in your default browser')
+                               help='Show description converted into HTML ' +\
+                                   'in your default browser')
         self.parser.add_option('-o', '--off-rows', dest='offrows',
                                action='store', type='int', default=2,
-                               help='show N rows before and after a bad row (only if not using -s)')
+                               help='show N rows before and after a bad ' +\
+                                   'row (only if not using -s)')
 
 basecommand.registerCommand(CheckdocsCommand)
-

@@ -78,6 +78,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                                action='store_true', default=False)
 
     def __call__(self):
+        if not self.options.quiet:
+            output.warning('Git repositories are not supported yet!')
         try:
             if self.options.verbose:
                 from ftw.manager import utils

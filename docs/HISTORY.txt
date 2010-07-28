@@ -5,6 +5,9 @@ Changelog
 1.1.3
 -----
 
+* GIT: added warnings for commands which do not support git ; cleaned up some code
+  [28.07.2010, jbaumann]
+
 * `eggcheck`: Implemented first version according to
   Issue #27 ftw.manager: Neuer Befehl zum Prüfen eines eggs
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/27

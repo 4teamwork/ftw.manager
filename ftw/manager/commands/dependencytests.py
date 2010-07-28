@@ -1,9 +1,9 @@
-
+from ftw.manager.commands import basecommand
+from ftw.manager.commands import zopeinstance
+from ftw.manager.utils import output
 import os
 import sys
 
-from ftw.manager.commands import basecommand
-from ftw.manager.commands import zopeinstance
 
 class DependencyTestsCommand(basecommand.BaseCommand):
     """

@@ -31,7 +31,7 @@ def prompt(prompt, validator=None):
         return ask()
 
 
-# Boolean
+# Boolean
 
 def prompt_bool(text, default=True):
     negative = ['no', 'nein', 'n', 'false', '0',]

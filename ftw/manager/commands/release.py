@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import git
@@ -58,6 +58,7 @@ class ReleaseCommand(basecommand.BaseCommand):
                                help='Docstring Fehler (reStructuredText) ignorieren')
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         self.check_doc()
         self.analyse()
         self.pre_build_check()

@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 import os
 
@@ -39,7 +39,6 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
     def buildout_dir(self):
         path = ['.']
         zopeFound = False
-        instance = []
         while not zopeFound:
             dir = os.listdir('/'.join(path))
             if '/'==os.path.abspath('/'.join(path)):
@@ -78,6 +77,7 @@ class BuildPotCommand(I18NDudeBaseCommand):
     usage = 'ftw %s' % command_name
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         scm.require_package_root_cwd()
         self.check_conditions()
         package_name = scm.get_package_name('.')
@@ -123,6 +123,7 @@ class SyncPoCommand(I18NDudeBaseCommand):
     usage = 'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         scm.require_package_root_cwd()
         if len(self.args)<1:
             output.error('Language code is required', exit=1)

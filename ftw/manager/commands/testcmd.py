@@ -1,9 +1,8 @@
-
-import sys
 from ftw.manager.commands import basecommand
 from ftw.manager.commands import zopeinstance
-from ftw.manager.utils import runcmd
 from ftw.manager.utils import scm
+import sys
+
 
 class TestCommand(basecommand.BaseCommand):
     """
@@ -18,6 +17,7 @@ class TestCommand(basecommand.BaseCommand):
     usage = 'ftw %s' % command_name
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         package_name = scm.get_package_name('.')
         sys.argv = [sys.argv[0], 'zopeinstance', 'test', '-s', package_name]
         zopeinstance.ZopeInstanceCommand(self.maincommand)()

@@ -1,15 +1,15 @@
-import tempfile
+from ftw.manager.commands import basecommand
+from ftw.manager.utils import output
+from ftw.manager.utils import scm
+from ftw.manager.utils.memoize import memoize
+from ftw.manager.utils.output import error
 from pkg_resources import parse_version, Requirement
-import urllib2
+from setuptools import package_index
 import ConfigParser
 import distutils.core
-from setuptools import package_index
-from ftw.manager.commands import basecommand
-from ftw.manager.utils import scm
-from ftw.manager.utils.output import error
-from ftw.manager.utils import output
-from ftw.manager.utils.memoize import memoize
 import os
+import tempfile
+import urllib2
 
 
 class VersioninfoCommand(basecommand.BaseCommand):
@@ -36,6 +36,7 @@ class VersioninfoCommand(basecommand.BaseCommand):
         '[<package1> [<package2> [...]]]'
 
     def __call__(self):
+        output.warning('This command does not support git packages')
         pinnings = self._get_pinnings_by_package()
         def _format_line(pkg, extra, version, file, current=False):
             pkgname = pkg

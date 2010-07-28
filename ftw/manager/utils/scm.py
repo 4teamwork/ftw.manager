@@ -15,6 +15,7 @@ import re
 import shutil
 import simplejson
 import subversion as svn
+import sys
 import tempfile
 
 is_git = git.is_git
@@ -101,7 +102,7 @@ def has_local_changes(path):
 
 @memoize
 def is_scm(path):
-    return is_subversion(path) or is_git(path)
+    return is_subversion(path) or is_git_svn(path) or is_git(path)
 
 @memoize
 def lazy_is_scm(path):
@@ -253,6 +254,33 @@ def remove_files(files):
         runcmd_unmemoized('svn remove %s' % ' '.join(files))
     elif is_git('.'):
         runcmd_unmemoized('git rm %s' % ' '.join(files))
+
+
+def tested_for_scms(scms=('svn'), dir='.'):
+    """Marks a command as tested for one or more of ('git', 'gitsvn', 'svn').
+    Calling this function checks if the repository-type in `dir` is one of `scms`.
+    """
+    if not is_scm(dir):
+        raise NotAScm
+    elif 'svn' in scms and is_subversion(dir):
+        # svn check always before git checks!
+        return True
+    elif 'gitsvn' in scms and is_git_svn(dir):
+        return True
+    elif 'git' in scms and is_git(dir):
+        return True
+    else:
+        # ask if the user wants to continue
+        output.warning('This command is not tested for your source control system ' + \
+                           '(for %s) ' % dir + \
+                           'Tested systems are: %s' % str(scms))
+        if input.prompt_bool('Do you really want to continue? It may make damage!',
+                             default=False):
+
+            if input.prompt_bool('REALLY SURE???', default=False):
+                return False
+        sys.exit(0)
+
 
 
 class PackageInfoMemory(Singleton):

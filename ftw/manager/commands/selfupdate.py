@@ -1,7 +1,7 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 from ftw.manager.commands import basecommand
-from ftw.manager.utils import output
+
 
 class SelfUpdate(basecommand.BaseCommand):
     """

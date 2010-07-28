@@ -332,6 +332,7 @@ class EggCheckCommand(BaseCommand):
     def __call__(self):
         """Run the checks
         """
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         if not os.path.exists('setup.py'):
             raise Exception('Could not find setup.py')
         if scm.has_local_changes('.'):

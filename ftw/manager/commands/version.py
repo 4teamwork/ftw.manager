@@ -1,10 +1,10 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
-import os
-import basecommand
 from ftw.manager.utils import output
-from ftw.manager.utils import runcmd
 from ftw.manager.utils import scm
+import basecommand
+import os
+
 
 class VersionCommand(basecommand.BaseCommand):
     """
@@ -12,16 +12,18 @@ class VersionCommand(basecommand.BaseCommand):
     """
 
     command_name = 'version'
-    description = 'Display Version of the package containing the current directory'
+    description = 'Display Version of the package containing the current ' +\
+        'directory'
     usage = 'ftw %s' % command_name
 
     def __call__(self):
+        scm.tested_for_scms(('svn', 'gitsvn'), '.')
         svn_url = scm.get_svn_url('.').split('/')
         svn_root_url = scm.get_package_root_url('.').split('/')
         package_name = scm.get_package_name('.')
         path = os.path.abspath(os.path.join(
                 (len(svn_url) - len(svn_root_url) - 1) * '../',
-                package_name.replace('.','/'),
+                package_name.replace('.', '/'),
                 'version.txt',
         ))
         if not os.path.isfile(path):
@@ -33,5 +35,3 @@ class VersionCommand(basecommand.BaseCommand):
         )
 
 basecommand.registerCommand(VersionCommand)
-
-

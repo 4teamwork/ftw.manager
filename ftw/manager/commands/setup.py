@@ -1,12 +1,11 @@
-# -*- coding: utf8 -*-
-
-import os
+# -*- coding: utf-8 -*-
 
 from ftw.manager.commands import basecommand
 from ftw.manager.config import Configuration
 from ftw.manager.utils import input
 from ftw.manager.utils import output
 from ftw.manager.schemes import COLOR_SCHEMES
+
 
 class Setup(basecommand.BaseCommand):
     """
