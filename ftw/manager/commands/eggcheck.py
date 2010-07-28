@@ -13,7 +13,8 @@ WIKI_PYTHON_EGGS = 'http://devwiki.4teamwork.ch/PythonEggs'
 
 
 class EggCheckCommand(BaseCommand):
-    """The command `eggcheck` checks if the egg has some common problems.
+    """
+    The command `eggcheck` checks if the egg has some common problems.
 
     Checks:
     * setup.py

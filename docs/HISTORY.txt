@@ -5,6 +5,12 @@ Changelog
 1.1.3
 -----
 
+* Updated README.txt with new buildout informations.
+  [28.07.2010, jbaumann]
+
+* Made `selfupdate` deprecated, since the buildout should be used.
+  [28.07.2010, jbaumann]
+
 * Removed command `dependencytests` since it requires a dependencies.txt, which
   no egg any more has and tests with "bin/instance tests" which is not the way
   to it should be done.

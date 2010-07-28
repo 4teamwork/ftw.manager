@@ -1,36 +1,53 @@
 ftw.manager
 ===========
 
-ftw.manager stellt eine Sammlung von Scripts zur Verfügung, die
-Entwicklungsprozesse automatisieren sollen.
+The `ftw.manager` provides various tools for development according
+to written and unwritten 4teamwork guidelines.
+
 
 Installation
 ============
 
-ftw.manager kann mit easy install installiert werden. Das Egg ist in unserem PSC
-eingetragen (http://psc.4teamwork.ch/4teamwork/ftw/ftw.manager).
+It's recommended to install it with a prepared buildout, because the
+it has various heavy dependencies which may install zope to your
+site-packges when you use easy_install - which is really bad.
 
-Installation der neusten Version von ftw.manager::
+You can install it with the python version you prefer, but a version
+of >= 2.4 is recommended. The python version you choose for boostraping
+is used for any commands run by `ftw.manager` (such as building and
+releasing packages, checking python code with pyflakes or creating
+translations with i18ndude).
 
-    sudo easy_install-2.4 -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
+    $ svn co https://svn.4teamwork.ch/repos/buildout/ftw.manager/
+    $ cd ftw.manager
+    $ python2.6 bootstrap.py
+    $ bin/buildout
 
-Es sollte die Python-Version verwendet werden, mit welcher auch Zope läuft. Das
-Updaten von ftw.manager auf den neusten Release funktioniert auch mit easy
-install::
+After a successful buildout there is a executable `bin/ftw` and some
+other useful and required commands such as i18ndude.
 
-    sudo easy_install-2.4 -U -f http://downloads.4teamwork.ch/4teamwork/ftw/simple ftw.manager
+    $ bin/ftw
 
-
-Während der Installation wird ein Script ``ftw`` im *bin*-Ordner der angegebenen
-Zope-Version erstellt. Wenn dieser *bin*-Ordner noch nicht im PATH ist, dann
-sollte er eingetragen werden::
-
-    ~% which python2.4
-    /Library/Frameworks/Python.framework/Versions/2.4.6/bin//python2.4
-    ~% echo "export PATH=/Library/Frameworks/Python.framework/Versions/2.4.6/bin:$PATH" >> ~/.profile
-
-Nach erfolgreicher Installation steht der Befehl ``ftw`` zur Verfügung::
-    ftw help
-    --help-text--
+For global usage it is recommended to either extend the $PATH variable
+of your shell with the path to the `bin` directory or to symlink the
+`bin/ftw` file to a $PATH-directory such as `/usr/local/bin`.
 
 
+Development
+===========
+
+For development you can install the `ftw.manager` package from source.
+Check it out to any directory and then run `python2.6 setup.py develop`
+which registers the package in the site-packages and creates a `ftw`
+executable in the bin folder of the python installation (which should
+be in the $PATH usually). A developers buildout is planned.
+
+
+Detailed Help
+=============
+
+Use the help command for detailed help:
+
+    $ ftw.help
+
+--help-text--
