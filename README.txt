@@ -16,7 +16,7 @@ You can install it with the python version you prefer, but a version
 of >= 2.4 is recommended. The python version you choose for bootstrapping
 is used for any commands run by `ftw.manager` (such as building and
 releasing packages, checking python code with pyflakes or creating
-translations with i18ndude).
+translations with i18ndude)::
 
     $ svn co https://svn.4teamwork.ch/repos/buildout/ftw.manager/
     $ cd ftw.manager
@@ -24,7 +24,7 @@ translations with i18ndude).
     $ bin/buildout
 
 After a successful buildout there is a executable `bin/ftw` and some
-other useful and required commands such as i18ndude.
+other useful and required commands such as i18ndude::
 
     $ bin/ftw
 
@@ -46,7 +46,7 @@ be in the $PATH usually). A developers buildout is planned.
 Detailed Help
 =============
 
-Use the help command for detailed help:
+Use the help command for detailed help::
 
     $ ftw.help
 
