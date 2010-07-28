@@ -21,6 +21,8 @@ import tempfile
 is_git = git.is_git
 is_subversion = svn.is_subversion
 is_git_svn = git.is_git_svn
+is_non_svn_git = lambda directory_or_url: is_git(directory_or_url) \
+    and not is_git_svn(directory_or_url)
 IGNORE_EGGS = [
     'setuptools',
     'Plone',
@@ -29,8 +31,20 @@ IGNORE_EGGS = [
 _marker = object()
 
 
-class NotAScm(Exception):
+class SCMException(Exception):
     pass
+
+
+class UrlsNotSupported(SCMException):
+    pass
+
+
+class PackageRootNotFound(SCMException):
+    pass
+
+class NotAScm(SCMException):
+    pass
+
 
 def require_package_root_cwd():
     """ Finds the next package-root relative to the current directory (cwd)
@@ -38,20 +52,15 @@ def require_package_root_cwd():
     """
     original_cwd = os.getcwd()
     setattr(os, '_original_cwd', original_cwd)
-    cwd = original_cwd
-    # we need a proper context (providing a svn url). is_package_root will check
-    if not is_package_root(cwd):
-        current_url = get_svn_url(cwd).split('/')
-        root_url = get_package_root_url(cwd).split('/')
-        levels = len(current_url) - len(root_url)
-        if 'trunk' in current_url:
-            levels -= 1
-        if 'tags' in current_url or 'branches' in current_url:
-            levels -= 2
-        if levels>0:
-            # change cwd to root
-            new_cwd = '/'.join(cwd.split('/')[:-levels])
-            os.chdir(new_cwd)
+    cwd = os.path.abspath(original_cwd)
+    # search the package root
+    while not is_package_root(cwd):
+        # remove last part
+        cwd = '/'.join(cwd.split('/')[:-1])
+        if cwd == '':
+            raise PackageRootNotFound
+    # switch to the new cwd
+    os.chdir(cwd)
 
 @memoize
 def get_svn_url(directory_or_url):
@@ -71,18 +80,32 @@ def get_package_root_url(directory_or_url):
 
 @memoize
 def get_package_root_path(directory_or_url):
-    url_here = get_svn_url(directory_or_url)
-    svn.check_project_layout(url_here)
-    url_root = get_package_root_url(directory_or_url)
-    url_rel = url_here[len(url_root)+1:].split('/')
-    if url_rel[0] in ('trunk'):
-        url_rel.pop(0)
-    elif url_rel[0] in ('branches', 'tags'):
-        url_rel.pop(0)
-        url_rel.pop(0)
+    if is_non_svn_git(directory_or_url):
+        # we do not have a svn url, so we need to walk up
+        # the local path.. package root is where .git is
+        if '://' in directory_or_url:
+            raise UrlsNotSupported
+        dir = directory_or_url
+        while not os.path.exists(os.path.join(dir, '.git')):
+            # remove last part from dir path
+            dir = '/'.join(dir.split('/')[:-1])
+            if dir == '':
+                raise PackageRootNotFound
+        return dir
     else:
-        raise Exception('Confused: check your svn project layout')
-    return os.path.abspath('../' * len(url_rel))
+        # we have svn url
+        url_here = get_svn_url(directory_or_url)
+        svn.check_project_layout(url_here)
+        url_root = get_package_root_url(directory_or_url)
+        url_rel = url_here[len(url_root)+1:].split('/')
+        if url_rel[0] in ('trunk'):
+            url_rel.pop(0)
+        elif url_rel[0] in ('branches', 'tags'):
+            url_rel.pop(0)
+            url_rel.pop(0)
+        else:
+            raise Exception('Confused: check your svn project layout')
+        return os.path.abspath('../' * len(url_rel))
 
 @memoize
 def get_package_name(directory_or_url):
@@ -106,23 +129,30 @@ def is_scm(path):
 
 @memoize
 def lazy_is_scm(path):
-    if os.path.isdir(os.path.join(path, '.git')):
+    if os.path.isdir(os.path.join(path, '.svn')):
         return True
-    elif os.path.isdir(os.path.join(path, '.svn')):
+    elif is_git(path):
         return True
     else:
         return False
 
 @memoize
 def is_package_root(directory_or_url):
-    svn_url = get_svn_url(directory_or_url)
-    svn_url = svn_url.strip()
-    if svn_url.endswith('/'):
-        svn_url = svn_url[:-1]
-    parts = svn_url.split('/')
-    last = parts[-1]
-    second_last = parts[-2]
-    return last=='trunk' or second_last in ('tags', 'branches')
+    if is_non_svn_git(directory_or_url):
+        # do it for not-svn-based git-repository
+        if '://' in directory_or_url:
+            raise UrlsNotSupported()
+        return os.path.exists(os.path.join(directory_or_url, '.git'))
+    else:
+        # do it for svn-based repositories (svn, git-svn)
+        svn_url = get_svn_url(directory_or_url)
+        svn_url = svn_url.strip()
+        if svn_url.endswith('/'):
+            svn_url = svn_url[:-1]
+        parts = svn_url.split('/')
+        last = parts[-1]
+        second_last = parts[-2]
+        return last=='trunk' or second_last in ('tags', 'branches')
 
 @memoize
 def get_egginfo_for(package, trunk=True, branch=False,

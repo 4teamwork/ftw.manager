@@ -18,11 +18,15 @@ def is_git(directory):
     """
     directory = os.path.abspath(directory)
     dir = directory.split('/')
-    while len(dir)>1:
+    while len(dir) > 1:
         path = '/'.join(dir)
         gitconfig = os.path.join(path, '.git', 'config')
         if os.path.isfile(gitconfig):
             return True
+        # if there is .svn (but no .git) it is a .svn directory and
+        # do not have to continue walking up...
+        if svn.is_subversion(path):
+            return False
         dir.pop()
     return False
 
@@ -34,6 +38,10 @@ def is_git_svn(directory):
         gitconfig = os.path.join(path, '.git', 'config')
         if os.path.isfile(gitconfig) and '[svn-remote' in open(gitconfig).read():
             return True
+        # if there is .svn (but no .git) it is a .svn directory and
+        # do not have to continue walking up...
+        if svn.is_subversion(path):
+            return False
         dir.pop()
     return False
     

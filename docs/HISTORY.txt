@@ -5,6 +5,9 @@ Changelog
 1.1.3
 -----
 
+* GIT: improved non-svn-git support added regular git support to i18ndude commands
+  [28.07.2010, jbaumann]
+
 * GIT: added warnings for commands which do not support git ; cleaned up some code
   [28.07.2010, jbaumann]
 

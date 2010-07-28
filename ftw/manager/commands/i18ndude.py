@@ -77,7 +77,7 @@ class BuildPotCommand(I18NDudeBaseCommand):
     usage = 'ftw %s' % command_name
 
     def __call__(self):
-        scm.tested_for_scms(('svn', 'gitsvn'), '.')
+        scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
         scm.require_package_root_cwd()
         self.check_conditions()
         package_name = scm.get_package_name('.')
@@ -123,7 +123,7 @@ class SyncPoCommand(I18NDudeBaseCommand):
     usage = 'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):
-        scm.tested_for_scms(('svn', 'gitsvn'), '.')
+        scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
         scm.require_package_root_cwd()
         if len(self.args)<1:
             output.error('Language code is required', exit=1)
