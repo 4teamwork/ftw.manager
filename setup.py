@@ -47,6 +47,7 @@ if generated_description:
     # --
     help.seek(0)
     long_description = long_description.replace(u'--help-text--', help.read())
+    long_description = long_description.encode('utf8')
     sys.argv[:] = argv
 
 
