@@ -4,8 +4,8 @@ import sys
 
 version = open('ftw/manager/version.txt').read().strip()
 
-long_description = open("README.txt").read() + "\n" + \
-    open(os.path.join("docs", "HISTORY.txt")).read()
+long_description = open("README.txt").read().decode('utf8') + u"\n" + \
+    open(os.path.join("docs", "HISTORY.txt")).read().decode('utf8')
 
 generated_description = False
 try:
@@ -46,7 +46,7 @@ if generated_description:
         help.write('\n')
     # --
     help.seek(0)
-    long_description = long_description.decode('utf-8')
+    long_description.encode('ascii')
     long_description = long_description.replace(u'--help-text--', help.read())
     sys.argv[:] = argv
 
