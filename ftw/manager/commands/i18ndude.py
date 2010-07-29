@@ -56,7 +56,7 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
 
 
 class BuildPotCommand(I18NDudeBaseCommand):
-    """
+    u"""
     Aktualisiert oder erstellt die .POT-Dateien eines Packets. Dieser Befehl
     wird in einem lokalen Checkout eines Eggs ausgeführt.
 
@@ -113,13 +113,13 @@ basecommand.registerCommand(BuildPotCommand)
 
 
 class SyncPoCommand(I18NDudeBaseCommand):
-    """
+    u"""
     Aktualisiert die Übersetzungs-Dateien (.po) einer bestimmten Sprache
     oder aller Sprachen.
     """
     command_name = 'i18nsync'
     command_shortcut = 'is'
-    description = 'Aktualisiert die Übersetzungs-Dateien einer Sprache'
+    description = u'Aktualisiert die Übersetzungs-Dateien einer Sprache'
     usage = 'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):

@@ -12,7 +12,7 @@ from ftw.manager.utils import git
 
 
 class SwitchCommand(basecommand.BaseCommand):
-    """
+    u"""
     Wandelt ein lokales SVN-Repository in ein GIT-SVN-Repository um,
     oder umgekehrt.
     Es wird ein lokaler SVN-Cache unter ~/.gitsvn angelegt, welcher

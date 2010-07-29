@@ -13,7 +13,7 @@ import os
 import sys
 
 class ReleaseCommand(basecommand.BaseCommand):
-    """
+    u"""
     Der "release" command publiziert die aktuellen Änderungen eines Packets in
     einer neuen Version. Der Befehl sollte vom root-Verzeichnis eines SVN-Checkouts
     (trunk) ausgeführt werden.

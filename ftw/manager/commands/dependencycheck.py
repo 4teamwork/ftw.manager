@@ -15,7 +15,7 @@ from ftw.manager.utils import output
 
 
 class DependencyCheckCommand(basecommand.BaseCommand):
-    """
+    u"""
     Der "dependencycheck" Befehl überprüft, ob in den Abhängigkeiten Packete
     angegeben sind, von denen es eine neue Version gibt oder ob Änderungen an den
     Packeten gemacht wurden.
@@ -45,7 +45,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
 
     command_name = 'dependencycheck'
     command_shortcut = 'dc'
-    description = 'Überprüfen der Abhängigkeiten'
+    description = u'Überprüfen der Abhängigkeiten'
     usage = 'ftw %s [OPTIONS]' % command_name
 
     def register_options(self):
