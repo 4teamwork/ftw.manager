@@ -5,6 +5,9 @@ Changelog
 1.2.2
 -----
 
+* Some more encoding problems..
+  [29.07.2010, jbaumann]
+
 
 1.2.1
 -----
