@@ -10,16 +10,17 @@ from ftw.manager.utils import subversion as svn
 
 
 class CheckoutCommand(basecommand.BaseCommand):
-    """
-    Checks out a package with git-svn
+    u"""
+    Checks out a package with git-svn or svn, depending on your
+    configuration (see ftw setup).
 
     package_name : Name of the package you want to checkout
     """
 
-    command_name = 'checkout'
-    command_shortcut = 'co'
-    description = 'Checks out a package with git-svn'
-    usage = 'ftw %s package_name' % command_name
+    command_name = u'checkout'
+    command_shortcut = u'co'
+    description = u'Checks out a package with git-svn'
+    usage = u'ftw %s package_name' % command_name
 
     def __call__(self):
         output.warning('GIT repositories are not supported yet ' +\

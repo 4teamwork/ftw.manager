@@ -11,15 +11,18 @@ import sys
 
 
 class CheckdocsCommand(basecommand.BaseCommand):
-    """
+    u"""
     Checks if the description defined in setup.py is reStructured Text valid.
+
+    This command requires docutils to be installed in the site-packes of
+    your python version.
     """
 
-    command_name = 'checkdocs'
-    command_shortcut = 'cd'
-    description = 'Checks if the description defined in setup.py is ' + \
-        'reStructured Text valid.'
-    usage = 'ftw %s' % command_name
+    command_name = u'checkdocs'
+    command_shortcut = u'cd'
+    description = u'Checks if the description defined in setup.py is ' + \
+        u'reStructured Text valid.'
+    usage = u'ftw %s' % command_name
 
     def __call__(self):
         if not os.path.isfile('setup.py'):
