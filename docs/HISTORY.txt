@@ -5,6 +5,10 @@ Changelog
 1.2.3
 -----
 
+* Translated german stuff to english, removed various
+  python2.4 vs python2.6 encode / decode issues.
+  [02.08.2010, jbaumann]
+
 
 1.2.2
 -----
