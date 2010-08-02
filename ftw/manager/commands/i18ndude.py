@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-
-import os
-
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import output
 from ftw.manager.utils import runcmd
 from ftw.manager.utils import scm
 from ftw.manager.utils.memoize import memoize
+import os
+
 
 class FileSystemRootReached(Exception):
     pass
+
 
 class I18NDudeBaseCommand(basecommand.BaseCommand):
 
@@ -20,7 +19,8 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
             package_name = scm.get_package_name('.')
             print '  using package name:', package_name
         except scm.NotAScm:
-            output.error('Not in a SVN- or GIT-Checkout, unable to guess package name', exit=1)
+            output.error('Not in a SVN- or GIT-Checkout, unable to guess '
+                         'package name', exit=1)
         # get package root
         package_root = scm.get_package_root_path('.')
         print '  using package root path:', package_root
@@ -41,12 +41,13 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
         zopeFound = False
         while not zopeFound:
             dir = os.listdir('/'.join(path))
-            if '/'==os.path.abspath('/'.join(path)):
+            if '/' == os.path.abspath('/'.join(path)):
                 raise FileSystemRootReached
             elif 'bin' in dir:
-                binContents = os.listdir('/'.join(path+['bin']))
-                instances = filter(lambda x:x.startswith('instance') or x=='i18ndude', binContents)
-                if len(instances)>0:
+                binContents = os.listdir('/'.join(path + ['bin']))
+                instances = filter(lambda x: x.startswith('instance') or \
+                                       x == 'i18ndude', binContents)
+                if len(instances) > 0:
                     zopeFound = True
                 else:
                     path.append('..')
@@ -56,25 +57,23 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
 
 
 class BuildPotCommand(I18NDudeBaseCommand):
-    u"""
-    Aktualisiert oder erstellt die .POT-Dateien eines Packets. Dieser Befehl
-    wird in einem lokalen Checkout eines Eggs ausgeführt.
+    u"""Builds the .pot files in your `locales` directory. By
+    default the name of your package is used as i18n domain.
+    The locales diretory is expected to be in the root of your
+    package (e.g. src/my.package/my/package/locales).
 
-    Voraussetzungen:
+    The .pot files are built with `i18ndude`, which have to be
+    installed (ftw.manager as a extras_require). i18ndude will
+    search all msgid from the templates and where you use the
+    zope message factory.
 
-    Der i18n-dude muss im Buildout eingetragen und installiert sein:
-    [buildout]
-    parts += i18ndude
-
-    [i18ndude]
-    recipe = zc.recipe.egg
-    eggs = i18ndude
     """
 
-    command_name = 'i18npot'
-    command_shortcut = 'ib'
-    description = 'Aktualisiert die i18n-POT-Dateien eines Packets'
-    usage = 'ftw %s' % command_name
+    command_name = u'i18npot'
+    command_shortcut = u'ib'
+    description = u'Builds the .pot files in your locales ' +\
+        'directory with i18ndude'
+    usage = u'ftw %s' % command_name
 
     def __call__(self):
         scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
@@ -113,19 +112,21 @@ basecommand.registerCommand(BuildPotCommand)
 
 
 class SyncPoCommand(I18NDudeBaseCommand):
-    u"""
-    Aktualisiert die Übersetzungs-Dateien (.po) einer bestimmten Sprache
-    oder aller Sprachen.
+    u"""Syncs the .pot files with the .po files of the selected
+    language. The files are synced with `i18ndude`, which may
+    be installed using the extras_require.
+
     """
-    command_name = 'i18nsync'
-    command_shortcut = 'is'
-    description = u'Aktualisiert die Übersetzungs-Dateien einer Sprache'
-    usage = 'ftw %s [LANG-CODE]' % command_name
+    command_name = u'i18nsync'
+    command_shortcut = u'is'
+    description = u'Syncs the .pot files with the .po files of a' +\
+        'language.'
+    usage = u'ftw %s [LANG-CODE]' % command_name
 
     def __call__(self):
         scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
         scm.require_package_root_cwd()
-        if len(self.args)<1:
+        if len(self.args) < 1:
             output.error('Language code is required', exit=1)
         lang = self.args[0]
         # check
@@ -160,7 +161,8 @@ class SyncPoCommand(I18NDudeBaseCommand):
         data = open(po_file).read().split('\n')
         file = open(po_file, 'w')
         for row in data:
-            if not row.startswith('"Language-Code') and not row.startswith('"Language-Name'):
+            if not row.startswith('"Language-Code') and \
+                    not row.startswith('"Language-Name'):
                 file.write(row)
                 file.write('\n')
         file.close()
@@ -172,4 +174,3 @@ class SyncPoCommand(I18NDudeBaseCommand):
 
 
 basecommand.registerCommand(SyncPoCommand)
-

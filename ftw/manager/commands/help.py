@@ -2,13 +2,13 @@
 import basecommand
 
 class HelpCommand(basecommand.BaseCommand):
-    """
+    u"""
     The ftw.manager egg provides various commands for daily work.
     """
 
-    command_name = 'help'
-    description = 'show help text'
-    usage = 'ftw %s command' % command_name
+    command_name = u'help'
+    description = u'show help text'
+    usage = u'ftw %s command' % command_name
 
     def __call__(self):
         if len(self.args)==0 or self.args[0]=='help':
