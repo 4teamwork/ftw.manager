@@ -13,7 +13,7 @@ WIKI_PYTHON_EGGS = 'http://devwiki.4teamwork.ch/PythonEggs'
 
 
 class EggCheckCommand(BaseCommand):
-    """
+    u"""
     The command `eggcheck` checks if the egg has some common problems.
 
     Checks:
@@ -24,7 +24,7 @@ class EggCheckCommand(BaseCommand):
     ** various metadata stuff (name, description, author, email, license)
     ** the docs/HISTORY.txt file should be embedded
     ** we should be able to run `setup.py egg_info`
-    * install_requires is checked by parsing all imports and some zcml statements
+    * install_requires is checked by parsing all imports and some zcml
     * the long_description in setup.py (and included files) should be rEST
     * various paster problems are checked
     ** do not use CHANGES.txt or CONTRIBUTORS.txt
@@ -33,15 +33,15 @@ class EggCheckCommand(BaseCommand):
     ** setup.cfg should not exist
     """
 
-    command_name = 'eggcheck'
-    command_shortcut = 'ec'
-    description = 'Check some common problems on a egg'
-    usage = 'ftw %s [OPTIONS]' % command_name
+    command_name = u'eggcheck'
+    command_shortcut = u'ec'
+    description = u'Check some common problems on a egg'
+    usage = u'ftw %s [OPTIONS]' % command_name
 
     PROBLEM_LEVELS = (
         ('ERROR', output.BOLD_ERROR),
         ('WARNING', output.BOLD_WARNING),
-        ('NOTICE', output.WARNING)
+        ('NOTICE', output.WARNING),
         )
 
     IGNORE_IMPORTS_FROM = (
@@ -308,23 +308,25 @@ class EggCheckCommand(BaseCommand):
     FIND_LINKS = [
         'http://pypi.python.org/simple',
         'http://downloads.4teamwork.ch/simple',
-        'http://psc.4teamwork.ch/simple'
+        'http://psc.4teamwork.ch/simple',
         ]
 
     def register_options(self):
         self.parser.add_option('-s', '--check-setup', default=False,
                                action='store_true', dest='check_setup',
-                               help='Check basic stuff in setup.py (maintainer, '
-                               'version, etc)')
+                               help='Check basic stuff in setup.py (maintainer'
+                               ', version, etc)')
         self.parser.add_option('-p', '--check-paster', default=False,
                                action='store_true', dest='check_paster',
                                help='Check problems caused by paster')
         self.parser.add_option('-d', '--check-description', default=False,
                                action='store_true', dest='check_description',
-                               help='Checks the long description / validates rEST')
+                               help='Checks the long description / validates '
+                               'rEST')
         self.parser.add_option('-r', '--check-requires', default=False,
                                action='store_true', dest='check_requires',
-                               help='Check install_requires: search all python imports'
+                               help='Check install_requires: search all python'
+                               ' imports'
                                ' and zcml directives')
         self.parser.add_option('-z', '--check-zcml', default=False,
                                action='store_true', dest='check_zcml',
@@ -387,13 +389,15 @@ class EggCheckCommand(BaseCommand):
         # MAINTAINER
         self.notify_check('Maintainer should be defined')
         maintainer = self.egginfo.get_maintainer()
-        if maintainer and maintainer!='UNKNOWN':
+        if maintainer and maintainer != 'UNKNOWN':
             self.notify(True)
         else:
-            if len(filter(lambda row:row.startswith('maintainer'),
+            if len(filter(lambda row: row.startswith('maintainer'),
                           open('setup.py').read().split('\n'))) > 0:
-                self.notify(False, 'maintainer is defined as variable but is not used '
-                            'in setup call', 'add "maintainer=maintainer," to the setup call', 1)
+                self.notify(False, 'maintainer is defined as variable but is '
+                            'not used in setup call',
+                            'add "maintainer=maintainer," to the setup call',
+                            1)
                 if input.prompt_bool('Should I try to fix it?'):
                     rows = open('setup.py').read().split('\n')
                     file_ = open('setup.py', 'w')
@@ -409,26 +413,33 @@ class EggCheckCommand(BaseCommand):
                             found = True
                     file_.close()
                     if not found:
-                        output.error('Could not find keyword author_email in your setup.py, '
-                                     'you have to fix it manually, sorry.', exit=1)
+                        output.error('Could not find keyword author_email in '
+                                     'your setup.py, you have to fix it '
+                                     'manually, sorry.', exit=1)
                     else:
                         self._validate_setup_py()
-                        scm.add_and_commit_files('setup.py: register maintainer',
-                                                 'setup.py')
+                        scm.add_and_commit_files(
+                            'setup.py: register maintainer',
+                            'setup.py')
                         self.notify_fix_completed()
                     print ''
             else:
-                self.notify(False, 'maintainer is not defined in the egg at all',
-                            'check %s on how to define a maintainer' % WIKI_PYTHON_EGGS)
+                self.notify(False,
+                            'maintainer is not defined in the egg at all',
+                            'check %s on how to define a maintainer' % \
+                                WIKI_PYTHON_EGGS)
 
         # VERSION.TXT
         self.notify_check('version.txt file exists')
-        versiontxt_path = scm.get_package_name('.').replace('.', '/') + '/version.txt'
+        versiontxt_path = scm.get_package_name('.').replace('.', '/') + \
+            '/version.txt'
         if os.path.exists(versiontxt_path) and os.path.isfile(versiontxt_path):
             self.notify(True)
         elif os.path.exists(versiontxt_path):
-            self.notify(False, '%s exists but is not a file !?' % versiontxt_path,
-                        'it should be a file containing the package version', 0)
+            self.notify(False, '%s exists but is not a file !?' % \
+                            versiontxt_path,
+                        'it should be a file containing the package version',
+                        0)
         else:
             self.notify(False, '%s does not exist' % versiontxt_path)
             if input.prompt_bool('Should I try to fix it?'):
@@ -436,30 +447,35 @@ class EggCheckCommand(BaseCommand):
                 file_ = open(versiontxt_path, 'w')
                 file_.write(version)
                 file_.close()
-                scm.add_and_commit_files('Added version.txt file', versiontxt_path)
+                scm.add_and_commit_files('Added version.txt file',
+                                         versiontxt_path)
                 self.notify_fix_completed()
                 print ''
 
         # VERSION
         self.notify_check('Version is taken form version.txt')
         rows = open('setup.py').read().split('\n')
-        version_rows = filter(lambda row:row.startswith('version ='), rows)
+        version_rows = filter(lambda row: row.startswith('version ='), rows)
         if len(version_rows) != 1:
-            self.notify(False, 'I\'m confused, it seems that you have a mess with '
-                        'your versions.',
-                        'check %s on how to define versions properly' % WIKI_PYTHON_EGGS)
+            self.notify(False, 'I\'m confused, it seems that you have a mess '
+                        'with your versions.',
+                        'check %s on how to define versions properly' % \
+                            WIKI_PYTHON_EGGS)
         elif not version_rows[0].startswith('version = open('):
-            self.notify(False, 'I\'m guessing that the version in your setup.py is not '
-                        'taken from %s' % versiontxt_path,
-                        'check %s on how to define versions properly' % WIKI_PYTHON_EGGS)
+            self.notify(False, 'I\'m guessing that the version in your '
+                        'setup.py is not taken from %s' % versiontxt_path,
+                        'check %s on how to define versions properly' % \
+                            WIKI_PYTHON_EGGS)
             if input.prompt_bool('Should I try to fix it?'):
-                new_version_row = "version = open('%s').read().strip()" % versiontxt_path
+                new_version_row = "version = open('%s').read().strip()" % \
+                    versiontxt_path
                 rows[rows.index(version_rows[0])] = new_version_row
                 file_ = open('setup.py', 'w')
                 file_.write('\n'.join(rows))
                 file_.close()
                 self._validate_setup_py()
-                scm.add_and_commit_files('setup.py: using version.txt', 'setup.py')
+                scm.add_and_commit_files('setup.py: using version.txt',
+                                         'setup.py')
                 self.notify_fix_completed()
         else:
             self.notify(True)
@@ -469,31 +485,37 @@ class EggCheckCommand(BaseCommand):
         guessed_namespaces = []
         namespace_parts = scm.get_package_name('.').split('.')
         for i, space in enumerate(namespace_parts[:-1]):
-            guessed_namespaces.append('.'.join(namespace_parts[:i+1]))
+            guessed_namespaces.append('.'.join(namespace_parts[:i + 1]))
         if set(guessed_namespaces) == set(self.egginfo.namespace_packages):
             self.notify(True)
         else:
-            print '  current namespaces: ', str(self.egginfo.namespace_packages)
+            print '  current namespaces: ', str(
+                self.egginfo.namespace_packages)
             print '  expected namespaces:', str(guessed_namespaces)
             print '  package name:       ', scm.get_package_name('.')
-            self.notify(False, 'I think your namespace_packages declaration is wrong')
+            self.notify(False, 'I think your namespace_packages declaration '
+                        'is wrong')
             if input.prompt_bool('Should I try to fix it?'):
                 guessed_namespaces.sort()
                 rows = open('setup.py').read().split('\n')
-                nsrows = filter(lambda x:x.strip().startswith('namespace_packages'), rows)
+                nsrows = filter(lambda x:
+                                    x.strip().startswith('namespace_packages'),
+                                rows)
                 if len(nsrows) != 1:
-                    output.error('Could not fix it: expected one and only one line '
-                                 'beginning with "namespace_packages" in setup.py..',
+                    output.error('Could not fix it: expected one and only one'
+                                 ' line beginning with "namespace_packages"'
+                                 ' in setup.py..',
                                  exit=True)
                 else:
-                    new_row = nsrows[0].split('=')[0] + '=' + str(guessed_namespaces) + ','
+                    new_row = nsrows[0].split('=')[0] + '=' + \
+                        str(guessed_namespaces) + ','
                     rows[rows.index(nsrows[0])] = new_row
                     file_ = open('setup.py', 'w')
                     file_.write('\n'.join(rows))
                     file_.close()
                     self._validate_setup_py()
-                    scm.add_and_commit_files('setup.py: fixed namespace_packages',
-                                             'setup.py')
+                    scm.add_and_commit_files(
+                        'setup.py: fixed namespace_packages', 'setup.py')
                     self.notify_fix_completed()
 
         # VARIOUS CHECKS
@@ -510,22 +532,26 @@ class EggCheckCommand(BaseCommand):
         # maintainer in description
         if self.egginfo.get_maintainer() not in self.egginfo.get_description():
             failure = True
-            self.notify(False, 'Description: Maintainer is not defined in description',
+            self.notify(False, 'Description: Maintainer is not defined '
+                        'in description',
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
         # docs/HISTORY.txt
         setuppy = open('setup.py').read()
         if 'HISTORY.txt' not in setuppy or \
                 not os.path.exists('docs/HISTORY.txt') or \
-                open('docs/HISTORY.txt').read() not in self.egginfo.get_long_description():
-            self.notify(False, 'docs/HISTORY.txt embedded be used in long_description',
+                open('docs/HISTORY.txt').read() not in \
+                self.egginfo.get_long_description():
+            self.notify(False, 'docs/HISTORY.txt embedded be used in '
+                        'long_description',
                         'Check long_description on %s' % WIKI_PYTHON_EGGS)
 
         # author: use maintainer
         expected_author = '%s, 4teamwork GmbH' % self.egginfo.get_maintainer()
         if self.egginfo.get_author() != expected_author:
             failure = True
-            self.notify(False, 'Author: Expected author to be "%s""' % expected_author + \
+            self.notify(False, 'Author: Expected author to be "%s""' % \
+                            expected_author + \
                             ' but it is "%s"' % self.egginfo.get_author(),
                         'Check out %s' % WIKI_PYTHON_EGGS, 2)
 
@@ -553,12 +579,11 @@ class EggCheckCommand(BaseCommand):
             print '   ', out.replace('\n', '\n    ')
         if errors:
             print '   ', errors.replace('\n', '\n    ')
-        if state==0:
+        if state == 0:
             self.notify(True)
         else:
             state.notify(False, 'Cant run `python setup.py egg_info`, see '
                          'errors above', 0)
-
 
     def check_paster_stuff(self):
         """ Paster does some bad things, so lets fix them.
@@ -576,11 +601,14 @@ class EggCheckCommand(BaseCommand):
             changes_used = True
         if os.path.exists('CHANGES.txt'):
             self.notify(False, 'A ./CHANGES.txt exists',
-                        'Remove the CHANGES.txt, we use the docs/HISTORY.txt', 1)
+                        'Remove the CHANGES.txt, we use the docs/HISTORY.txt',
+                        1)
             if not changes_used:
-                if input.prompt_bool('Should I remove the CHANGES.txt for you?'):
+                if input.prompt_bool(
+                    'Should I remove the CHANGES.txt for you?'):
                     scm.remove_files('CHANGES.txt')
-                    scm.commit_files('Removed unused CHANGES.txt', 'CHANGES.txt')
+                    scm.commit_files('Removed unused CHANGES.txt',
+                                     'CHANGES.txt')
                     self.notify_fix_completed()
         elif not changes_used:
             self.notify(True)
@@ -596,7 +624,8 @@ class EggCheckCommand(BaseCommand):
             self.notify(False, 'A ./CONTRIBUTORS.txt exists',
                         'Remove the CONTRIBUTORS.txt', 1)
             if not contributors_used:
-                if input.prompt_bool('Should I remove the CONTRIBUTORS.txt for you?'):
+                if input.prompt_bool('Should I remove the CONTRIBUTORS.txt '
+                                     'for you?'):
                     scm.remove_files('CONTRIBUTORS.txt')
                     scm.commit_files('Removed unused CONTRIBUTORS.txt',
                                      'CONTRIBUTORS.txt')
@@ -605,7 +634,8 @@ class EggCheckCommand(BaseCommand):
             self.notify(True)
 
         # interfaces not as folder
-        self.notify_check('%s.interfaces should not be a folder' % scm.get_package_name('.'))
+        self.notify_check('%s.interfaces should not be a folder' %
+                          scm.get_package_name('.'))
         path = os.path.join(package_base_path, 'interfaces')
         if os.path.isdir(path):
             self.notify(False, '%s is a folder' % path,
@@ -639,7 +669,9 @@ class EggCheckCommand(BaseCommand):
             self.notify(True)
 
     def check_description(self):
-        """ Validates the restructured text of the long_description and included files
+        """ Validates the restructured text of the long_description and
+        included files
+
         """
         self.notify_part('Check the long_description')
         self.notify_check('long_description should be restructured text')
