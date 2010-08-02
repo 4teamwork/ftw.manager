@@ -1,52 +1,39 @@
-# -*- coding: utf-8 -*-
-
+from ftw.manager.commands import basecommand
+from ftw.manager.utils import aggressive_decode
+from ftw.manager.utils import output
+from ftw.manager.utils import scm
+from ftw.manager.utils.memoize import memoize
+import ConfigParser
+import distutils.core
 import os
 import re
-import distutils.core
-import ConfigParser
 import tempfile
 import urllib2
-
-from ftw.manager.commands import basecommand
-from ftw.manager.utils.memoize import memoize
-from ftw.manager.utils import aggressive_decode
-from ftw.manager.utils import scm
-from ftw.manager.utils import output
 
 
 class DependencyCheckCommand(basecommand.BaseCommand):
     u"""
-    Der "dependencycheck" Befehl überprüft, ob in den Abhängigkeiten Packete
-    angegeben sind, von denen es eine neue Version gibt oder ob Änderungen an den
-    Packeten gemacht wurden.
+    The "dependencycheck" Command checks the dependencies of your package and
+    displays a table of all packages you have a dependency to.
+    The command checks for each package if there is a new SVN tag.
 
-    Anwendung
+    Run the command on the root of your package checkout, where your setup.py
+    is.
 
-    * Wird der Befehl auf dem Root-Ordner des Packets ausgeführt, also z.B. im
-      Ordner "trunk", so werden die im setup.py definierten Abhängigkeiten überprüft
+    Caching
+    The results are cached in `~/.ftw.manager` for faster access. If you do
+    not trust the caching algorithm you can force a refresh with `--refresh`.
 
-    * Wird der Befehl auf einem Ordner ausgeführt, welches ausgecheckte Pakete
-      enthält (z.B. der src-Ordner), so werden diese Pakete aufgelistet.
-
-    * Die Resultate des Befehls werden gecacht. Mit dem optionalen Parametern
-      --refresh (oder -r) kann bewirkt werden, dass alle Informationen neu abgefragt
-      werden.
-
-    * Mit dem Parameter --config (oder -c) kann ein buildout.cfg angegeben werden,
-      welches dann nach version-pinnings durchsucht wird.
-
-    * Wenn die Option --history verwendet wird, werden aus den aktualiserten Paketen
-      die Änderungen im Format einer globalen HISTORY.txt-Datei zusammengeführt. Es
-      werden nur Pakete beachtet, die in einer neuen Version als die verwendete
-      existieren. Dazu sollte die Option --config immer verwendet werden.
-      Wenn die Option --dev verwendent wird, werden alle Pakete aufgelistet, die nicht
-      getaggte Änderungen im trunk haben.
+    Generated History
+    WIth the `--history` option it is possible to generate a history using
+    the `HISTORY.txt` files of each package which has changes in trunk or
+    tag (dependending on `--dev` option).
     """
 
-    command_name = 'dependencycheck'
-    command_shortcut = 'dc'
-    description = u'Überprüfen der Abhängigkeiten'
-    usage = 'ftw %s [OPTIONS]' % command_name
+    command_name = u'dependencycheck'
+    command_shortcut = u'dc'
+    description = u'Check Dependencies'
+    usage = u'ftw %s [OPTIONS]' % command_name
 
     def register_options(self):
         self.parser.add_option('-r', '--refresh', dest='refresh',
@@ -54,27 +41,30 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                                help='Force refresh. Recalculates all infos')
         self.parser.add_option('-c', '--config', dest='buildout',
                                action='store', default=None,
-                               help='Buildout config file containing version infos')
+                               help='Buildout config file containing version '
+                               'infos')
         self.parser.add_option('-v', '--verbose', dest='verbose',
                                action='store_true', default=False,
                                help='Print executed commands')
         self.parser.add_option('-H', '--history', dest='history',
                                action='store_true', default=False,
-                               help='Generate history file with all packages with a new ' +\
-                                   'version')
+                               help='Generate history file with all packages '
+                               'with a new version')
         self.parser.add_option('-d', '--dev', dest='history_dev',
                                action='store_true', default=False,
-                               help='List packages with modified trunk when using ' +\
-                                   '--history option')
+                               help='List packages with modified trunk when '
+                               'using --history option')
         self.parser.add_option('-l', '--limit', dest='limit',
                                action='store', default=0,
                                help='Set depth limit (default 0)')
         self.parser.add_option('-q', '--quiet', dest='quiet',
                                help='Do not ask anything',
                                action='store_true', default=False)
-        self.parser.add_option('-p', '--pinning-proposal', dest='pinning_proposal',
-                               help='Show a list of packages to upgrade with their newest ' +\
-                                   'version in version pinning format.',
+        self.parser.add_option('-p', '--pinning-proposal',
+                               dest='pinning_proposal',
+                               help='Show a list of packages to upgrade with '
+                               'their newest version in version pinning '
+                               'format.',
                                action='store_true', default=False)
 
     def __call__(self):
@@ -106,25 +96,28 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         pinnings = {}
         if limit < 0:
             limit += 1
+
         def _add_rows(dependencies, indent=0):
             for package, extra, v in dependencies:
                 color = None
-                ctag = package in versions.keys() and str(versions[package]) or ''
-                info = scm.PackageInfoMemory().get_info(package,
-                                                        force_reload=force_reload,
-                                                        prompt=(not self.options.quiet))
-                maintainer = scm.PackageInfoMemory().get_maintainer_for(package,
-                                                                        with_extra=extra) or ''
+                ctag = package in versions.keys() and \
+                    str(versions[package]) or ''
+                info = scm.PackageInfoMemory().get_info(
+                    package,
+                    force_reload=force_reload,
+                    prompt=(not self.options.quiet))
+                maintainer = scm.PackageInfoMemory().get_maintainer_for(
+                    package, with_extra=extra) or ''
                 ntag = info and str(info['newest_tag']) or ''
                 if ntag and ctag:
-                    if ntag<ctag:
+                    if ntag < ctag:
                         ntag = output.colorize(ntag, output.WARNING)
                         color = output.WARNING
-                    elif ntag>ctag:
+                    elif ntag > ctag:
                         ntag = output.colorize(ntag, output.ERROR)
                         color = output.ERROR
                         pinnings[package] = ntag
-                    elif ntag==ctag:
+                    elif ntag == ctag:
                         ntag = output.colorize(ntag, output.INFO)
                         color = output.INFO
                 elif ntag:
@@ -142,9 +135,9 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                         chg,
                         maintainer,
                         ))
-                if indent<limit:
-                    sub_deps = scm.PackageInfoMemory().get_dependencies_for(package,
-                                                                            with_extra=extra)
+                if indent < limit:
+                    sub_deps = scm.PackageInfoMemory().get_dependencies_for(
+                        package, with_extra=extra)
                     if sub_deps:
                         _add_rows(sub_deps, indent + 1)
         _add_rows(self.dependency_packages)
@@ -167,6 +160,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         if limit > 0:
             packages = []
             # packages is only *this* package, so lets walk up the dependencies
+
             def _follow_dependencies(pkg, level=0, extra=None, version=None):
                 # add it to the package list
                 if pkg not in packages:
@@ -175,11 +169,12 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     # load some infos about the package and cache them
                     scm.PackageInfoMemory().get_info(pkg, prompt=False)
                     # load and follow the dependencies
-                    deps = scm.PackageInfoMemory().get_dependencies_for(pkg,
-                                                                        with_extra=extra)
+                    deps = scm.PackageInfoMemory().get_dependencies_for(
+                        pkg, with_extra=extra)
                     if deps:
                         for subpkg, subextra, subversion in deps:
-                            _follow_dependencies(subpkg, level=level + 1, extra=subextra,
+                            _follow_dependencies(subpkg, level=level + 1,
+                                                 extra=subextra,
                                                  version=subversion)
             _follow_dependencies(scm.get_package_name('.'))
             packages.sort()
@@ -191,50 +186,57 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                 print package
             ctag = package in versions.keys() and str(versions[package]) or ''
             info = scm.PackageInfoMemory().get_info(package,
-                                                    force_reload=force_reload, prompt=False)
+                                                    force_reload=force_reload,
+                                                    prompt=False)
             ntag = info and str(info['newest_tag']) or ''
             if list_trunk_modifications and info and info['changes']:
-                history = scm.PackageInfoMemory().get_history_for(package, 'trunk',
+                history = scm.PackageInfoMemory().get_history_for(package,
+                                                                  'trunk',
                                                                   prompt=False)
                 if not history:
                     continue
                 history = history.strip().split('\n')
                 if ctag not in history:
-                    print '* ERROR in', package, ': could not find tag', ctag, \
-                        'in changelog'
+                    print '* ERROR in', package, ': could not find tag', ctag,
+                    print 'in changelog'
                     continue
                 packages_data[package] = history[2:history.index(ctag)]
-            elif ntag and ctag and ntag!=ctag:
+            elif ntag and ctag and ntag != ctag:
                 history = scm.PackageInfoMemory().get_history_for(package,
-                                                                  ntag, prompt=False)
+                                                                  ntag,
+                                                                  prompt=False)
                 if not history:
                     continue
                 history = history.strip().split('\n')
                 if ctag not in history:
-                    print '* ERROR in', package, ': could not find tag', ctag, \
-                        'in changelog'
+                    print '* ERROR in', package, ': could not find tag', ctag,
+                    print 'in changelog'
                     continue
                 if ntag not in history:
-                    print '* ERROR in', package, ': could not find tag', ntag, \
-                        'in changelog'
+                    print '* ERROR in', package, ': could not find tag', ntag,
+                    print 'in changelog'
                     continue
-                packages_data[package] = history[history.index(ntag):history.index(ctag)]
+                packages_data[package] = history[history.index(ntag):
+                                                     history.index(ctag)]
 
         # change tag headlines to: * package ntag, remove empty lines
         # and indent any other row with 4 spaces
-        old_entry_format = re.compile('^([ ]*)\* (\[(.*?)\]){0,1}(.{2,}}?)\[(.*?)\]')
+        pat = '^([ ]*)\* (\[(.*?)\]){0,1}(.{2,}}?)\[(.*?)\]'
+        old_entry_format = re.compile(pat)
         skip_next = False
         for package, diff in packages_data.items():
             for i, line in enumerate(diff):
                 line = aggressive_decode(line).encode('utf8')
-                next_line = len(diff)>(i+1) and diff[i+1] or None
+                next_line = len(diff) > (i + 1) and diff[i + 1] or None
                 if skip_next:
                     skip_next = False
                     continue
-                elif len(line.strip())==0:
+                elif len(line.strip()) == 0:
                     continue
-                elif next_line and (next_line==len(line)*'-' or next_line==len(line)*'='):
-                    # current line is a tag-name, next line contains only '-' or '='
+                elif next_line and (next_line == len(line) * '-' or
+                                    next_line == len(line) * '='):
+                    # current line is a tag-name, next line contains
+                    # only '-' or '='
                     print ''
                     print '*', package, '-', line.strip()
                     skip_next = True
@@ -244,7 +246,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     if old_entry:
                         indent, foo, date, text, author = old_entry.groups()
                         print '  ', indent, '*', text.strip()
-                        date_author = date and '%s, %s' % (date, author) or author
+                        date_author = date and '%s, %s' % (date, author) or \
+                            author
                         print '    ', indent, '[%s]' % date_author
                     else:
                         print '   ', line
@@ -264,6 +267,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
             parser = ConfigParser.SafeConfigParser()
             loaded = [self.options.buildout]
             # load extends
+
             def load_extends(file, dir):
                 path = os.path.join(dir, file)
                 if path in loaded:
@@ -278,7 +282,8 @@ class DependencyCheckCommand(basecommand.BaseCommand):
                     for file in extend_files:
                         load_extends(file, os.path.dirname(path))
             load_extends(os.path.basename(self.options.buildout),
-                         os.path.abspath(os.path.dirname(self.options.buildout)))
+                         os.path.abspath(os.path.dirname(
+                        self.options.buildout)))
             # -- add versions
             if parser.has_option('buildout', 'versions'):
                 version_section_name = parser.get('buildout', 'versions')
@@ -298,7 +303,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     @memoize
     def dependency_packages(self):
         dependencies = [(scm.get_package_name('.'), None, None)]
-        if int(self.options.limit)>0:
+        if int(self.options.limit) > 0:
             return dependencies
         if self.egg:
             dependencies += scm.get_egg_dependencies(self.egg, with_extra='*')
@@ -313,11 +318,13 @@ class DependencyCheckCommand(basecommand.BaseCommand):
         return dependencies
 
     def download_file(self, url):
-        """ Download file from *url*, store it in a tempfile and return its path
+        """ Download file from *url*, store it in a tempfile and
+        return its path
+
         """
         if not getattr(self, '_temporary_downloaded', None):
-            # we need to keep a reference to the tempfile, otherwise it will be deleted
-            # imidiately
+            # we need to keep a reference to the tempfile, otherwise it will
+            # be deleted imidiately
             self._temporary_downloaded = []
         request = urllib2.Request(url)
         response = urllib2.urlopen(request)
