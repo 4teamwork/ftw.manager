@@ -57,7 +57,8 @@ class I18NDudeBaseCommand(basecommand.BaseCommand):
 
 
 class BuildPotCommand(I18NDudeBaseCommand):
-    u"""Builds the .pot files in your `locales` directory. By
+    u"""
+    Builds the .pot files in your `locales` directory. By
     default the name of your package is used as i18n domain.
     The locales diretory is expected to be in the root of your
     package (e.g. src/my.package/my/package/locales).
@@ -112,7 +113,8 @@ basecommand.registerCommand(BuildPotCommand)
 
 
 class SyncPoCommand(I18NDudeBaseCommand):
-    u"""Syncs the .pot files with the .po files of the selected
+    u"""
+    Syncs the .pot files with the .po files of the selected
     language. The files are synced with `i18ndude`, which may
     be installed using the extras_require.
 

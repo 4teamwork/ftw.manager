@@ -13,7 +13,7 @@ import urllib2
 
 
 class VersioninfoCommand(basecommand.BaseCommand):
-    """
+    u"""
     This command searches all version pinnings for a specific package in
     the buildout configuration. It walks up the `extends`-list and follows
     remote KGS systems.
@@ -27,13 +27,14 @@ class VersioninfoCommand(basecommand.BaseCommand):
     Its possible to use this command for multiple packages by calling the command
     with each package as a parameter, but its also possible to use the command on
     a list of dependencies which are defined in ./setup.py
+
     """
 
-    command_name = 'versioninfo'
-    command_shortcut = 'vi'
-    description = 'Prints version pinning information'
-    usage = 'ftw %s [-n] [-c <buildout.cfg>] [-d] '  % command_name + \
-        '[<package1> [<package2> [...]]]'
+    command_name = u'versioninfo'
+    command_shortcut = u'vi'
+    description = u'Prints version pinning information'
+    usage = u'ftw %s [-n] [-c <buildout.cfg>] [-d] '  % command_name + \
+        u'[<package1> [<package2> [...]]]'
 
     def __call__(self):
         output.warning('This command does not support git packages')
@@ -125,7 +126,7 @@ class VersioninfoCommand(basecommand.BaseCommand):
             if dist.parsed_version > parsed_version:
                 new_dists.append('%s = %s' % (dist.project_name, dist.version))
         return tuple(set(new_dists))
-        
+
 
     @memoize
     def _get_packages(self):
@@ -213,7 +214,7 @@ class VersioninfoCommand(basecommand.BaseCommand):
             parser = ConfigParser.SafeConfigParser()
             parser.read(path)
             loaded.append(path)
-                    
+
             # get the defined versions
             if parser.has_section(version_section_name):
                 subdata = []
@@ -233,14 +234,14 @@ class VersioninfoCommand(basecommand.BaseCommand):
                 extend_files = parser.get('buildout', 'extends').split()
                 for file in extend_files:
                     load_extends(file.strip(), os.path.dirname(path))
-                    
+
             # remember find_links
             if parser.has_option('buildout', 'find-links'):
                 for link in parser.get('buildout', 'find-links').split():
                     link = link.strip()
                     if link:
                         self.find_links.append(link)
-                    
+
         load_extends(os.path.basename(buildout_file),
                      os.path.abspath(os.path.dirname(buildout_file)))
 
@@ -263,7 +264,4 @@ class VersioninfoCommand(basecommand.BaseCommand):
         file_.flush()
         return file_.name
 
-
-
 basecommand.registerCommand(VersioninfoCommand)
-

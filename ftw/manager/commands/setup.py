@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ftw.manager.commands import basecommand
 from ftw.manager.config import Configuration
 from ftw.manager.utils import input
@@ -8,14 +6,15 @@ from ftw.manager.schemes import COLOR_SCHEMES
 
 
 class Setup(basecommand.BaseCommand):
-    """
+    u"""
     Setup the ftw.manager command.
     Creates a config file in $HOME/.ftw.manager/config
+
     """
 
-    command_name = 'setup'
-    description = 'Configuration Wizard for ftw.manager'
-    usage = 'ftw %s' % command_name
+    command_name = u'setup'
+    description = u'Configuration Wizard for ftw.manager'
+    usage = u'ftw %s' % command_name
 
     def __call__(self):
         output.part_title('Configure ftw.manager')
@@ -35,7 +34,7 @@ class Setup(basecommand.BaseCommand):
             for s in schemes:
                 print '   *', s
             scheme = input.prompt('Select color scheme [%s]:' %
-                    '/'.join([s==current_scheme and s.upper() or s for s in schemes]), validator).lower()
+                                  '/'.join([s==current_scheme and s.upper() or s for s in schemes]), validator).lower()
             if not scheme:
                 scheme = current_scheme
             config.config.set('output', 'scheme', scheme)

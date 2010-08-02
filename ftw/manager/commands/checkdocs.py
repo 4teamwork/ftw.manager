@@ -16,6 +16,7 @@ class CheckdocsCommand(basecommand.BaseCommand):
 
     This command requires docutils to be installed in the site-packes of
     your python version.
+
     """
 
     command_name = u'checkdocs'

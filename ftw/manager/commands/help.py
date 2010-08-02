@@ -4,6 +4,7 @@ import basecommand
 class HelpCommand(basecommand.BaseCommand):
     u"""
     The ftw.manager egg provides various commands for daily work.
+
     """
 
     command_name = u'help'

@@ -5,15 +5,17 @@ from ftw.manager.utils import output
 
 
 class SelfUpdate(basecommand.BaseCommand):
-    """
+    u"""
+    --- DEPRECATED ----
     Updates ftw.manager to the newest version from PSC using easy_install
     Uses PSC-URL: http://downloads.4teamwork.ch/4teamwork/ftw/simple
+
     """
 
-    command_name = 'selfupdate'
-    description = 'DEPRECATED Updates ftw.manager with newest version from ' +\
-        'PSC using easy_install'
-    usage = 'ftw %s [options]' % command_name
+    command_name = u'selfupdate'
+    description = u'DEPRECATED Updates ftw.manager with newest version from ' +\
+        u'PSC using easy_install'
+    usage = u'ftw %s [options]' % command_name
 
     def __call__(self):
         # warning
@@ -21,7 +23,7 @@ class SelfUpdate(basecommand.BaseCommand):
                            'in site-packages, since we have a implicit ' +\
                            'dependency to zope.')
         output.warning('Use the buildout instead: ' +\
-                       'https://svn.4teamwork.ch/repos/buildout/ftw.manager/')
+                           'https://svn.4teamwork.ch/repos/buildout/ftw.manager/')
         output.error('Quitting. See help for enforcing update...')
         if not self.options.ignore_warning:
             return

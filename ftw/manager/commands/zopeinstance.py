@@ -6,18 +6,19 @@ import sys
 
 
 class ZopeInstanceCommand(basecommand.BaseCommand):
-    """
+    u"""
     Run bin/instance from any directory within the buildout.
     This may be useful called from a editor (e.g. vim).
 
     Example:
     % ftw zi fg
+
     """
 
-    command_name = 'zopeinstance'
-    command_shortcut = 'zi'
-    description = 'Run bin/instance placeless'
-    usage = 'ftw %s action [options]' % command_name
+    command_name = u'zopeinstance'
+    command_shortcut = u'zi'
+    description = u'Run bin/instance placeless'
+    usage = u'ftw %s action [options]' % command_name
     use_optparse = False
 
     def __call__(self):

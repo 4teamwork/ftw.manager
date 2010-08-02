@@ -15,6 +15,7 @@ class CheckoutCommand(basecommand.BaseCommand):
     configuration (see ftw setup).
 
     package_name : Name of the package you want to checkout
+
     """
 
     command_name = u'checkout'

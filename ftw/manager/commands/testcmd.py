@@ -5,16 +5,17 @@ import sys
 
 
 class TestCommand(basecommand.BaseCommand):
-    """
+    u"""
     Runs the tests for the current package.
     This command only works if you are in a checkout directory of
     your package and the this directory is part of a buildout.
+
     """
 
-    command_name = 'test'
-    command_shortcut = 't'
-    description = 'Run tests for current package'
-    usage = 'ftw %s' % command_name
+    command_name = u'test'
+    command_shortcut = u't'
+    description = u'Run tests for current package'
+    usage = u'ftw %s' % command_name
 
     def __call__(self):
         scm.tested_for_scms(('svn', 'gitsvn'), '.')
@@ -23,5 +24,3 @@ class TestCommand(basecommand.BaseCommand):
         zopeinstance.ZopeInstanceCommand(self.maincommand)()
 
 basecommand.registerCommand(TestCommand)
-
-

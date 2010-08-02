@@ -1,38 +1,24 @@
-# -*- coding: utf-8 -*-
-
-import os.path
-import sys
-
 from ftw.manager.commands import basecommand
+from ftw.manager.utils import git
 from ftw.manager.utils import output
 from ftw.manager.utils import runcmd
 from ftw.manager.utils import scm
-from ftw.manager.utils import git
-
+import os.path
+import sys
 
 
 class SwitchCommand(basecommand.BaseCommand):
     u"""
-    Wandelt ein lokales SVN-Repository in ein GIT-SVN-Repository um,
-    oder umgekehrt.
-    Es wird ein lokaler SVN-Cache unter ~/.gitsvn angelegt, welcher
-    Kopien der GIT-SVN-Repositories enthält. Dies erlaubt einen schnellen
-    Wechesel zwischen SVN und GIT.
+    Converts the local svn checkout into a git-svn checkout and vice versa.
+    The git-svn repository is initally heavy to clone, thats why it is cached
+    in `~/.gitsvn` after the first clone.
 
-    Dieser Befehl sollte im Root-Verzeichnis eines Packages ausgeführt werden.
-
-    Pushen mit GIT-SVN:
-        git svn dcommit
-
-    Pullen mit GIT-SVN:
-        git svn fetch
-        git svn rebase
     """
 
-    command_name = 'switch'
-    command_shortcut = 'sw'
-    description = 'Wechselt zwischen lokalem SVN- und GIT-SVN-Repository'
-    usage = 'ftw %s' % command_name
+    command_name = u'switch'
+    command_shortcut = u'sw'
+    description = u'Switch between SVN and GIT-SVN'
+    usage = u'ftw %s' % command_name
 
     def __call__(self):
         scm.tested_for_scms(('svn', 'gitsvn'), '.')
@@ -51,11 +37,12 @@ class SwitchCommand(basecommand.BaseCommand):
             output.error('Not in a local repository', exit=True)
         # check location
         if not scm.is_package_root('.'):
-            output.error('Please run this command at the root of the package' +\
+            output.error('Please run this command at the root of the package'
                          '(trunk folder, branch, tag)', exit=True)
         # check changes
         if scm.has_local_changes('.'):
-            output.error('You have local changes, commit them first..', exit=True)
+            output.error('You have local changes, commit them first..',
+                         exit=True)
 
     def switch_to_git(self):
         output.part_title('Switching to GIT')
@@ -75,6 +62,6 @@ class SwitchCommand(basecommand.BaseCommand):
     def create_egg_info(self):
         if os.path.exists('setup.py'):
             output.part_title('Creating egg-infos')
-            runcmd('%s setup.py egg_info' % sys.executable) 
+            runcmd('%s setup.py egg_info' % sys.executable)
 
 basecommand.registerCommand(SwitchCommand)

@@ -1,14 +1,13 @@
-
-import os
-import time
-
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import output
 from ftw.manager.utils import runcmd
 from ftw.manager.utils.memoize import memoize
+import os
+import time
+
 
 class MultiinstanceCommand(basecommand.BaseCommand):
-    """
+    u"""
     Calls multiple (ZEO-) instances one after another with
     a given parameter.
 
@@ -37,12 +36,13 @@ class MultiinstanceCommand(basecommand.BaseCommand):
 
     ftw mi --delay 50 1 2 restart
         Restarts instance1 then pauses for 50 seconds and then restarts instance2
+
     """
 
-    command_name = 'multiinstance'
-    command_shortcut = 'mi'
-    description = 'Calls multiple (ZEO-) instances one after another'
-    usage = 'ftw %s FROM [TO] ACTION' % command_name
+    command_name = u'multiinstance'
+    command_shortcut = u'mi'
+    description = u'Calls multiple (ZEO-) instances one after another'
+    usage = u'ftw %s FROM [TO] ACTION' % command_name
 
     alias_map = {
         'adm' : 0,

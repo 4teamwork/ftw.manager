@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import git
 from ftw.manager.utils import input
@@ -12,50 +10,47 @@ import ConfigParser
 import os
 import sys
 
+
 class ReleaseCommand(basecommand.BaseCommand):
     u"""
-    Der "release" command publiziert die aktuellen Änderungen eines Packets in
-    einer neuen Version. Der Befehl sollte vom root-Verzeichnis eines SVN-Checkouts
-    (trunk) ausgeführt werden.
+    This command creates a source release and publishs it on pypi
+    or a closed egg repository like a PSC.
 
-    Bedingungen
+    For releasing problerly you need to configure the credentials to
+    your target in your `./pypirc`.
 
-    *   Die Option *long_description* im *setup.py* muss validierter restructuredText sein
-    *   Man muss sich im Root-Verzeichnis eines SVN-Checkouts befinden: Wenn nur
-        das Egg erstellt (-e) wird, kann dies der trunk, ein branch oder ein tag
-        sein, ansonsten muss es der trunk sein.
-    *   Das Projekt muss ein gültiges SVN-Layout haben, d.H. die Ordner trunk,
-        branches und tags besitzen
-    *   Die Dateien setup.py und setup.cfg sind im aktuellen Ordner notwendig
-    *   Die Version ist in der Datei my/package/version.txt gespeichert
-    *   Eine Datei docs/HISTORY.txt ist notwendig
-    *   Das lokale Repository darf keine Änderungen haben, die nicht commitet wurden
-    *   Es wird eine MANIFEST.in Datei erwartet. Existiert keine, wird eine angelegt.
+    Following tasks will be performed:
 
-    Aktionen
+    * Create a tag
+    * Change versions in tag and trunk
+    * Fix HISTORY.txt in tag and trunk
+    * Create a source dist of the new tag
+    * Upload the dist to the selected target
 
-    *   Es wird ein SVN-Tag erstellt
-    *   Die Version im Trunk wird erhöht (version.txt und HISTORY.txt)
-    *   Die Version im Tag wird angepasst (version.txt und HISTORY.txt)
-    *   Der Tag wird aufgeräumt (setup.cfg : dev-angaben entfernen)
-    *   Vom Tag wird ein Egg erstellt und ins pypi geladen
+    More info on how to make release: https://devwiki.4teamwork.ch/Releasen
+
     """
 
-    command_name = 'release'
-    command_shortcut = 'rl'
-    description = 'Release eines Packets erstellen'
-    usage = 'ftw %s [OPTIONS]' % command_name
+    command_name = u'release'
+    command_shortcut = u'rl'
+    description = u'Release eines Packets erstellen'
+    usage = u'ftw %s [OPTIONS]' % command_name
 
     def register_options(self):
         self.parser.add_option('-e', '--only-egg', dest='release_egg_only',
                                action='store_true', default=False,
-                               help='Nur Egg erstellen, kein SVN-Tag machen')
+                               help='Do not commit changes (no tag, no '
+                               'versions changed), just create / submit'
+                               ' the source distribution.')
         self.parser.add_option('-E', '--no-egg', dest='release_egg',
                                action='store_false', default=True,
-                               help='Kein Egg erstellen')
-        self.parser.add_option('-i', '--ignore-doc-errors', dest='ignore_doc_errors',
+                               help='Do not create / submit the dist, but '
+                               'create a tag and change the bump versions.')
+        self.parser.add_option('-i', '--ignore-doc-errors',
+                               dest='ignore_doc_errors',
                                action='store_true', default=False,
-                               help='Docstring Fehler (reStructuredText) ignorieren')
+                               help='Do not check if the description is '
+                               'valid restructured text.')
 
     def __call__(self):
         scm.tested_for_scms(('svn', 'gitsvn'), '.')
@@ -240,7 +235,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             # test if its properly configured
             if config.has_section(srv):
                 print '* found target "%s"' % output.colorize(srv,
-                                                          output.WARNING)
+                                                              output.WARNING)
                 sections.append(srv)
         if basic_namespace in sections:
             self.pypi_target = basic_namespace

@@ -28,6 +28,7 @@ class DependencyCheckCommand(basecommand.BaseCommand):
     WIth the `--history` option it is possible to generate a history using
     the `HISTORY.txt` files of each package which has changes in trunk or
     tag (dependending on `--dev` option).
+
     """
 
     command_name = u'dependencycheck'

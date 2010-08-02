@@ -31,6 +31,7 @@ class EggCheckCommand(BaseCommand):
     ** do not use interfaces as folder
     ** viewlets and portlets should not be within a browser directory
     ** setup.cfg should not exist
+
     """
 
     command_name = u'eggcheck'
