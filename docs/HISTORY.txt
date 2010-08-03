@@ -5,6 +5,9 @@ Changelog
 1.2.3
 -----
 
+* Added better error message when using a erroneous svn remote with git
+  [03.08.2010, jbaumann]
+
 * `release` has now support for subversion, git-svn and git
   [03.08.2010, jbaumann]
 

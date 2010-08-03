@@ -30,6 +30,7 @@ def is_git(directory):
         dir.pop()
     return False
 
+@memoize
 def is_git_svn(directory):
     directory = os.path.abspath(directory)
     dir = directory.split('/')
@@ -37,6 +38,13 @@ def is_git_svn(directory):
         path = '/'.join(dir)
         gitconfig = os.path.join(path, '.git', 'config')
         if os.path.isfile(gitconfig) and '[svn-remote' in open(gitconfig).read():
+            # check if the remote really works. maybe we have just migrated the package
+            # and do not use the svn remote any more
+            foo, out, err = runcmd_with_exitcode('git svn info', log=False,
+                                                 respond=True, respond_error=True)
+            if len(err):
+                output.error('Your svn remote does not working. Fix it or remove it.',
+                             exit=True)
             return True
         # if there is .svn (but no .git) it is a .svn directory and
         # do not have to continue walking up...
