@@ -5,6 +5,9 @@ Changelog
 1.2.4
 -----
 
+* Fixed encoding problems - again
+  [03.08.2010, jbaumann]
+
 
 1.2.3
 -----
@@ -60,7 +63,7 @@ Changelog
   [28.07.2010, jbaumann]
 
 * `eggcheck`: Implemented first version according to
-  Issue #27 ftw.manager: Neuer Befehl zum Prüfen eines eggs
+  Issue #27 ftw.manager: Neuer Befehl zum Pruefen eines eggs
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/27
   [21.07.2010, jbaumann]
 
@@ -96,7 +99,7 @@ Changelog
 1.1.1
 -----
 
-* Issue #23 ftw.manager release: MANIFEST.in besser prüfen
+* Issue #23 ftw.manager release: MANIFEST.in besser pruefen
   https://extranet.4teamwork.ch/intranet/10-interne-projekte/tracker-softwareentwicklung/23
   [24.06.2010, jbaumann]
 
