@@ -306,7 +306,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             git.pull_changes('.')
         elif scm.is_git('.'):
             runcmd('git tag %s' % self.new_tag_version, log=True)
-            runcmd('git push origin %s' % self.new_tag_version, log=True)
+            runcmd('git push origin --tags', log=True)
 
     def bump_version_after_tagging(self):
         """Bump the version in the trunk / branch / master after
