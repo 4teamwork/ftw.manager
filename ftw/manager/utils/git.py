@@ -3,7 +3,7 @@ contains git-svn helper methods
 """
 
 import os
-from ftw.manager.utils import runcmd
+from ftw.manager.utils import runcmd, runcmd_unmemoized, runcmd_with_exitcode
 from ftw.manager.utils import subversion as svn
 from ftw.manager.utils import output
 from ftw.manager.utils.memoize import memoize
@@ -185,9 +185,38 @@ def has_local_changes(path):
     return len(runcmd(cmd, log=False, respond=True))>0
 
 def pull_changes(path):
-    cmd = 'cd %s ; git svn fetch ; git svn rebase' % path
+    if is_git_svn(path):
+        cmd = 'cd %s ; git svn fetch ; git svn rebase' % path
+    elif is_git(path):
+        cmd = 'cd %s ; git pull' % path
+    else:
+        raise NotAGitsvnRepository
     return runcmd(cmd, log=True, respond=True)
 
 def push_committed_changes(path):
-    cmd = 'cd %s ; git svn dcommit' % path
-    return runcmd(cmd, log=True, respond=True)
+    if is_git_svn(path):
+        cmd = 'cd %s ; git svn dcommit' % path
+    elif is_git(path):
+        cmd = 'cd %s ; git push' % path
+    else:
+        raise NotAGitsvnRepository
+    return runcmd_unmemoized(cmd, log=True, respond=True)
+
+def get_existing_tags(path):
+    if '://' in path:
+        raise Exception('Not a directory: ' % path)
+    if is_git_svn(path):
+        root_svn = get_package_root_url('.')
+        return svn.get_existing_tags(root_svn)
+    elif is_git(path):
+        tags = runcmd('git tag', log=False, respond=True)
+        tags = [t.strip() for t in tags]
+        # make a dict
+        return dict(zip(tags, tags))
+
+def has_remote(remote):
+    """Checks if there is a `remote` configured in the repo '.'
+    """
+    cmd = 'git remote show %s' % remote
+    exitcode = runcmd_with_exitcode(cmd, log=False, respond=False)
+    return exitcode == 0

@@ -4,7 +4,8 @@ contains subversion helper methods
 
 import os
 import xml.dom.minidom
-from ftw.manager.utils import runcmd, runcmd_with_exitcode, output, input
+from ftw.manager.utils import runcmd, runcmd_with_exitcode, runcmd_unmemoized
+from ftw.manager.utils import output, input
 from ftw.manager.utils.memoize import memoize, flush_cache
 
 class NotASubversionCheckout(Exception):
@@ -153,3 +154,8 @@ def has_local_changes(path):
     cmd = 'svn st %s | grep -v ^X | grep -v ^Performing | grep -v ^$' % path
     return len(runcmd(cmd, log=False, respond=True))>0
 
+def update(path):
+    """Runs svn up
+    """
+    cmd = 'svn up'
+    return runcmd_unmemoized(cmd, log=True)

@@ -66,16 +66,16 @@ def require_package_root_cwd():
 def get_svn_url(directory_or_url):
     if is_subversion(directory_or_url):
         return svn.get_svn_url(directory_or_url)
-    elif is_git(directory_or_url):
+    elif is_git_svn(directory_or_url):
         return git.get_svn_url(directory_or_url)
     raise NotAScm
 
 @memoize
 def get_package_root_url(directory_or_url):
-    if is_git(directory_or_url):
-        return git.get_package_root_url(directory_or_url)
-    elif is_subversion(directory_or_url):
+    if is_subversion(directory_or_url):
         return svn.get_package_root_url(directory_or_url)
+    elif is_git_svn(directory_or_url):
+        return git.get_package_root_url(directory_or_url)
     raise NotAScm
 
 @memoize
@@ -117,10 +117,10 @@ def get_package_name(directory_or_url):
 
 @memoize
 def has_local_changes(path):
-    if is_git(path):
-        return git.has_local_changes(path)
-    elif is_subversion(path):
+    if is_subversion(path):
         return svn.has_local_changes(path)
+    elif is_git(path) or is_git_svn(path):
+        return git.has_local_changes(path)
     raise NotAScm
 
 @memoize
@@ -221,7 +221,7 @@ def get_egg_dependencies(egg, with_extra=None):
     return dependencies
 
 
-def add_and_commit_files(message, files='*'):
+def add_and_commit_files(message, files='*', push=True):
     """Adds and commits files to the scm. The repository
     must be .
     Use files='*' to commit all changed files
@@ -243,9 +243,9 @@ def add_and_commit_files(message, files='*'):
                 runcmd('git add %s' % file_)
     else:
         raise Exception('unknown scm')
-    commit_files(message, files=files)
+    commit_files(message, files=files, push=push)
 
-def commit_files(message, files=''):
+def commit_files(message, files='', push=True):
     """Commit some files
     """
     commit_all_files = files in ('*', '.')
@@ -264,11 +264,10 @@ def commit_files(message, files=''):
             runcmd_unmemoized('git add .')
         else:
             for file_ in files:
-                runcmd('git add %s' % file_)
+                runcmd_unmemoized('git add %s' % file_)
         runcmd_unmemoized('git commit -m "%s"' % message)
-        if is_git_svn('.'):
-            runcmd_unmemoized('git svn dcommit')
-
+        if push:
+            git.push_committed_changes('.')
 
     else:
         raise Exception('unkown scm')
@@ -374,8 +373,8 @@ class PackageInfoMemory(Singleton):
                     if url.startswith(os.path.join(trunk_url,
                                                    package.replace('.', '/'))) \
                                                    and not url.endswith('version.txt'):
-                                                   data['changes'] = True
-                                                   break
+                        data['changes'] = True
+                        break
             else:
                 data['changes'] = True
             self.set_cached_info(package, data)
@@ -657,3 +656,12 @@ class PackageSourceMemory(Singleton):
 @memoize
 def guess_package_url(*args, **kwargs):
     return PackageSourceMemory().guess_url(*args, **kwargs)
+
+@memoize
+def get_existing_tags(path):
+    if is_subversion(path):
+        return svn.get_existing_tags(path)
+    elif is_git(path):
+        return git.get_existing_tags(path)
+    else:
+        raise NotAScm

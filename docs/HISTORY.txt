@@ -5,6 +5,9 @@ Changelog
 1.2.3
 -----
 
+* `release` has now support for subversion, git-svn and git
+  [03.08.2010, jbaumann]
+
 * Translated german stuff to english, removed various
   python2.4 vs python2.6 encode / decode issues.
   [02.08.2010, jbaumann]

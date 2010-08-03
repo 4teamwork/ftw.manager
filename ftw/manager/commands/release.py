@@ -53,7 +53,7 @@ class ReleaseCommand(basecommand.BaseCommand):
                                'valid restructured text.')
 
     def __call__(self):
-        scm.tested_for_scms(('svn', 'gitsvn'), '.')
+        scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
         self.check_doc()
         self.analyse()
         self.pre_build_check()
@@ -64,14 +64,12 @@ class ReleaseCommand(basecommand.BaseCommand):
         print ''
         input.prompt('Are you sure to continue? [OK]')
         if not self.options.release_egg_only:
+            self.bump_version_before_tagging()
             self.create_tag()
-            self.bump_trunk_after_tagging()
-            self.bump_tag_after_tagging()
         if self.options.release_egg:
             self.release_egg()
         if not self.options.release_egg_only:
-            self.switch_to_back()
-        # swith back to trunk
+            self.bump_version_after_tagging()
 
     def pre_build_check(self):
         """ Check if a build will work later. Check this before doing anything
@@ -120,33 +118,56 @@ class ReleaseCommand(basecommand.BaseCommand):
         output.part_title('Checking subversion project')
         if not scm.is_scm('.'):
             # without subversion or gitsvn it doesnt work...
-            output.error('Current directory is not a subversion checkout, nor a git-svn repo',
+            output.error('Current directory is not a repository of type svn, '
+                         'git-svn, git.',
                          exit=True)
-        if scm.is_git('.'):
+        # update newest remote changes
+        if scm.is_git('.') or scm.is_git_svn('.'):
             git.pull_changes('.')
             git.push_committed_changes('.')
-        root_svn = scm.get_package_root_url('.')
-        if not svn.check_project_layout(root_svn, raise_exception=False,
-                                        ask_for_creation=False):
-            # we should have the folders trunk, tags, branches in the project
-            output.error('Project does not have default layout with trunk, ' +\
-                             'tags and branches. At least one folder is missing.',
-                         exit=True)
-        if not self.options.release_egg_only:
-            here_url = scm.get_svn_url('.')
-            here_root = scm.get_package_root_url('.')
-            is_trunk = here_url == here_root +'/trunk'
-            is_branch = '/'.join(here_url.split('/')[:-1]) == here_root + '/branches'
-            if not is_trunk and not is_branch:
-                # command must be run at the "trunk" folder of a package
+        elif scm.is_subversion('.'):
+            svn.update('.')
+        # remote should be there
+        if scm.is_git('.') and not scm.is_git_svn('.'):
+            if not git.has_remote('origin'):
+                output.error('There is no remote "origin", which is needd',
+                             exit=True)
+        # run it at repo root
+        if scm.is_subversion('.') or scm.is_git_svn('.'):
+            root_svn = scm.get_package_root_url('.')
+            if not svn.check_project_layout(root_svn, raise_exception=False,
+                                            ask_for_creation=False):
+                # we should have the folders trunk, tags, branches in the project
+                output.error('Project does not have default layout with trunk, ' +\
+                                 'tags and branches. At least one folder is missing.',
+                             exit=True)
+            if not self.options.release_egg_only:
+                here_url = scm.get_svn_url('.')
+                here_root = scm.get_package_root_url('.')
+                is_trunk = here_url == here_root +'/trunk'
+                is_branch = '/'.join(here_url.split('/')[:-1]) == here_root + '/branches'
+                if not is_trunk and not is_branch:
+                    # command must be run at the "trunk" folder of a package
+                    output.error('Please run this command at the root of the package ' +\
+                                     '(trunk/branch folder)', exit=True)
+        elif scm.is_git('.'):
+            if not os.path.exists('.git'):
                 output.error('Please run this command at the root of the package ' +\
-                                 '(trunk/branch folder)', exit=True)
+                                 'checkout', exit=True)
+        # .. other checks
         if not os.path.isfile('setup.py'):
             # setup.py is required
             output.error('Could not find the file ./setup.py', exit=True)
         if not os.path.isfile('docs/HISTORY.txt'):
             # docs/HISTORY.txt is required
             output.error('Could not find the file ./docs/HISTORY.txt', exit=True)
+        if os.path.isfile('setup.cfg'):
+            # setup.cfg is not necessary, it should not be used since the development
+            # stuff makes bad distribution versions
+            output.error('setup.cfg should not be used anymore')
+            if input.prompt_bool('Should I delete setup.cfg?'):
+                scm.remove_files('setup.cfg')
+                scm.commit_files('Removed setup.cfg', 'setup.cfg')
         version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         if not os.path.isfile(version_file):
@@ -176,8 +197,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         print ' * Current version of trunk:         %s' %\
             output.colorize(trunk_version, output.WARNING)
         next_version = trunk_version.split('-')[0]
-        root_svn = scm.get_package_root_url('.')
-        existing_tags = svn.get_existing_tags(root_svn)
+        existing_tags = scm.get_existing_tags('.')
         if next_version in existing_tags.keys():
             output.warning('Tag %s already existing' % next_version)
         # ask for next tag version
@@ -250,6 +270,23 @@ class ReleaseCommand(basecommand.BaseCommand):
         if pypi_target_input:
             self.pypi_target = pypi_target_input
 
+    def bump_version_before_tagging(self):
+        """Sets the version in version.txt and HISTORY.txt from the
+        trunk version (e.g. 1.0-dev) to the tag-version (1.0).
+
+        """
+        output.part_title('Bumping versions')
+        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
+                                    'version.txt')
+        print '* updating %s: set version to %s' % (version_file,
+                                                    self.new_tag_version)
+        version_txt = open(version_file, 'w')
+        version_txt.write(self.new_tag_version)
+        version_txt.close()
+        # commit
+        msg = 'bumping version to %s' % self.new_tag_version
+        scm.commit_files(msg, version_file)
+
     def create_tag(self):
         output.part_title('Creating subversion tag')
         if scm.is_subversion('.'):
@@ -263,16 +300,24 @@ class ReleaseCommand(basecommand.BaseCommand):
                 svn.get_package_name('.'),
                 )
             runcmd(cmd)
-        elif scm.is_git('.'):
+        elif scm.is_git_svn('.'):
             cmd = 'git svn tag %s' % self.new_tag_version
             runcmd(cmd)
             git.pull_changes('.')
+        elif scm.is_git('.'):
+            runcmd('git tag %s' % self.new_tag_version, log=True)
+            runcmd('git push origin %s' % self.new_tag_version, log=True)
 
-    def bump_trunk_after_tagging(self):
+    def bump_version_after_tagging(self):
+        """Bump the version in the trunk / branch / master after
+        creating the tag. Update version.txt and HISTORY.txt
+
+        """
         output.part_title('Bumping versions in trunk')
         version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
-        print '* updating %s' % version_file
+        print '* updating %s: set version to %s' % (version_file,
+                                                 self.new_trunk_version)
         version_txt = open(version_file, 'w')
         version_txt.write(self.new_trunk_version)
         version_txt.close()
@@ -287,59 +332,12 @@ class ReleaseCommand(basecommand.BaseCommand):
         file = open(history_file, 'w')
         file.write('\n'.join(data))
         file.close()
+        # commit
         ci_msg = 'bumping versions in trunk of %s after tagging %s' % (
             scm.get_package_name('.'),
             self.new_tag_version,
             )
-        if scm.is_subversion('.'):
-            cmd = 'svn ci -m "%s"' % ci_msg
-            runcmd(cmd)
-        elif scm.is_git('.'):
-            cmd = 'git commit -a -m "%s"' % ci_msg
-            runcmd(cmd)
-            git.push_committed_changes('.')
-
-    def bump_tag_after_tagging(self):
-        self._package_root = scm.get_package_root_url('.')
-        self._checkout_url = scm.get_svn_url('.')
-        if scm.is_subversion('.'):
-            tag_url = os.path.join(scm.get_package_root_url('.'), 'tags',
-                                   self.new_tag_version)
-            cmd = 'svn switch %s' % tag_url
-            runcmd(cmd)
-        elif scm.is_git('.'):
-            cmd = 'git checkout remotes/tags/%s; git checkout -b %s' % (
-                self.new_tag_version,
-                self.new_tag_version
-                )
-            runcmd(cmd)
-        output.part_title('Bumping versions in tag')
-        version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
-                                    'version.txt')
-        print '* updating %s' % version_file
-        version_txt = open(version_file, 'w')
-        version_txt.write(self.new_tag_version)
-        version_txt.close()
-        if os.path.isfile('setup.cfg'):
-            print '* updating setup.cfg : removing dev stuff'
-            data = open('setup.cfg').read().split('\n')
-            file = open('setup.cfg', 'w')
-            for line in data:
-                if not line.startswith('tag_build') and not line.startswith('tag_svn_rev'):
-                    file.write(line)
-                    file.write('\n')
-            file.write('\n')
-            file.close()
-        ci_msg = "bumping versions in tag of %s after tagging %s"  % (
-            scm.get_package_name('.'),
-            self.new_tag_version,
-            )
-        if scm.is_subversion('.'):
-            cmd = 'svn ci -m "%s"' % ci_msg
-            runcmd(cmd)
-        elif scm.is_git('.'):
-            cmd = 'git commit -a -m "%s" ; git svn dcommit' % ci_msg
-            runcmd(cmd)
+        scm.commit_files(ci_msg, '*', push=True)
 
     def release_egg(self):
         output.part_title('Releasing agg to target %s' % self.pypi_target)
@@ -350,24 +348,6 @@ class ReleaseCommand(basecommand.BaseCommand):
         runcmd(cmd)
         runcmd('rm -rf dist build')
 
-    def switch_to_back(self):
-        output.part_title('Cleaning up local repository')
-        if scm.is_subversion('.'):
-            cmd = 'svn switch %s' % self._checkout_url
-            runcmd(cmd)
-        elif scm.is_git('.'):
-            git.push_committed_changes('.')
-            folder = self._checkout_url[len(self._package_root)+1:]
-            if folder=='trunk':
-                folder = 'master'
-            elif folder.startswith('branches'):
-                folder = 'remotes/%s' % folder[len('branches/'):]
-            else:
-                folder = 'remotes/%s' % folder
-            cmd = 'git checkout %s' % folder
-            cmd += ' ; git branch -D %s' % self.new_tag_version
-            runcmd(cmd)
-            runcmd('git svn dcommit')
 
     def check_manifest(self):
         """ Checks the MANIFEST.in file and gives advices. It returns if the
@@ -442,15 +422,11 @@ class ReleaseCommand(basecommand.BaseCommand):
         if created or modified:
             # commit it ?
             if input.prompt_bool('Would you like to commit the MANIFEST.in?'):
-                if scm.is_subversion('.'):
-                    if created:
-                        runcmd('svn add MANIFEST.in')
-                    runcmd('svn commit -m "%s"' % commit_message)
+                if created:
+                    scm.add_and_commit_files(commit_message, 'MANIFEST.in')
                     return True
-                elif scm.is_git('.'):
-                    runcmd('git add MANIFEST.in')
-                    runcmd('git commit -am "%s"' % commit_message)
-                    runcmd('git svn dcommit')
+                elif modified:
+                    scm.commit_files(commit_message, 'MANIFEST.in')
                     return True
             return False
 
