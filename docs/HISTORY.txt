@@ -5,6 +5,9 @@ Changelog
 1.2.5
 -----
 
+* `eggcheck`: Fixed recursion problem when guessing svn urls.
+  [05.08.2010, jbaumann]
+
 
 1.2.4
 -----

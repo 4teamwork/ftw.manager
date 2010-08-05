@@ -72,11 +72,11 @@ def get_svn_url(directory_or_url):
 
 @memoize
 def get_package_root_url(directory_or_url):
-    if is_subversion(directory_or_url):
+    if '://' in directory_or_url or is_subversion(directory_or_url):
         return svn.get_package_root_url(directory_or_url)
     elif is_git_svn(directory_or_url):
         return git.get_package_root_url(directory_or_url)
-    raise NotAScm
+    raise NotAScm, directory_or_url
 
 @memoize
 def get_package_root_path(directory_or_url):
@@ -596,9 +596,13 @@ class PackageSourceMemory(Singleton):
         for dir in hint_dirs:
             path = os.path.join(dir, package)
             if os.path.isdir(path) and is_scm(path):
-                url = get_package_root_url(path)
-                self.set(package, url)
-                return url
+                try:
+                    url = get_package_root_url(path)
+                except NotAScm:
+                    pass
+                else:
+                    self.set(package, url)
+                    return url
 
         # now lets guess it with the namespace...
         # first we check the packages we alreay know the path:
@@ -613,21 +617,6 @@ class PackageSourceMemory(Singleton):
                         return url
                 except NotAScm:
                     pass
-
-        # ok, now we need to check our hint_dirs for packages with the same namespace
-        for dir in hint_dirs:
-            for pkg in os.listdir(dir):
-                path = os.path.join(dir, pkg)
-                if pkg.startswith('%s.' % namespace):
-                    try:
-                        pkg_url = self.guess_url(pkg, prompt=False)
-                        dir_url = '/'.join(pkg_url.split('/')[:-1])
-                        if package+'/' in svn.listdir(dir_url):
-                            url = os.path.join(dir_url, package)
-                            self.set(package, url)
-                            return url
-                    except NotAScm:
-                        pass
 
         # could not find any? we may need to ask the user...
         if prompt:
