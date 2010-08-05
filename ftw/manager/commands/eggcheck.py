@@ -1,4 +1,6 @@
 from StringIO import StringIO
+from ftw.manager.packages import PACKAGE_REQUIREMENTS_INADVISABLE
+from ftw.manager.packages import TESTING_PACKAGES
 from ftw.manager.commands.basecommand import BaseCommand, registerCommand
 from ftw.manager.utils import output, input, scm, runcmd_with_exitcode, runcmd
 from pkg_resources import Requirement
@@ -43,267 +45,6 @@ class EggCheckCommand(BaseCommand):
         ('ERROR', output.BOLD_ERROR),
         ('WARNING', output.BOLD_WARNING),
         ('NOTICE', output.WARNING),
-        )
-
-    IGNORE_IMPORTS_FROM = (
-        'AccessControl',
-        'Acquisition',
-        'ClientForm',
-        'DateTime',
-        'ExtensionClass',
-        'Jinja2',
-        'Missing',
-        'MultiMapping',
-        'OFS',
-        'PIL',
-        'Persistence',
-        'Products.ATContentTypes',
-        'Products.Archetypes',
-        'Products.BTreeFolder2',
-        'Products.CMFActionIcons',
-        'Products.CMFCalendar',
-        'Products.CMFCore',
-        'Products.CMFDefault',
-        'Products.CMFDiffTool',
-        'Products.CMFDynamicViewFTI',
-        'Products.CMFEditions',
-        'Products.CMFFormController',
-        'Products.CMFPlacefulWorkflow',
-        'Products.CMFPlone',
-        'Products.CMFQuickInstallerTool',
-        'Products.CMFUid',
-        'Products.DCWorkflow',
-        'Products.ExtendedPathIndex',
-        'Products.ExternalEditor',
-        'Products.ExternalMethod',
-        'Products.Five',
-        'Products.GenericSetup',
-        'Products.MIMETools',
-        'Products.MailHost',
-        'Products.MimetypesRegistry',
-        'Products.OFSP',
-        'Products.PageTemplates',
-        'Products.PasswordResetTool',
-        'Products.PlacelessTranslationService',
-        'Products.PloneLanguageTool',
-        'Products.PlonePAS',
-        'Products.PloneTestCase',
-        'Products.PluggableAuthService',
-        'Products.PluginIndexes',
-        'Products.PluginRegistry',
-        'Products.PortalTransforms',
-        'Products.PythonScripts',
-        'Products.ResourceRegistries',
-        'Products.Sessions',
-        'Products.SiteAccess',
-        'Products.SiteErrorLog',
-        'Products.StandardCacheManagers',
-        'Products.TemporaryFolder',
-        'Products.TinyMCE',
-        'Products.Transience',
-        'Products.ZCTextIndex',
-        'Products.ZCatalog',
-        'Products.ZGadflyDA',
-        'Products.ZODBMountPoint',
-        'Products.ZReST',
-        'Products.ZSQLMethods',
-        'Products.kupu',
-        'Products.statusmessages',
-        'Pygments',
-        'Record',
-        'RestrictedPython',
-        'Sphinx',
-        'StringIO',
-        'Testing.ZopeTestCase',
-        'ThreadLock',
-        'ZConfig',
-        'ZODB3',
-        'ZPublisher',
-        'Zope2',
-        'ZopeUndo',
-        'archetypes.kss',
-        'archetypes.referencebrowserwidget',
-        'borg.localrole',
-        'buildout.dumppickedversions',
-        'collective.testcaselayer',
-        'distribute',
-        'docutils',
-        'five.customerize',
-        'five.formlib',
-        'five.localsitemanager',
-        'initgroups',
-        'kss.core',
-        'lxml',
-        'mechanize',
-        'persistent',
-        'pkgutil.',
-        'plone.app.blob',
-        'plone.app.content',
-        'plone.app.contentmenu',
-        'plone.app.contentrules',
-        'plone.app.controlpanel',
-        'plone.app.customerize',
-        'plone.app.folder',
-        'plone.app.form',
-        'plone.app.i18n',
-        'plone.app.iterate',
-        'plone.app.jquerytools',
-        'plone.app.kss',
-        'plone.app.layout',
-        'plone.app.linkintegrity',
-        'plone.app.locales',
-        'plone.app.openid',
-        'plone.app.portlets',
-        'plone.app.redirector',
-        'plone.app.upgrade',
-        'plone.app.users',
-        'plone.app.viewletmanager',
-        'plone.app.vocabularies',
-        'plone.app.workflow',
-        'plone.browserlayer',
-        'plone.contentrules',
-        'plone.fieldsets',
-        'plone.i18n',
-        'plone.indexer',
-        'plone.intelligenttext',
-        'plone.locking',
-        'plone.memoize',
-        'plone.openid',
-        'plone.portlet.collection',
-        'plone.portlet.static',
-        'plone.portlets',
-        'plone.protect',
-        'plone.session',
-        'plone.theme',
-        'plonetheme.classic',
-        'plonetheme.sunburst',
-        'python-gettext',
-        'pytz',
-        'roman',
-        'tempstorage',
-        'transaction',
-        'unittest',
-        'wicked',
-        'xml.',
-        'z3c.autoinclude',
-        'z3c.checkversions',
-        'zExceptions',
-        'zLOG',
-        'zc.buildout',
-        'zc.lockfile',
-        'zc.recipe.egg',
-        'zc.recipe.testrunner',
-        'zdaemon',
-        'zodbcode',
-        'zope.annotation',
-        'zope.app.annotation',
-        'zope.app.apidoc',
-        'zope.app.applicationcontrol',
-        'zope.app.appsetup',
-        'zope.app.authentication',
-        'zope.app.basicskin',
-        'zope.app.broken',
-        'zope.app.cache',
-        'zope.app.catalog',
-        'zope.app.component',
-        'zope.app.container',
-        'zope.app.content',
-        'zope.app.dav',
-        'zope.app.debug',
-        'zope.app.dependable',
-        'zope.app.dtmlpage',
-        'zope.app.error',
-        'zope.app.exception',
-        'zope.app.file',
-        'zope.app.folder',
-        'zope.app.form',
-        'zope.app.generations',
-        'zope.app.http',
-        'zope.app.i18n',
-        'zope.app.interface',
-        'zope.app.intid',
-        'zope.app.locales',
-        'zope.app.localpermission',
-        'zope.app.pagetemplate',
-        'zope.app.principalannotation',
-        'zope.app.publication',
-        'zope.app.publisher',
-        'zope.app.renderer',
-        'zope.app.rotterdam',
-        'zope.app.schema',
-        'zope.app.security',
-        'zope.app.securitypolicy',
-        'zope.app.server',
-        'zope.app.session',
-        'zope.app.testing',
-        'zope.app.traversing',
-        'zope.app.undo',
-        'zope.app.wsgi',
-        'zope.app.zapi',
-        'zope.app.zcmlfiles',
-        'zope.app.zopeappgenerations',
-        'zope.app.zptpage',
-        'zope.authentication',
-        'zope.broken',
-        'zope.browser',
-        'zope.cachedescriptors',
-        'zope.catalog',
-        'zope.component',
-        'zope.componentvocabulary',
-        'zope.configuration',
-        'zope.container',
-        'zope.contentprovider',
-        'zope.contenttype',
-        'zope.copy',
-        'zope.copypastemove',
-        'zope.datetime',
-        'zope.decorator',
-        'zope.deferredimport',
-        'zope.deprecation',
-        'zope.documenttemplate',
-        'zope.dottedname',
-        'zope.dublincore',
-        'zope.error',
-        'zope.event',
-        'zope.exceptions',
-        'zope.filerepresentation',
-        'zope.formlib',
-        'zope.hookable',
-        'zope.i18n',
-        'zope.i18nmessageid',
-        'zope.index',
-        'zope.interface',
-        'zope.intid',
-        'zope.keyreference',
-        'zope.lifecycleevent',
-        'zope.location',
-        'zope.minmax',
-        'zope.mkzeoinstance',
-        'zope.modulealias',
-        'zope.pagetemplate',
-        'zope.password',
-        'zope.principalannotation',
-        'zope.principalregistry',
-        'zope.processlifetime',
-        'zope.proxy',
-        'zope.publisher',
-        'zope.schema',
-        'zope.security',
-        'zope.securitypolicy',
-        'zope.sendmail',
-        'zope.sequencesort',
-        'zope.server',
-        'zope.session',
-        'zope.site',
-        'zope.size',
-        'zope.structuredtext',
-        'zope.tal',
-        'zope.tales',
-        'zope.testbrowser',
-        'zope.testing',
-        'zope.thread',
-        'zope.traversing',
-        'zope.viewlet',
         )
 
     FIND_LINKS = [
@@ -398,7 +139,7 @@ class EggCheckCommand(BaseCommand):
                 self.notify(False, 'maintainer is defined as variable but is '
                             'not used in setup call',
                             'add "maintainer=maintainer," to the setup call',
-                            1)
+                            1, pause=False)
                 if input.prompt_bool('Should I try to fix it?'):
                     rows = open('setup.py').read().split('\n')
                     file_ = open('setup.py', 'w')
@@ -442,7 +183,8 @@ class EggCheckCommand(BaseCommand):
                         'it should be a file containing the package version',
                         0)
         else:
-            self.notify(False, '%s does not exist' % versiontxt_path)
+            self.notify(False, '%s does not exist' % versiontxt_path,
+                        pause=False)
             if input.prompt_bool('Should I try to fix it?'):
                 version = self.egginfo.get_version()
                 file_ = open(versiontxt_path, 'w')
@@ -466,7 +208,7 @@ class EggCheckCommand(BaseCommand):
             self.notify(False, 'I\'m guessing that the version in your '
                         'setup.py is not taken from %s' % versiontxt_path,
                         'check %s on how to define versions properly' % \
-                            WIKI_PYTHON_EGGS)
+                            WIKI_PYTHON_EGGS, pause=False)
             if input.prompt_bool('Should I try to fix it?'):
                 new_version_row = "version = open('%s').read().strip()" % \
                     versiontxt_path
@@ -495,7 +237,7 @@ class EggCheckCommand(BaseCommand):
             print '  expected namespaces:', str(guessed_namespaces)
             print '  package name:       ', scm.get_package_name('.')
             self.notify(False, 'I think your namespace_packages declaration '
-                        'is wrong')
+                        'is wrong', pause=False)
             if input.prompt_bool('Should I try to fix it?'):
                 guessed_namespaces.sort()
                 rows = open('setup.py').read().split('\n')
@@ -603,7 +345,7 @@ class EggCheckCommand(BaseCommand):
         if os.path.exists('CHANGES.txt'):
             self.notify(False, 'A ./CHANGES.txt exists',
                         'Remove the CHANGES.txt, we use the docs/HISTORY.txt',
-                        1)
+                        1, pause=changes_used)
             if not changes_used:
                 if input.prompt_bool(
                     'Should I remove the CHANGES.txt for you?'):
@@ -623,7 +365,7 @@ class EggCheckCommand(BaseCommand):
             contributors_used = True
         if os.path.exists('CONTRIBUTORS.txt'):
             self.notify(False, 'A ./CONTRIBUTORS.txt exists',
-                        'Remove the CONTRIBUTORS.txt', 1)
+                        'Remove the CONTRIBUTORS.txt', 1, pause=False)
             if not contributors_used:
                 if input.prompt_bool('Should I remove the CONTRIBUTORS.txt '
                                      'for you?'):
@@ -661,7 +403,8 @@ class EggCheckCommand(BaseCommand):
         # setup.cfg
         self.notify_check('Do not use setup.cfg')
         if os.path.exists('setup.cfg'):
-            self.notify(False, 'Found a setup.cfg', 'Remove the setup.cfg', 1)
+            self.notify(False, 'Found a setup.cfg', 'Remove the setup.cfg', 1,
+                        pause=False)
             if input.prompt_bool('Should I remove the setup.cfg?'):
                 scm.remove_files('setup.cfg')
                 scm.commit_files('Removed setup.cfg', 'setup.cfg')
@@ -682,6 +425,20 @@ class EggCheckCommand(BaseCommand):
         else:
             self.notify(False, 'You have restructured text errors in your long_description.',
                         'Run "ftw checkdocs" for detailed errors.', 0)
+
+    def _get_guessed_related_packages(self):
+        """If we are in e.g. src/my.package, it will return a list
+        of other folders in the src folder.
+
+        """
+        path = os.getcwd().split('/')
+        if path[-2] == 'src':
+            other_dirs = filter(
+                lambda e: os.path.isdir('../' + e) and e != path[-1],
+                os.listdir('..'))
+            return tuple(other_dirs)
+        else:
+            return ()
 
     def check_requires(self):
         """ Checks, if there are missing dependencies
@@ -708,8 +465,13 @@ class EggCheckCommand(BaseCommand):
         self.notify_check('Its not necessary to import some default plone / zope stuff')
         failures = False
         for egg in requires:
-            if egg in self.IGNORE_IMPORTS_FROM:
-                self.notify(False, 'Maybe you should remove the requirement %s' % egg,
+            if egg in PACKAGE_REQUIREMENTS_INADVISABLE and egg not in TESTING_PACKAGES:
+                self.notify(False, 'Maybe you should remove the requirement ' +\
+                                output.colorize(egg, output.ERROR) +\
+                                output.colorize('. It seems to be in a python, ' +\
+                                                    'zope or plone distribution and ' +\
+                                                    'those packages should not be ' +\
+                                                    'set as requirement.', output.WARNING),
                             problem_level=2)
                 failures = True
         if not failures:
@@ -750,13 +512,13 @@ class EggCheckCommand(BaseCommand):
             ipath_file_mapping[ipath] = file_
 
         # SEARCH ZCML FILES
-        cmd = "find . -name '*.zcml' -exec grep -Hr '\(layer\|for\)=' {} \;"
+        cmd = "find . -name '*.zcml' -exec grep -Hr '\(layer\|package\|for\)=' {} \;"
         zcml_grep_results = runcmd(cmd, respond=True)
 
         # cleanup results
         zcml_xpr = re.compile('(for|layer)="(.*?)("|$)')
         for row in zcml_grep_results:
-            file_, stmt = row.split(':')
+            file_, stmt = row.split(':', 1)
             stmt = stmt.strip()
             match = zcml_xpr.search(stmt)
             if not match:
@@ -772,6 +534,8 @@ class EggCheckCommand(BaseCommand):
             if not ipath.startswith('.'):
                 ipath_file_mapping[ipath] = file_
 
+        # for later use
+        guessed_related_packages = self._get_guessed_related_packages()
 
         # HANDLE ALL IMPORTS
         for ipath, file_ in ipath_file_mapping.items():
@@ -794,7 +558,7 @@ class EggCheckCommand(BaseCommand):
                         break
             if not found:
                 # is it ignored?
-                for egg in self.IGNORE_IMPORTS_FROM:
+                for egg in PACKAGE_REQUIREMENTS_INADVISABLE + TESTING_PACKAGES:
                     if ipath.startswith(egg):
                         found = True
                         break
@@ -816,13 +580,22 @@ class EggCheckCommand(BaseCommand):
             # does one of the eggs exist?
             found = False
 
-            # .. in pypi
+            # is there package in our src directory, if we are in one?
             for egg_name in guessed_egg_names:
-                if len(self.find_egg_in_index(egg_name)) > 0:
+                if egg_name.strip() in guessed_related_packages:
                     if egg_name.strip() not in propose_requires:
                         propose_requires.append(egg_name.strip())
                     found = True
                     break
+
+            # .. in pypi
+            if not found:
+                for egg_name in guessed_egg_names:
+                    if len(self.find_egg_in_index(egg_name)) > 0:
+                        if egg_name.strip() not in propose_requires:
+                            propose_requires.append(egg_name.strip())
+                        found = True
+                        break
 
             # .. or do we have one in the svn cache?
             if not found:
@@ -961,7 +734,8 @@ class EggCheckCommand(BaseCommand):
         print output.colorize('CHECK:', output.BOLD_INFO), \
             output.colorize(title, output.INFO)
 
-    def notify(self, state, problem='', solution='', problem_level=0):
+    def notify(self, state, problem='', solution='', problem_level=0,
+               pause=True):
         """Notify the user of a problem
         """
         if state:
@@ -972,6 +746,8 @@ class EggCheckCommand(BaseCommand):
                 output.colorize(problem, prob_color)
             if solution:
                 print '  SOLUTION:', solution
+            if pause:
+                input.prompt('[ENTER TO CONTINUE]')
         print ''
 
     def notify_fix_completed(self):
