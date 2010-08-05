@@ -112,7 +112,446 @@ Use the help command for detailed help::
 
     $ ftw.help
 
---help-text--
+
+usage: ftw ACTION [options]
+
+ACTIONS::
+
+    checkdocs        : Checks if the description defined in setup.py is reStructured Text valid. [cd]
+    checkout         : Checks out a package with git-svn [co]
+    dependencycheck  : Check Dependencies [dc]
+    eggcheck         : Check some common problems on a egg [ec]
+    help             : show help text
+    i18npot          : Builds the .pot files in your locales directory with i18ndude [ib]
+    i18nsync         : Syncs the .pot files with the .po files of alanguage. [is]
+    multiinstance    : Calls multiple (ZEO-) instances one after another [mi]
+    release          : Release eines Packets erstellen [rl]
+    selfupdate       : DEPRECATED Updates ftw.manager with newest version from PSC using easy_install
+    setup            : Configuration Wizard for ftw.manager
+    switch           : Switch between SVN and GIT-SVN [sw]
+    test             : Run tests for current package [t]
+    version          : Display Version of the package containing the current directory
+    versioninfo      : Prints version pinning information [vi]
+    zopeinstance     : Run bin/instance placeless [zi]
+
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+  -D          Debug mode (for any command)
+
+ftw checkdocs (cd)
+==================
+usage: ftw checkdocs
+    Command name:     checkdocs
+    Command shortcut: cd
+
+    Checks if the description defined in setup.py is reStructured Text valid.
+
+    This command requires docutils to be installed in the site-packes of
+    your python version.
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -s, --show-description
+                        show long-description of setup.py (with line numbers)
+  -b, --show-inbrowser  Show description converted into HTML in your default
+                        browser
+  -o OFFROWS, --off-rows=OFFROWS
+                        show N rows before and after a bad row (only if not
+                        using -s)
+
+
+
+ftw checkout (co)
+=================
+usage: ftw checkout package_name
+    Command name:     checkout
+    Command shortcut: co
+
+    Checks out a package with git-svn or svn, depending on your
+    configuration (see ftw setup).
+
+    package_name : Name of the package you want to checkout
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw dependencycheck (dc)
+========================
+usage: ftw dependencycheck [OPTIONS]
+    Command name:     dependencycheck
+    Command shortcut: dc
+
+    The "dependencycheck" Command checks the dependencies of your package and
+    displays a table of all packages you have a dependency to.
+    The command checks for each package if there is a new SVN tag.
+
+    Run the command on the root of your package checkout, where your setup.py
+    is.
+
+    Caching
+    The results are cached in `~/.ftw.manager` for faster access. If you do
+    not trust the caching algorithm you can force a refresh with `--refresh`.
+
+    Generated History
+    WIth the `--history` option it is possible to generate a history using
+    the `HISTORY.txt` files of each package which has changes in trunk or
+    tag (dependending on `--dev` option).
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -r, --refresh         Force refresh. Recalculates all infos
+  -c BUILDOUT, --config=BUILDOUT
+                        Buildout config file containing version infos
+  -v, --verbose         Print executed commands
+  -H, --history         Generate history file with all packages with a new
+                        version
+  -d, --dev             List packages with modified trunk when using --history
+                        option
+  -l LIMIT, --limit=LIMIT
+                        Set depth limit (default 0)
+  -q, --quiet           Do not ask anything
+  -p, --pinning-proposal
+                        Show a list of packages to upgrade with their newest
+                        version in version pinning format.
+
+
+
+ftw eggcheck (ec)
+=================
+usage: ftw eggcheck [OPTIONS]
+    Command name:     eggcheck
+    Command shortcut: ec
+
+    The command `eggcheck` checks if the egg has some common problems.
+
+    Checks:
+    * setup.py
+    ** maintainer should be defined
+    ** version should be read from version.txt, which sould exist
+    ** package namespaces shouls be defined properly
+    ** various metadata stuff (name, description, author, email, license)
+    ** the docs/HISTORY.txt file should be embedded
+    ** we should be able to run `setup.py egg_info`
+    * install_requires is checked by parsing all imports and some zcml
+    * the long_description in setup.py (and included files) should be rEST
+    * various paster problems are checked
+    ** do not use CHANGES.txt or CONTRIBUTORS.txt
+    ** do not use interfaces as folder
+    ** viewlets and portlets should not be within a browser directory
+    ** setup.cfg should not exist
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -s, --check-setup     Check basic stuff in setup.py (maintainer, version,
+                        etc)
+  -p, --check-paster    Check problems caused by paster
+  -d, --check-description
+                        Checks the long description / validates rEST
+  -r, --check-requires  Check install_requires: search all python imports and
+                        zcml directives
+  -z, --check-zcml      ZCML checks (locales registration, ...)
+
+
+
+ftw help
+========
+usage: ftw help command
+    Command name:     help
+
+    The ftw.manager egg provides various commands for daily work.
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw i18npot (ib)
+================
+usage: ftw i18npot
+    Command name:     i18npot
+    Command shortcut: ib
+
+    Builds the .pot files in your `locales` directory. By
+    default the name of your package is used as i18n domain.
+    The locales diretory is expected to be in the root of your
+    package (e.g. src/my.package/my/package/locales).
+
+    The .pot files are built with `i18ndude`, which have to be
+    installed (ftw.manager as a extras_require). i18ndude will
+    search all msgid from the templates and where you use the
+    zope message factory.
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -d DOMAIN, --domain=DOMAIN
+                        i18n domain. Default: package name
+
+
+
+ftw i18nsync (is)
+=================
+usage: ftw i18nsync [LANG-CODE]
+    Command name:     i18nsync
+    Command shortcut: is
+
+    Syncs the .pot files with the .po files of the selected
+    language. The files are synced with `i18ndude`, which may
+    be installed using the extras_require.
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -d DOMAIN, --domain=DOMAIN
+                        i18n domain. Default: package name
+
+
+
+ftw multiinstance (mi)
+======================
+usage: ftw multiinstance FROM [TO] ACTION
+    Command name:     multiinstance
+    Command shortcut: mi
+
+    Calls multiple (ZEO-) instances one after another with
+    a given parameter.
+
+    The Instances should be numbered.
+    Example::
+
+        bin/zeoserver
+        bin/instanceadm
+        bin/instance1
+        bin/instance2
+        bin/instance3
+
+    instanceadm is the same as instance0
+
+    FROM:   Number of first instance to call
+    TO:     Number of last instance to call
+    ACTION: The action is passed to the instance (e.g. start, stop, restart, fg)
+
+    Examples:
+
+    ftw multiinstance 2 3 stop
+        Stops instance2 and instance3
+
+    ftw mi 0 2 start
+        Starts instanceadm, instance1 and instance2
+
+    ftw mi --delay 50 1 2 restart
+        Restarts instance1 then pauses for 50 seconds and then restarts instance2
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -d DELAY, --delay=DELAY
+                        Timeout between two instance calls
+
+
+
+ftw release (rl)
+================
+usage: ftw release [OPTIONS]
+    Command name:     release
+    Command shortcut: rl
+
+    This command creates a source release and publishs it on pypi
+    or a closed egg repository like a PSC.
+
+    For releasing problerly you need to configure the credentials to
+    your target in your `./pypirc`.
+
+    Following tasks will be performed:
+
+    * Create a tag
+    * Change versions in tag and trunk
+    * Fix HISTORY.txt in tag and trunk
+    * Create a source dist of the new tag
+    * Upload the dist to the selected target
+
+    More info on how to make release: https://devwiki.4teamwork.ch/Releasen
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -e, --only-egg        Do not commit changes (no tag, no versions changed),
+                        just create / submit the source distribution.
+  -E, --no-egg          Do not create / submit the dist, but create a tag and
+                        change the bump versions.
+  -i, --ignore-doc-errors
+                        Do not check if the description is valid restructured
+                        text.
+
+
+
+ftw selfupdate
+==============
+usage: ftw selfupdate [options]
+    Command name:     selfupdate
+
+    --- DEPRECATED ----
+    Updates ftw.manager to the newest version from PSC using easy_install
+    Uses PSC-URL: http://downloads.4teamwork.ch/4teamwork/ftw/simple
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -f FINDLINKS, --find-links=FINDLINKS
+                        additional URL(s) to search for packages
+  --ignore-warning      Ignore the warning not to use site-package
+                        insetallation.
+
+
+
+ftw setup
+=========
+usage: ftw setup
+    Command name:     setup
+
+    Setup the ftw.manager command.
+    Creates a config file in $HOME/.ftw.manager/config
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw switch (sw)
+===============
+usage: ftw switch
+    Command name:     switch
+    Command shortcut: sw
+
+    Converts the local svn checkout into a git-svn checkout and vice versa.
+    The git-svn repository is initally heavy to clone, thats why it is cached
+    in `~/.gitsvn` after the first clone.
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw test (t)
+============
+usage: ftw test
+    Command name:     test
+    Command shortcut: t
+
+    Runs the tests for the current package.
+    This command only works if you are in a checkout directory of
+    your package and the this directory is part of a buildout.
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw version
+===========
+usage: ftw version
+    Command name:     version
+
+    Displays the version of the package you are currently in.
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
+ftw versioninfo (vi)
+====================
+usage: ftw versioninfo [-n] [-c <buildout.cfg>] [-d] [<package1> [<package2> [...]]]
+    Command name:     versioninfo
+    Command shortcut: vi
+
+    This command searches all version pinnings for a specific package in
+    the buildout configuration. It walks up the `extends`-list and follows
+    remote KGS systems.
+
+    The buildout config file to use can be specificed the option `-c <FILE.cfg>`,
+    if the option is not used it defaults to buildout.cfg in the current working
+    directory.
+
+    The option `-n` tries to find new releases of this egg.
+
+    Its possible to use this command for multiple packages by calling the command
+    with each package as a parameter, but its also possible to use the command on
+    a list of dependencies which are defined in ./setup.py
+
+    
+
+options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -n, --new             Searches for newer versions
+  -d, --dependencies    Run with dependency packages in ./setup.py
+  -c BUILDOUT, --config=BUILDOUT
+                        Buildout config file containing version infos
+
+
+
+ftw zopeinstance (zi)
+=====================
+usage: ftw zopeinstance action [options]
+    Command name:     zopeinstance
+    Command shortcut: zi
+
+    Run bin/instance from any directory within the buildout.
+    This may be useful called from a editor (e.g. vim).
+
+    Example:
+    % ftw zi fg
+
+    
+
+options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+
+
+
 
 Changelog
 =========
@@ -120,6 +559,9 @@ Changelog
 
 1.2.5
 -----
+
+* Added script for generating RAEDME.rst for github
+  [05.08.2010, jbaumann]
 
 * `eggcheck`: Improved various stuff, refactored package listings
   [05.08.2010, jbaumann]

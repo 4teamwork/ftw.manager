@@ -3,17 +3,24 @@
 the setup.py including the docstrings of the commands.
 
 """
-from distutils.core import run_setup
 import os
 
 if __name__ == '__main__':
-    root_dir = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..'))
+    root_dir = os.path.dirname(
+        os.path.abspath(__file__))
     # chdir to root dir
     os.chdir(root_dir)
+
+    # we need to be able to import those things
+    from ftw.manager import ftwCommand
+    from ftw.manager import commands
+    from ftw.manager import config
+
     # get description
+    from distutils.core import run_setup
     egg = run_setup('setup.py')
     description = egg.get_long_description()
+
     # write to README.rst
     file_ = open('README.rst', 'w')
     file_.write(description)
