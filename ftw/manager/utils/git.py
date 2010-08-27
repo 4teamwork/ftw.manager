@@ -43,7 +43,7 @@ def is_git_svn(directory):
             foo, out, err = runcmd_with_exitcode('git svn info', log=False,
                                                  respond=True, respond_error=True)
             if len(err):
-                output.error('Your svn remote does not working. Fix it or remove it.',
+                output.error('Your svn remote is not working. Fix it or remove it.',
                              exit=True)
             return True
         # if there is .svn (but no .git) it is a .svn directory and
