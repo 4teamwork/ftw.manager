@@ -549,7 +549,6 @@ PLONE_CORE_PACKAGES = (
     'python-openid',
     'roman',
     'setuptools',
-    'simplejson',
     'wicked',
     'z3c.autoinclude',
     'zope.ramcache',

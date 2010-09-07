@@ -40,10 +40,12 @@ def is_git_svn(directory):
         if os.path.isfile(gitconfig) and '[svn-remote' in open(gitconfig).read():
             # check if the remote really works. maybe we have just migrated the package
             # and do not use the svn remote any more
-            foo, out, err = runcmd_with_exitcode('git svn info', log=False,
-                                                 respond=True, respond_error=True)
-            if len(err):
-                output.error('Your svn remote does not working. Fix it or remove it.',
+            foo, out, err = runcmd_with_exitcode('cd %s ; git svn info' % path,
+                                                 log=False, respond=True,
+                                                 respond_error=True)
+            if len(err.strip()):
+                output.error('Your svn remote is not working. Fix it or '
+                             'remove it. (%s)' % directory,
                              exit=True)
             return True
         # if there is .svn (but no .git) it is a .svn directory and
