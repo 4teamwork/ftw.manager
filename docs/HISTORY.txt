@@ -5,6 +5,9 @@ Changelog
 1.2.5
 -----
 
+* Updated packages with plone-4 packages according to good-py
+  [13.09.2010, jbaumann]
+
 * Added script for generating RAEDME.rst for github
   [05.08.2010, jbaumann]
 
