@@ -5,6 +5,9 @@ Changelog
 1.2.6
 -----
 
+* Release: glboally excluding ._* files, which fixes the ._*.po files problem.
+  [jbaumann]
+
 
 1.2.5
 -----
@@ -194,23 +197,23 @@ Changelog
 
 * Dependencycheck: do not list the same egg multiple times
   [12.04.2010, jbaumann]
-  
+
 * Added --show-in-browser option for checkdocs command
   [12.04.2010, jbaumann]
-  
+
 * Added package name to error message "invalid project layout"
   [29.03.2010, jbaumann]
-  
+
 * Fixed URL in setup.py
   [22.03.2010, jbaumann]
-  
+
 
 1.0.9
 -----
 
 * Checkout command: added support for subversion
   [22.03.2010, jbaumann]
-  
+
 * Config: Added new config option "default VCS"
   [22.03.2010, jbaumann]
 
@@ -220,7 +223,7 @@ Changelog
 
 * Release command: added support for git-svn
   [19.03.2010, jbaumann]
-  
+
 * Release command bug fixed: after modifying setup.cfg in tag there were no
   more carriage returns
   [19.03.2010, jbaumann]
@@ -238,45 +241,45 @@ Changelog
 
 * Removed bad characters from auto generated docu
   [18.03.2010, jbaumann]
-  
+
 * Help: Sort commands
   [18.03.2010, jbaumann]
-  
+
 
 1.0.5
 -----
 
 * dependency-check action: fixed bug in download cache for buildout configs
   [17.03.2010, jbaumann]
-  
+
 
 1.0.4
 -----
 
 * dependency-check action: added support for http-extends
   [16.03.2010, jbaumann]
-  
+
 * dependency-check action: improved history cleanup
   [24.02.2010, jbaumann]
-  
+
 
 1.0.3
 -----
 
 * dependency-check action: added --dev option, which also lists packages with trunk-changes
   [21.02.2010, jbaumann]
-  
+
 * dependency-check action: added --history option which generates a history containing all
   changes of upgraded packages
   [21.02.2010, jbaumann]
-  
+
 
 1.0.2
 -----
 
 * i18ndude: added support for domains other than the package name
   [04.02.2010, jbaumann]
-  
+
 
 1.0.1
 -----
@@ -284,10 +287,10 @@ Changelog
 * git-svn checkout: added support for packages without standard svn layout (e.g. a
   missing "branches" folder).
   [04.02.2010, jbaumann]
-  
+
 * Fixed buildout-config issues with relative paths in other directories.
   [18.01.2010, jbaumann]
-  
+
 
 1.0
 ---
@@ -297,7 +300,7 @@ Changelog
 
 * Dependency-Check: ask for svn-urls, if the guessing fails
   [18.01.2010, jbaumann]
-  
+
 
 0.1.12
 ------
@@ -307,7 +310,7 @@ Changelog
 
 * Fixed bug in utils.runcmd_with_exitcode, which caused some commands to hang
   [12.01.2010, jbaumann]
-  
+
 * Fixed bug in utils.git.has_local_changes
   [05.01.2010, jbaumann]
 

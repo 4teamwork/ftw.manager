@@ -364,6 +364,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             'include *.txt',
             'global-exclude *.pyc',
             'global-exclude *.mo',
+            'global-exclude ._*',
             )
 
         unused_lines = (
