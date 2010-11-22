@@ -114,6 +114,21 @@ class ReleaseCommand(basecommand.BaseCommand):
             if error:
                 output.error(error, exit=True)
 
+        # check locales
+        locales_dir = os.path.join(scm.get_package_name('.').replace('.', '/'),
+                                   'locales')
+        if os.path.isdir(locales_dir):
+            for basedir, dirs, files in os.walk(locales_dir):
+                for file_ in files:
+                    path = os.path.join(basedir, file_)
+                    if path.endswith('.po'):
+                        data = open(path).read()
+                        if 'fuzzy' in data:
+                            print path
+                            output.error('You have "Fuzzy" entries in your '
+                                         'translations! I\'m not releasing '
+                                         'it like this.', exit=True)
+
     def analyse(self):
         output.part_title('Checking subversion project')
         if not scm.is_scm('.'):
@@ -317,7 +332,7 @@ class ReleaseCommand(basecommand.BaseCommand):
         version_file = os.path.join(scm.get_package_name('.').replace('.', '/'),
                                     'version.txt')
         print '* updating %s: set version to %s' % (version_file,
-                                                 self.new_trunk_version)
+                                                    self.new_trunk_version)
         version_txt = open(version_file, 'w')
         version_txt.write(self.new_trunk_version)
         version_txt.close()

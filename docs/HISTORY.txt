@@ -5,6 +5,9 @@ Changelog
 1.2.7
 -----
 
+* Release: Added check which refuses to release eggs containing fuzzy .po-files
+  [jbaumann]
+
 
 1.2.6
 -----
