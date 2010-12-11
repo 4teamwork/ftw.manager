@@ -5,6 +5,9 @@ Changelog
 1.2.8
 -----
 
+* `release`: Use annotated tags for git
+  [jbaumann]
+
 
 1.2.7
 -----
