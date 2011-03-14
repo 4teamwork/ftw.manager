@@ -5,6 +5,11 @@ Changelog
 1.2.8
 -----
 
+* `release`: Include .mo-files in every release. The .po-files are checked
+  for validitiy and should not contain fuzzy entries. The .mo-files are
+  built with msgfmt when releasing.
+  [jbaumann]
+
 * `release`: Use annotated tags for git
   [jbaumann]
 
