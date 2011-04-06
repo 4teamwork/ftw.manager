@@ -5,6 +5,10 @@ Changelog
 1.2.8
 -----
 
+* Added Workaround for broken tarfile implementation of python 2.4,
+  use sdist --formats=zip
+  [06.04.2011, mathias.leimgruber]
+
 * `release`: Use annotated tags for git
   [jbaumann]
 

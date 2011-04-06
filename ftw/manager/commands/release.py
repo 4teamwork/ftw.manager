@@ -356,8 +356,20 @@ class ReleaseCommand(basecommand.BaseCommand):
 
     def release_egg(self):
         output.part_title('Releasing agg to target %s' % self.pypi_target)
-        cmd = '%s setup.py mregister sdist mupload -r %s' % (
+        sdist_params = ''
+        
+        # Workaround for broken tarfile implementation in python 2.4
+        # more infos at http://bugs.python.org/issue4218
+        # Only python 2.4.x is affected
+        if  (2, 5) > sys.version_info > (2, 4): 
+            # Probably sys.hexinfo would be the better solution
+            output.part_title(
+                'Python 2.4.x detected, use sdist with --formats=zip')
+            sdist_params = '--formats=zip'
+
+        cmd = '%s setup.py mregister sdist %s mupload -r %s' % (
             sys.executable,
+            sdist_params,
             self.pypi_target
             )
         runcmd(cmd)
