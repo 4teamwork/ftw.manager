@@ -2,12 +2,21 @@ Changelog
 =========
 
 
-1.2.8
+1.2.9
 -----
 
 * Added Workaround for broken tarfile implementation of python 2.4,
   use sdist --formats=zip
   [06.04.2011, mathias.leimgruber]
+
+
+1.2.8
+-----
+
+* `release`: Include .mo-files in every release. The .po-files are checked
+  for validitiy and should not contain fuzzy entries. The .mo-files are
+  built with msgfmt when releasing.
+  [jbaumann]
 
 * `release`: Use annotated tags for git
   [jbaumann]

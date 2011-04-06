@@ -56,13 +56,14 @@ class ReleaseCommand(basecommand.BaseCommand):
         scm.tested_for_scms(('svn', 'gitsvn', 'git'), '.')
         self.check_doc()
         self.analyse()
-        self.pre_build_check()
         if self.options.release_egg:
             self.check_pyprc()
         if not self.options.release_egg_only:
             self.check_versions()
         print ''
         input.prompt('Are you sure to continue? [OK]')
+        self.build_mo_files()
+        self.pre_build_check()
         if not self.options.release_egg_only:
             self.bump_version_before_tagging()
             self.create_tag()
@@ -122,19 +123,29 @@ class ReleaseCommand(basecommand.BaseCommand):
                 for file_ in files:
                     path = os.path.join(basedir, file_)
                     if path.endswith('.po'):
+                        # check with msgfmt
+                        exitcode, errors = runcmd_with_exitcode(
+                            'msgfmt -o /dev/null %s' % path,
+                            log=True,
+                            respond_error=True)
+                        if exitcode > 0:
+                            output.error(errors, exit=True)
+
                         data = open(path).read()
                         if 'fuzzy' in data:
                             print path
                             output.error('You have "Fuzzy" entries in your '
-                                         'translations! I\'m not releasing '
+                            'translations! I\'m not releasing '
                                          'it like this.', exit=True)
+
+
 
     def analyse(self):
         output.part_title('Checking subversion project')
         if not scm.is_scm('.'):
             # without subversion or gitsvn it doesnt work...
             output.error('Current directory is not a repository of type svn, '
-                         'git-svn, git.',
+            'git-svn, git.',
                          exit=True)
         # update newest remote changes
         if scm.is_git('.') or scm.is_git_svn('.'):
@@ -146,12 +157,12 @@ class ReleaseCommand(basecommand.BaseCommand):
         if scm.is_git('.') and not scm.is_git_svn('.'):
             if not git.has_remote('origin'):
                 output.error('There is no remote "origin", which is needd',
-                             exit=True)
+                exit=True)
         # run it at repo root
         if scm.is_subversion('.') or scm.is_git_svn('.'):
             root_svn = scm.get_package_root_url('.')
             if not svn.check_project_layout(root_svn, raise_exception=False,
-                                            ask_for_creation=False):
+            ask_for_creation=False):
                 # we should have the folders trunk, tags, branches in the project
                 output.error('Project does not have default layout with trunk, ' +\
                                  'tags and branches. At least one folder is missing.',
@@ -302,6 +313,24 @@ class ReleaseCommand(basecommand.BaseCommand):
         msg = 'bumping version to %s' % self.new_tag_version
         scm.commit_files(msg, version_file)
 
+    def build_mo_files(self):
+        """Build mo files in locales and i18n dirs
+        """
+        output.part_title('Build .mo files')
+        po_files_to_build = []
+
+        for basedir, dirs, files in os.walk(os.path.abspath('.')):
+            if basedir.endswith('i18n') or basedir.endswith('LC_MESSAGES'):
+                for file_ in files:
+                    if file_.endswith('.po'):
+                        po_files_to_build.append(os.path.join(basedir, file_))
+
+        for path in po_files_to_build:
+            runcmd('msgfmt %s -o %s' % (path, path[:-3] + '.mo'),
+                   log=True)
+
+
+
     def create_tag(self):
         output.part_title('Creating subversion tag')
         if scm.is_subversion('.'):
@@ -390,7 +419,6 @@ class ReleaseCommand(basecommand.BaseCommand):
             'recursive-include docs *',
             'include *.txt',
             'global-exclude *.pyc',
-            'global-exclude *.mo',
             'global-exclude ._*',
             )
 
@@ -400,6 +428,7 @@ class ReleaseCommand(basecommand.BaseCommand):
             'include CONTRIBUTORS.txt',
             'global-exclude *pyc',
             'global-exclude *mo',
+            'global-exclude *.mo',
             )
 
         created = False
