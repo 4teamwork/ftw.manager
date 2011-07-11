@@ -370,9 +370,11 @@ class PackageInfoMemory(Singleton):
                 for row in rows:
                     flag, url = re.split('\W*', row.strip(), maxsplit=1)
                     url = url.strip()
-                    if url.startswith(os.path.join(trunk_url,
-                                                   package.replace('.', '/'))) \
-                                                   and not url.endswith('version.txt'):
+                    if url.startswith(os.path.join(
+                            trunk_url,
+                            package.replace('.', '/'))) \
+                            and not url.endswith('version.txt') \
+                            and not url.endswith('.mo'):
                         data['changes'] = True
                         break
             else:

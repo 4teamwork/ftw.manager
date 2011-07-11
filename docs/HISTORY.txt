@@ -5,6 +5,10 @@ Changelog
 1.2.9
 -----
 
+* Dependencycheck: do not mark packages as changed if only .mo-files
+  changed (since they are rebuilt in tag).
+  [jbaumann]
+
 * Added Workaround for broken tarfile implementation of python 2.4,
   use sdist --formats=zip
   [06.04.2011, mathias.leimgruber]
