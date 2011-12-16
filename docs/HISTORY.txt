@@ -5,6 +5,9 @@ Changelog
 1.2.9
 -----
 
+- Support basic HTTP authentication in version info.
+  [jone]
+
 * Dependencycheck: do not mark packages as changed if only .mo-files
   changed (since they are rebuilt in tag).
   [jbaumann]

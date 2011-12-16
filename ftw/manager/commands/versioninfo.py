@@ -1,10 +1,12 @@
 from ftw.manager.commands import basecommand
 from ftw.manager.utils import output
 from ftw.manager.utils import scm
+from ftw.manager.utils.http import HTTPRealmFinder
 from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.output import error
 from pkg_resources import parse_version, Requirement
 from setuptools import package_index
+from urlparse import urlparse, urlunparse
 import ConfigParser
 import distutils.core
 import os
@@ -255,6 +257,32 @@ class VersioninfoCommand(basecommand.BaseCommand):
             # we need to keep a reference to the tempfile, otherwise it will be deleted
             # imidiately
             self._temporary_downloaded = []
+
+        if '@' in url:
+            # http basic auth in url
+
+            # remove credentials part from url
+            protocol, rest = url.split('://', 1)
+            protocol += '://'
+            credentials, rest = rest.split('@', 1)
+            url = protocol + rest
+
+            realm = HTTPRealmFinder(url).get()
+
+            # install a basic auth handler
+            if ':' in credentials:
+                user, password = credentials.split(':', 1)
+            else:
+                user, password = credentials, None
+
+            auth_handler = urllib2.HTTPBasicAuthHandler()
+            auth_handler.add_password(realm=realm,
+                                      uri=url,
+                                      user=user,
+                                      passwd=password)
+            opener = urllib2.build_opener(auth_handler)
+            urllib2.install_opener(opener)
+
         request = urllib2.Request(url)
         response = urllib2.urlopen(request)
         data = response.read()
