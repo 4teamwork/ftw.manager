@@ -113,7 +113,7 @@ Use the help command for detailed help::
     $ ftw.help
 
 
-usage: ftw ACTION [options]
+Usage: ftw ACTION [options]
 
 ACTIONS::
 
@@ -135,14 +135,14 @@ ACTIONS::
     zopeinstance     : Run bin/instance placeless [zi]
 
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
   -D          Debug mode (for any command)
 
 ftw checkdocs (cd)
 ==================
-usage: ftw checkdocs
+Usage: ftw checkdocs
     Command name:     checkdocs
     Command shortcut: cd
 
@@ -153,22 +153,20 @@ usage: ftw checkdocs
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -s, --show-description
                         show long-description of setup.py (with line numbers)
-  -b, --show-inbrowser  Show description converted into HTML in your default
-                        browser
+  -b, --show-inbrowser  Show description converted into HTML in your default browser
   -o OFFROWS, --off-rows=OFFROWS
-                        show N rows before and after a bad row (only if not
-                        using -s)
+                        show N rows before and after a bad row (only if not using -s)
 
 
 
 ftw checkout (co)
 =================
-usage: ftw checkout package_name
+Usage: ftw checkout package_name
     Command name:     checkout
     Command shortcut: co
 
@@ -179,7 +177,7 @@ usage: ftw checkout package_name
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -187,7 +185,7 @@ options:
 
 ftw dependencycheck (dc)
 ========================
-usage: ftw dependencycheck [OPTIONS]
+Usage: ftw dependencycheck [OPTIONS]
     Command name:     dependencycheck
     Command shortcut: dc
 
@@ -209,29 +207,26 @@ usage: ftw dependencycheck [OPTIONS]
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -r, --refresh         Force refresh. Recalculates all infos
   -c BUILDOUT, --config=BUILDOUT
                         Buildout config file containing version infos
   -v, --verbose         Print executed commands
-  -H, --history         Generate history file with all packages with a new
-                        version
-  -d, --dev             List packages with modified trunk when using --history
-                        option
+  -H, --history         Generate history file with all packages with a new version
+  -d, --dev             List packages with modified trunk when using --history option
   -l LIMIT, --limit=LIMIT
                         Set depth limit (default 0)
   -q, --quiet           Do not ask anything
   -p, --pinning-proposal
-                        Show a list of packages to upgrade with their newest
-                        version in version pinning format.
+                        Show a list of packages to upgrade with their newest version in version pinning format.
 
 
 
 ftw eggcheck (ec)
 =================
-usage: ftw eggcheck [OPTIONS]
+Usage: ftw eggcheck [OPTIONS]
     Command name:     eggcheck
     Command shortcut: ec
 
@@ -255,30 +250,28 @@ usage: ftw eggcheck [OPTIONS]
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
-  -s, --check-setup     Check basic stuff in setup.py (maintainer, version,
-                        etc)
+  -s, --check-setup     Check basic stuff in setup.py (maintainer, version, etc)
   -p, --check-paster    Check problems caused by paster
   -d, --check-description
                         Checks the long description / validates rEST
-  -r, --check-requires  Check install_requires: search all python imports and
-                        zcml directives
+  -r, --check-requires  Check install_requires: search all python imports and zcml directives
   -z, --check-zcml      ZCML checks (locales registration, ...)
 
 
 
 ftw help
 ========
-usage: ftw help command
+Usage: ftw help command
     Command name:     help
 
     The ftw.manager egg provides various commands for daily work.
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -286,7 +279,7 @@ options:
 
 ftw i18npot (ib)
 ================
-usage: ftw i18npot
+Usage: ftw i18npot
     Command name:     i18npot
     Command shortcut: ib
 
@@ -302,7 +295,7 @@ usage: ftw i18npot
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -d DOMAIN, --domain=DOMAIN
@@ -312,7 +305,7 @@ options:
 
 ftw i18nsync (is)
 =================
-usage: ftw i18nsync [LANG-CODE]
+Usage: ftw i18nsync [LANG-CODE]
     Command name:     i18nsync
     Command shortcut: is
 
@@ -322,7 +315,7 @@ usage: ftw i18nsync [LANG-CODE]
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -d DOMAIN, --domain=DOMAIN
@@ -332,7 +325,7 @@ options:
 
 ftw multiinstance (mi)
 ======================
-usage: ftw multiinstance FROM [TO] ACTION
+Usage: ftw multiinstance FROM [TO] ACTION
     Command name:     multiinstance
     Command shortcut: mi
 
@@ -367,7 +360,7 @@ usage: ftw multiinstance FROM [TO] ACTION
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -d DELAY, --delay=DELAY
@@ -377,7 +370,7 @@ options:
 
 ftw release (rl)
 ================
-usage: ftw release [OPTIONS]
+Usage: ftw release [OPTIONS]
     Command name:     release
     Command shortcut: rl
 
@@ -399,22 +392,20 @@ usage: ftw release [OPTIONS]
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
-  -e, --only-egg        Do not commit changes (no tag, no versions changed),
-                        just create / submit the source distribution.
-  -E, --no-egg          Do not create / submit the dist, but create a tag and
-                        change the bump versions.
+  -e, --only-egg        Do not commit changes (no tag, no versions changed), just create / submit the source
+                        distribution.
+  -E, --no-egg          Do not create / submit the dist, but create a tag and change the bump versions.
   -i, --ignore-doc-errors
-                        Do not check if the description is valid restructured
-                        text.
+                        Do not check if the description is valid restructured text.
 
 
 
 ftw selfupdate
 ==============
-usage: ftw selfupdate [options]
+Usage: ftw selfupdate [options]
     Command name:     selfupdate
 
     --- DEPRECATED ----
@@ -423,19 +414,18 @@ usage: ftw selfupdate [options]
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -f FINDLINKS, --find-links=FINDLINKS
                         additional URL(s) to search for packages
-  --ignore-warning      Ignore the warning not to use site-package
-                        insetallation.
+  --ignore-warning      Ignore the warning not to use site-package insetallation.
 
 
 
 ftw setup
 =========
-usage: ftw setup
+Usage: ftw setup
     Command name:     setup
 
     Setup the ftw.manager command.
@@ -443,7 +433,7 @@ usage: ftw setup
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -451,7 +441,7 @@ options:
 
 ftw switch (sw)
 ===============
-usage: ftw switch
+Usage: ftw switch
     Command name:     switch
     Command shortcut: sw
 
@@ -461,7 +451,7 @@ usage: ftw switch
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -469,7 +459,7 @@ options:
 
 ftw test (t)
 ============
-usage: ftw test
+Usage: ftw test
     Command name:     test
     Command shortcut: t
 
@@ -479,7 +469,7 @@ usage: ftw test
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -487,14 +477,14 @@ options:
 
 ftw version
 ===========
-usage: ftw version
+Usage: ftw version
     Command name:     version
 
     Displays the version of the package you are currently in.
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -502,7 +492,7 @@ options:
 
 ftw versioninfo (vi)
 ====================
-usage: ftw versioninfo [-n] [-c <buildout.cfg>] [-d] [<package1> [<package2> [...]]]
+Usage: ftw versioninfo [-n] [-c <buildout.cfg>] [-d] [<package1> [<package2> [...]]]
     Command name:     versioninfo
     Command shortcut: vi
 
@@ -522,7 +512,7 @@ usage: ftw versioninfo [-n] [-c <buildout.cfg>] [-d] [<package1> [<package2> [..
 
     
 
-options:
+Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -n, --new             Searches for newer versions
@@ -534,7 +524,7 @@ options:
 
 ftw zopeinstance (zi)
 =====================
-usage: ftw zopeinstance action [options]
+Usage: ftw zopeinstance action [options]
     Command name:     zopeinstance
     Command shortcut: zi
 
@@ -546,7 +536,7 @@ usage: ftw zopeinstance action [options]
 
     
 
-options:
+Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
 
@@ -557,8 +547,49 @@ Changelog
 =========
 
 
+1.2.9
+-----
+
+* Dependencycheck: do not mark packages as changed if only .mo-files
+  changed (since they are rebuilt in tag).
+  [jbaumann]
+
+* Added Workaround for broken tarfile implementation of python 2.4,
+  use sdist --formats=zip
+  [06.04.2011, mathias.leimgruber]
+
+
+1.2.8
+-----
+
+* `release`: Include .mo-files in every release. The .po-files are checked
+  for validitiy and should not contain fuzzy entries. The .mo-files are
+  built with msgfmt when releasing.
+  [jbaumann]
+
+* `release`: Use annotated tags for git
+  [jbaumann]
+
+
+1.2.7
+-----
+
+* Release: Added check which refuses to release eggs containing fuzzy .po-files
+  [jbaumann]
+
+
+1.2.6
+-----
+
+* Release: glboally excluding ._* files, which fixes the ._*.po files problem.
+  [jbaumann]
+
+
 1.2.5
 -----
+
+* Updated packages with plone-4 packages according to good-py
+  [13.09.2010, jbaumann]
 
 * Added script for generating RAEDME.rst for github
   [05.08.2010, jbaumann]
@@ -742,23 +773,23 @@ Changelog
 
 * Dependencycheck: do not list the same egg multiple times
   [12.04.2010, jbaumann]
-  
+
 * Added --show-in-browser option for checkdocs command
   [12.04.2010, jbaumann]
-  
+
 * Added package name to error message "invalid project layout"
   [29.03.2010, jbaumann]
-  
+
 * Fixed URL in setup.py
   [22.03.2010, jbaumann]
-  
+
 
 1.0.9
 -----
 
 * Checkout command: added support for subversion
   [22.03.2010, jbaumann]
-  
+
 * Config: Added new config option "default VCS"
   [22.03.2010, jbaumann]
 
@@ -768,7 +799,7 @@ Changelog
 
 * Release command: added support for git-svn
   [19.03.2010, jbaumann]
-  
+
 * Release command bug fixed: after modifying setup.cfg in tag there were no
   more carriage returns
   [19.03.2010, jbaumann]
@@ -786,45 +817,45 @@ Changelog
 
 * Removed bad characters from auto generated docu
   [18.03.2010, jbaumann]
-  
+
 * Help: Sort commands
   [18.03.2010, jbaumann]
-  
+
 
 1.0.5
 -----
 
 * dependency-check action: fixed bug in download cache for buildout configs
   [17.03.2010, jbaumann]
-  
+
 
 1.0.4
 -----
 
 * dependency-check action: added support for http-extends
   [16.03.2010, jbaumann]
-  
+
 * dependency-check action: improved history cleanup
   [24.02.2010, jbaumann]
-  
+
 
 1.0.3
 -----
 
 * dependency-check action: added --dev option, which also lists packages with trunk-changes
   [21.02.2010, jbaumann]
-  
+
 * dependency-check action: added --history option which generates a history containing all
   changes of upgraded packages
   [21.02.2010, jbaumann]
-  
+
 
 1.0.2
 -----
 
 * i18ndude: added support for domains other than the package name
   [04.02.2010, jbaumann]
-  
+
 
 1.0.1
 -----
@@ -832,10 +863,10 @@ Changelog
 * git-svn checkout: added support for packages without standard svn layout (e.g. a
   missing "branches" folder).
   [04.02.2010, jbaumann]
-  
+
 * Fixed buildout-config issues with relative paths in other directories.
   [18.01.2010, jbaumann]
-  
+
 
 1.0
 ---
@@ -845,7 +876,7 @@ Changelog
 
 * Dependency-Check: ask for svn-urls, if the guessing fails
   [18.01.2010, jbaumann]
-  
+
 
 0.1.12
 ------
@@ -855,7 +886,7 @@ Changelog
 
 * Fixed bug in utils.runcmd_with_exitcode, which caused some commands to hang
   [12.01.2010, jbaumann]
-  
+
 * Fixed bug in utils.git.has_local_changes
   [05.01.2010, jbaumann]
 
