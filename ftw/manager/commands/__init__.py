@@ -3,7 +3,7 @@ import checkout
 import dependencycheck
 import eggcheck
 import help
-import i18ndude
+import i18n
 import multiinstance
 import release
 import selfupdate
@@ -20,7 +20,7 @@ checkout
 dependencycheck
 eggcheck
 help
-i18ndude
+i18n
 multiinstance
 release
 selfupdate

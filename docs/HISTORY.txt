@@ -5,6 +5,9 @@ Changelog
 1.2.9
 -----
 
+- Rename i18ndude module for avoiding conflicts with i18ndude package.
+  [jone]
+
 - Support basic HTTP authentication in version info.
   [jone]
 
