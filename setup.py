@@ -79,6 +79,8 @@ setup(name='ftw.manager',
         # -*- Extra requirements: -*-
         'collective.dist',
         'simplejson',
+        'i18ndude',
+        'xlwt'
         ],
       extras_require=extras_require,
       entry_points = {

@@ -13,7 +13,7 @@ import testcmd
 import version
 import versioninfo
 import zopeinstance
-
+import poexport
 # make pyflakes happy
 checkdocs
 checkout
@@ -30,3 +30,4 @@ testcmd
 version
 versioninfo
 zopeinstance
+poexport
