@@ -14,6 +14,7 @@ import version
 import versioninfo
 import zopeinstance
 import poexport
+import poimport
 # make pyflakes happy
 checkdocs
 checkout
@@ -31,3 +32,4 @@ version
 versioninfo
 zopeinstance
 poexport
+poimport

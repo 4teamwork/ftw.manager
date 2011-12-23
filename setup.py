@@ -80,7 +80,8 @@ setup(name='ftw.manager',
         'collective.dist',
         'simplejson',
         'i18ndude',
-        'xlwt'
+        'xlwt',
+        'xlrd'
         ],
       extras_require=extras_require,
       entry_points = {

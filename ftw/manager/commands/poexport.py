@@ -1,9 +1,8 @@
 from ftw.manager.commands import basecommand
 import os
-import sys
 from ftw.manager.utils import output, runcmd
 from i18ndude import catalog
-from xlwt import Workbook, XFStyle
+from xlwt import Workbook
 
 class ExportPo(basecommand.BaseCommand):
     u"""Expots Po files to a XLS"""
@@ -11,17 +10,16 @@ class ExportPo(basecommand.BaseCommand):
     command_name = u'poexport'
     command_shortcut = u'pe'
     description = u'exports all po files to xls'
-    usage = u'ftw %s [OPTIONS]' % command_name
-    
+    usage = u'ftw %s [LANG-CODE] [OPTIONS]' % command_name
     
     def __call__(self):
-        
+    
         if len(self.args) < 1:
             output.error('Language code is required', exit=1)
         lang = self.args[0]
         workingpath = os.getcwd()
         if os.path.basename(workingpath) != "src":
-            print "The working Path is not a source directory"
+            output.error("The working Path is not a source directory", exit=1)
             return
         if self.options.original:
             origlang = self.options.original
@@ -82,7 +80,7 @@ class ExportPo(basecommand.BaseCommand):
         wb.save('translations.xls')
 
     def get_potfiles(self, path):
-        potfiles = runcmd('find . -name "*.pot"', **{'respond':True})
+        potfiles = runcmd('find . -name "*.pot"', respond=True)
         clean_pofiles = []
         for potfile in potfiles:
             if '/i18n/' in potfile:
@@ -90,7 +88,7 @@ class ExportPo(basecommand.BaseCommand):
             if '-manual' in potfile:
                 continue
             else:
-                clean_pofiles.append(potfile.strip('\n')) 
+                clean_pofiles.append(potfile.strip()) 
         return clean_pofiles
 
     def register_options(self):
