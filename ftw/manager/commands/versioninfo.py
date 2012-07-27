@@ -66,8 +66,8 @@ class VersioninfoCommand(basecommand.BaseCommand):
             if dep_version:
                 current_version = None
                 print _format_line(pkg, dep_extra, dep_version, './setup.py')
-            if pkg in pinnings.keys():
-                pkg_pinnings = pinnings[pkg][:]
+            if pkg.lower() in pinnings.keys():
+                pkg_pinnings = pinnings[pkg.lower()][:]
                 pkg_pinnings.reverse()
                 for file, extra, version in pkg_pinnings:
                     if not current_version:
@@ -176,9 +176,9 @@ class VersioninfoCommand(basecommand.BaseCommand):
         data = {}
         for file, packages in data_by_file:
             for pkg, extra, version in packages:
-                if pkg not in data.keys():
-                    data[pkg] = []
-                data[pkg].append((file, extra, version))
+                if pkg.lower() not in data.keys():
+                    data[pkg.lower()] = []
+                data[pkg.lower()].append((file, extra, version))
         return data
 
     @memoize
