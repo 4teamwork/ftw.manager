@@ -3,7 +3,9 @@ from ftw.manager.commands.versioninfo import VersioninfoCommand
 import re
 
 
-FTW_KGS_PATTERNS = [r'https?://kgs.4teamwork.ch/.*']
+FTW_KGS_PATTERNS = [r'https?://kgs.4teamwork.ch/.*',
+                    r'^versions.cfg$',
+                    ]
 PLONE_KGS_PATTERNS = [r'https?://dist.plone.org/release/.*?/versions.cfg',
                       r'https?://download.zope.org/zopetoolkit/index/.*?/zopeapp-versions.cfg',
                       r'https?://download.zope.org/Zope2/index/.*?/versions.cfg',
