@@ -38,7 +38,6 @@ class VersioninfoCommand(basecommand.BaseCommand):
         u'[<package1> [<package2> [...]]]'
 
     def __call__(self):
-        output.warning('This command does not support git packages')
         pinnings = self._get_pinnings_by_package()
 
         def _format_line(pkg, extra, version, file, current=False):
