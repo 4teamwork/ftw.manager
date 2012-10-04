@@ -45,13 +45,13 @@ class CheckPinningsCommand(basecommand.BaseCommand):
             print title.ljust(COLUMN_WIDTHS[i]),
         print
         print "=" * 74
-        print
 
         # Find all Zope / Plone KGSs and check them for pinning overrides
         for kgs in self.pinning_mapping:
             url = kgs[0]
             for pattern in PLONE_KGS_PATTERNS:
                 if re.match(pattern, url):
+                    print
                     print url
                     print "-" * 74
                     packages = kgs[1]
