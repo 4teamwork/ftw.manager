@@ -6,7 +6,6 @@ from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.output import error
 from pkg_resources import parse_version, Requirement
 from setuptools import package_index
-from urlparse import urlparse, urlunparse
 import ConfigParser
 import distutils.core
 import os
