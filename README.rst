@@ -104,6 +104,22 @@ Solution: Commit / push your current changes, remove the repository and clone it
 from your origin remote, then the svn-remote is dropped.
 
 
+Links
+=====
+
+- Main github project repository: https://github.com/4teamwork/ftw.manager
+- Issue tracker: https://github.com/4teamwork/ftw.manager/issues
+- Package on pypi: http://pypi.python.org/pypi/ftw.manager
+
+
+Copyright
+=========
+
+This package is copyright by `4teamwork <http://www.4teamwork.ch/>`_.
+
+``ftw.manager`` is licensed under GNU General Public License, version 2.
+
+
 
 Detailed Help
 =============
@@ -151,7 +167,7 @@ Usage: ftw checkdocs
     This command requires docutils to be installed in the site-packes of
     your python version.
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -175,7 +191,7 @@ Usage: ftw checkout package_name
 
     package_name : Name of the package you want to checkout
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -205,7 +221,7 @@ Usage: ftw dependencycheck [OPTIONS]
     the `HISTORY.txt` files of each package which has changes in trunk or
     tag (dependending on `--dev` option).
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -248,7 +264,7 @@ Usage: ftw eggcheck [OPTIONS]
     ** viewlets and portlets should not be within a browser directory
     ** setup.cfg should not exist
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -269,7 +285,7 @@ Usage: ftw help command
 
     The ftw.manager egg provides various commands for daily work.
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -293,7 +309,7 @@ Usage: ftw i18npot
     search all msgid from the templates and where you use the
     zope message factory.
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -313,7 +329,7 @@ Usage: ftw i18nsync [LANG-CODE]
     language. The files are synced with `i18ndude`, which may
     be installed using the extras_require.
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -358,7 +374,7 @@ Usage: ftw multiinstance FROM [TO] ACTION
     ftw mi --delay 50 1 2 restart
         Restarts instance1 then pauses for 50 seconds and then restarts instance2
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -390,7 +406,7 @@ Usage: ftw release [OPTIONS]
 
     More info on how to make release: https://devwiki.4teamwork.ch/Releasen
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -412,7 +428,7 @@ Usage: ftw selfupdate [options]
     Updates ftw.manager to the newest version from PSC using easy_install
     Uses PSC-URL: http://downloads.4teamwork.ch/4teamwork/ftw/simple
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -431,7 +447,7 @@ Usage: ftw setup
     Setup the ftw.manager command.
     Creates a config file in $HOME/.ftw.manager/config
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -449,7 +465,7 @@ Usage: ftw switch
     The git-svn repository is initally heavy to clone, thats why it is cached
     in `~/.gitsvn` after the first clone.
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -467,7 +483,7 @@ Usage: ftw test
     This command only works if you are in a checkout directory of
     your package and the this directory is part of a buildout.
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -482,7 +498,7 @@ Usage: ftw version
 
     Displays the version of the package you are currently in.
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -510,7 +526,7 @@ Usage: ftw versioninfo [-n] [-c <buildout.cfg>] [-d] [<package1> [<package2> [..
     with each package as a parameter, but its also possible to use the command on
     a list of dependencies which are defined in ./setup.py
 
-    
+
 
 Options:
   --version             show program's version number and exit
@@ -534,7 +550,7 @@ Usage: ftw zopeinstance action [options]
     Example:
     % ftw zi fg
 
-    
+
 
 Options:
   --version   show program's version number and exit
@@ -1007,4 +1023,3 @@ Changelog
     * release       : Release eines Packets erstellen [rl]
     * version       : Display Version of the package containing the current directory
     * test          : Run tests for current package [t]
-

@@ -113,3 +113,19 @@ Use the help command for detailed help::
     $ ftw.help
 
 --help-text--
+
+
+Links
+=====
+
+- Main github project repository: https://github.com/4teamwork/ftw.manager
+- Issue tracker: https://github.com/4teamwork/ftw.manager/issues
+- Package on pypi: http://pypi.python.org/pypi/ftw.manager
+
+
+Copyright
+=========
+
+This package is copyright by `4teamwork <http://www.4teamwork.ch/>`_.
+
+``ftw.manager`` is licensed under GNU General Public License, version 2.
