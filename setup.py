@@ -65,15 +65,18 @@ setup(name='ftw.manager',
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
+
       keywords='release subversion psc egg',
-      author='Jonas Baumann',
-      author_email='mailto:j.baumann@4teamwork.ch',
-      url='http://psc.4teamwork.ch/4teamwork/ftw/ftw-manager/',
+      author='4teamwork GmbH',
+      author_email='mailto:info@4teamwork.ch',
+      url='https://github.com/4teamwork/ftw.manager',
       license='GPL2',
+
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['ftw'],
       include_package_data=True,
       zip_safe=False,
+
       install_requires=[
         'setuptools',
         # -*- Extra requirements: -*-
@@ -81,6 +84,7 @@ setup(name='ftw.manager',
         'simplejson',
         ],
       extras_require=extras_require,
+
       entry_points = {
         'console_scripts' : [
             'ftw = ftw.manager.ftwCommand:main',
