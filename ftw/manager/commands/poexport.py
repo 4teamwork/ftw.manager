@@ -3,7 +3,7 @@ import os
 from ftw.manager.utils import output, runcmd
 from i18ndude import catalog
 from xlwt import Workbook
-
+from xlwt import easyxf
 class ExportPo(basecommand.BaseCommand):
     u"""Expots Po files to a XLS"""
     
@@ -49,12 +49,13 @@ class ExportPo(basecommand.BaseCommand):
                 if len([line for line in message.comments if 'fuzzy' in line.lower()]) > 0:
                     print "\n*******\nWARNING\n*******"
                     print "Message_ID '" + message.msgid + "' is fuzzy in file " + new_po +"\n\n" 
-                if messages.has_key(message.msgid):
+                if messages.get(message.msgid).msgstr:
                     translations.append([{message.msgid:message.msgstr}, default,
                         new_po, messages.get(message.msgid).msgstr ])
                 else:
                     translations.append([{message.msgid:message.msgstr}, default, new_po])
         wb = Workbook()
+        style = easyxf('pattern: pattern solid, fore_colour red') 
         sheet = wb.add_sheet("Translations")
         sheet.write(0,4, "Path")
         sheet.write(0,0, "Message_ID")
@@ -64,19 +65,30 @@ class ExportPo(basecommand.BaseCommand):
         
         print str(len(translations)) + " Message_IDs found."
         untranslated = 0
+        no_orig = 0
         for i, translation in enumerate(translations):
+            must_translate = True
             key, value = translation[0].items()[0]
+
+            if len(translation) == 3 and not translation[1]:
+                must_translate = False
+                no_orig +=1
             if not value:
                 untranslated += 1
+                style
             path = translation[2]
             sheet.write(i+1,4, path)
             sheet.write(i+1,0, key)
             sheet.write(i+1,1, translation[1])
-            sheet.write(i+1,3, value)
+            if not value and must_translate == True:
+                sheet.write(i+1,3, value, style=style)
+            else:
+                sheet.write(i+1,3, value)
             if len(translation) == 4:
                 sheet.write(i+1,2, translation[3])
                 
         print str(untranslated) + " Message_IDs have no Translations."
+        print str(no_orig) + " Message_IDs have no original Translation and Default"
         wb.save('translations.xls')
 
     def get_potfiles(self, path):
