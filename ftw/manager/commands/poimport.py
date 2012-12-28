@@ -11,10 +11,10 @@ class ImportPo(basecommand.BaseCommand):
     u"""Imports translation from xls"""
     command_name = u'poimport'
     command_shortcut = u'pi'
-    description = u'imports an xls file with translations for specific po files'
+    description = u'imports an xls file \
+with translations for specific po files'
     usage = u'ftw %s [OPTIONS]' % command_name
-    
-    
+
     def __call__(self):
         self.message_storages = {}
         file_ = self.args[0]
@@ -31,14 +31,13 @@ class ImportPo(basecommand.BaseCommand):
             path = values[-1]
             msgid = values[0]
             msgstr = values[self.translated_column]
-            self.write_in_catalog(path,msgid,msgstr)
+            self.write_in_catalog(path, msgid, msgstr)
         self.write_all_catalogs()
-    
-    
+
     def write_in_catalog(self, path, msgid, msgstr):
         if not os.path.isfile(path):
             return
-        if not self.message_storages.has_key(path):
+        if not path in self.message_storages:
             self.sync_po(path)
             self.message_storages[path] = catalog.MessageCatalog(path)
         cat = self.message_storages[path]
@@ -47,14 +46,12 @@ class ImportPo(basecommand.BaseCommand):
             return
         message.msgstr = msgstr
 
-        
     def sync_po(self, path):
         domain = os.path.splitext(os.path.basename(path))[0]
         locales = path.split('/')[:-3]
-        pot = '/'.join(locales)+'/'+domain+'.pot'
-        os.system('i18ndude sync --pot %s %s > /dev/null' % (pot, path))        
+        pot = '/'.join(locales) + '/' + domain + '.pot'
+        os.system('i18ndude sync --pot %s %s > /dev/null' % (pot, path))
         return
-
 
     def write_all_catalogs(self):
         for key in self.message_storages.keys():
@@ -69,7 +66,7 @@ class ImportPo(basecommand.BaseCommand):
                 if not row.startswith('"Language-Code') and \
                         not row.startswith('"Language-Name'):
                     file_.write(row)
-                    if not data.index(row)  == len(data)-1:  
+                    if not data.index(row) == len(data) - 1:
                         file_.write('\n')
             file_.close()
 
@@ -81,8 +78,5 @@ class ImportPo(basecommand.BaseCommand):
                 respond_error=True)
             if exitcode > 0:
                 output.error(errors, exit=False)
-
-
-
 
 basecommand.registerCommand(ImportPo)
