@@ -6,7 +6,6 @@ from ftw.manager.utils.memoize import memoize
 from ftw.manager.utils.output import error
 from pkg_resources import parse_version, Requirement
 from setuptools import package_index
-from urlparse import urlparse, urlunparse
 import ConfigParser
 import distutils.core
 import os
@@ -20,27 +19,27 @@ class VersioninfoCommand(basecommand.BaseCommand):
     the buildout configuration. It walks up the `extends`-list and follows
     remote KGS systems.
 
-    The buildout config file to use can be specificed the option `-c <FILE.cfg>`,
-    if the option is not used it defaults to buildout.cfg in the current working
-    directory.
+    The buildout config file to use can be specificed the option
+    `-c <FILE.cfg>`, if the option is not used it defaults to buildout.cfg in
+    the current working directory.
 
     The option `-n` tries to find new releases of this egg.
 
-    Its possible to use this command for multiple packages by calling the command
-    with each package as a parameter, but its also possible to use the command on
-    a list of dependencies which are defined in ./setup.py
+    Its possible to use this command for multiple packages by calling the
+    command with each package as a parameter, but its also possible to use the
+    command on a list of dependencies which are defined in ./setup.py
 
     """
 
     command_name = u'versioninfo'
     command_shortcut = u'vi'
     description = u'Prints version pinning information'
-    usage = u'ftw %s [-n] [-c <buildout.cfg>] [-d] '  % command_name + \
+    usage = u'ftw %s [-n] [-c <buildout.cfg>] [-d] ' % command_name + \
         u'[<package1> [<package2> [...]]]'
 
     def __call__(self):
-        output.warning('This command does not support git packages')
         pinnings = self._get_pinnings_by_package()
+
         def _format_line(pkg, extra, version, file, current=False):
             pkgname = pkg
             if extra:
@@ -66,20 +65,21 @@ class VersioninfoCommand(basecommand.BaseCommand):
             if dep_version:
                 current_version = None
                 print _format_line(pkg, dep_extra, dep_version, './setup.py')
-            if pkg in pinnings.keys():
-                pkg_pinnings = pinnings[pkg][:]
+            if pkg.lower() in pinnings.keys():
+                pkg_pinnings = pinnings[pkg.lower()][:]
                 pkg_pinnings.reverse()
                 for file, extra, version in pkg_pinnings:
                     if not current_version:
                         current_version = version
-                        print _format_line(pkg, extra, version, file, current=True)
+                        print _format_line(pkg, extra, version, file,
+                                           current=True)
                     else:
                         print _format_line(pkg, extra, version, file)
             if self.options.new:
                 new_dists = self._get_newer_versions_for(pkg, current_version)
                 if len(new_dists) > 0:
-                    print output.colorize('newer distributions than %s:' % current_version,
-                                          output.ERROR)
+                    print output.colorize('newer distributions than %s:' %
+                                          current_version, output.ERROR)
                     for dist in new_dists:
                         print ' ' * 5, output.colorize(dist, output.ERROR)
 
@@ -89,15 +89,17 @@ class VersioninfoCommand(basecommand.BaseCommand):
                                help='Searches for newer versions')
         self.parser.add_option('-d', '--dependencies', dest='dependencies',
                                action='store_true', default=False,
-                               help='Run with dependency packages in ./setup.py')
+                               help='Run with dependency packages in '
+                                    './setup.py')
         self.parser.add_option('-c', '--config', dest='buildout',
                                action='store', default='./buildout.cfg',
-                               help='Buildout config file containing version infos')
+                               help='Buildout config file containing version'
+                                    'infos')
 
     def _get_newer_versions_for(self, pkg, version):
-        if version == None:
+        if version is None:
             version = ''
-        # There is a problem when using find-links for eggs which are on the pypi
+        # There is a problem when using find-links for eggs which are on pypi
         # so we need to use two different indexes
         # - self.pi : index using find-links
         try:
@@ -118,8 +120,8 @@ class VersioninfoCommand(basecommand.BaseCommand):
         try:
             index.find_packages(req)
         except TypeError:
-            # .. that didnt work, so lets try it without find-links.. we need to
-            # use the "fresh" self.pypi index
+            # .. that didnt work, so lets try it without find-links.. we need
+            # to use the "fresh" self.pypi index
             index = self.pypi
             index.find_packages(req)
         parsed_version = parse_version(version)
@@ -129,7 +131,6 @@ class VersioninfoCommand(basecommand.BaseCommand):
                 new_dists.append('%s = %s' % (dist.project_name, dist.version))
         return tuple(set(new_dists))
 
-
     @memoize
     def _get_packages(self):
         """ Returns a list of [(pkgname, extra, version),(...)]
@@ -138,13 +139,13 @@ class VersioninfoCommand(basecommand.BaseCommand):
         packages = list([(pkg, None, None) for pkg in self.args])
         if self.options.dependencies:
             packages.extend(self._get_dependency_packages())
-        if len(packages)==0:
+        if len(packages) == 0:
             try:
                 packages.append((scm.get_package_name('.'), None, None))
             except:
                 # maybe we are not in a package - thats not a error
                 pass
-        if len(packages)==0:
+        if len(packages) == 0:
             # maybe we are in a src folder.. use every item
             for pkg in os.listdir('.'):
                 packages.append((pkg, None, None))
@@ -164,7 +165,6 @@ class VersioninfoCommand(basecommand.BaseCommand):
         else:
             return None
 
-
     @memoize
     def _get_pinnings_by_package(self):
         """ Example:
@@ -176,9 +176,9 @@ class VersioninfoCommand(basecommand.BaseCommand):
         data = {}
         for file, packages in data_by_file:
             for pkg, extra, version in packages:
-                if pkg not in data.keys():
-                    data[pkg] = []
-                data[pkg].append((file, extra, version))
+                if pkg.lower() not in data.keys():
+                    data[pkg.lower()] = []
+                data[pkg.lower()].append((file, extra, version))
         return data
 
     @memoize
@@ -227,8 +227,9 @@ class VersioninfoCommand(basecommand.BaseCommand):
                     subdata.append((pkg, extra, version))
                 # make a pretty relative name
                 pretty_name = file
-                if path.startswith(os.path.dirname(buildout_file)):
-                    pretty_name = path[len(os.path.dirname(buildout_file))+1:]
+                buildout_dir = os.path.dirname(buildout_file)
+                if path.startswith(buildout_dir):
+                    pretty_name = path[len(buildout_dir) + 1:]
                 data.insert(0, (pretty_name, subdata))
 
             # follow extends
@@ -249,13 +250,13 @@ class VersioninfoCommand(basecommand.BaseCommand):
 
         return data
 
-
     def _download_file(self, url):
-        """ Download file from *url*, store it in a tempfile and return its path
+        """ Download file from *url*, store it in a tempfile and return its
+        path
         """
         if not getattr(self, '_temporary_downloaded', None):
-            # we need to keep a reference to the tempfile, otherwise it will be deleted
-            # imidiately
+            # we need to keep a reference to the tempfile, otherwise it will be
+            # deleted immediately
             self._temporary_downloaded = []
 
         if '@' in url:

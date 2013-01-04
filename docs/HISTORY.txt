@@ -5,6 +5,13 @@ Changelog
 1.2.9
 -----
 
+- Added new checkpinnings command.
+  Lists all Plone / Zope packages whose version pin is overriden in one of our KGSs.
+  [lgraf]
+
+- Fixed determining current version in versioninfo command
+  [lgraf]
+
 - Rename i18ndude module for avoiding conflicts with i18ndude package.
   [jone]
 

@@ -1,5 +1,6 @@
 import checkdocs
 import checkout
+import checkpinnings
 import dependencycheck
 import eggcheck
 import help
@@ -17,6 +18,7 @@ import zopeinstance
 # make pyflakes happy
 checkdocs
 checkout
+checkpinnings
 dependencycheck
 eggcheck
 help
