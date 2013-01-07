@@ -27,7 +27,8 @@ class ExportPo(basecommand.BaseCommand):
         origlang = ''
         if self.options.original:
             origlang = self.options.original
-
+	
+	short = False
         if self.options.short:
             short = self.options.short
 
