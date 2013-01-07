@@ -5,6 +5,9 @@ Changelog
 1.2.9
 -----
 
+- Add Poexport and Poimport script. Export and Import all po files of a src directory to a xls allowing to translate them in a given language and importing them again.(commands: ftw pe and ftw pi)
+  [tschanzt]
+
 - Rename i18ndude module for avoiding conflicts with i18ndude package.
   [jone]
 
