@@ -107,9 +107,9 @@ from your origin remote, then the svn-remote is dropped.
 Links
 =====
 
-- Main github project repository: https://github.com/4teamwork/ftw.manager
-- Issue tracker: https://github.com/4teamwork/ftw.manager/issues
-- Package on pypi: http://pypi.python.org/pypi/ftw.manager
+- Github: https://github.com/4teamwork/ftw.manager
+- Issues: https://github.com/4teamwork/ftw.manager/issues
+- Pypi: http://pypi.python.org/pypi/ftw.manager
 
 
 Copyright
