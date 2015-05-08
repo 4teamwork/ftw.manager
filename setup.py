@@ -67,7 +67,7 @@ setup(name='ftw.manager',
         ],
 
       keywords='release subversion psc egg',
-      author='4teamwork GmbH',
+      author='4teamwork AG',
       author_email='mailto:info@4teamwork.ch',
       url='https://github.com/4teamwork/ftw.manager',
       license='GPL2',
